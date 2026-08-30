@@ -1,0 +1,29 @@
+:root {
+    --bg-primary: #151515;
+    --bg-sidebar: #191918;
+    --bg-topbar: #181817;
+
+    --bg-card: #20201e;
+    --bg-card-hover: #272724;
+
+    --border: #3a3934;
+    --border-soft: #292925;
+
+    --text-primary: #f1f1eb;
+    --text-secondary: #b8b8ad;
+    --text-muted: #77776f;
+
+    --accent-green: #9cad70;
+    --accent-green-soft: #7e9660;
+
+    --accent-yellow: #c9ad63;
+    --accent-blue: #8198b8;
+    --accent-red: #d86d5e;
+
+    --sidebar-width: 220px;
+    --topbar-height: 72px;
+
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+}
