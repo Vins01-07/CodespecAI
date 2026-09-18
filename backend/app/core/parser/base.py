@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 class BaseParser(ABC):
     """Abstract base for all tree-sitter language parsers."""
 
+    #Runs when parser is created
     def __init__(self) -> None:
         self._ts_language: Language = self._build_language()
         self._parser: Parser = tree_sitter.Parser(self._ts_language)
