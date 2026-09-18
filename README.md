@@ -1,154 +1,217 @@
-# CodeSpec AI: AI-Powered Software Architecture & Impact Analysis System
+# ⚡ CodeSpec AI
 
-![Status](https://img.shields.io/badge/status-active-success?style=for-the-badge)
-![AI](https://img.shields.io/badge/AI-LLM_%2B_RAG-blueviolet?style=for-the-badge)
-![Backend](https://img.shields.io/badge/Backend-FastAPI-informational?style=for-the-badge)
-![Parsing](https://img.shields.io/badge/Parsing-Tree--sitter-orange?style=for-the-badge)
-![Graph](https://img.shields.io/badge/Dependency_Graph-Neo4j-green?style=for-the-badge)
-![Frontend](https://img.shields.io/badge/Frontend-React-61DAFB?style=for-the-badge)
+### **AI-Powered Software Architecture Intelligence**
 
-**CodeSpec AI** is an AI-powered software architecture intelligence platform designed to understand large software repositories, reconstruct their internal architecture, analyze dependencies, predict the impact of code changes, and automatically generate technical documentation.
+<p align="center">
 
-Instead of treating a codebase as a collection of independent files, CodeSpec AI builds a **machine-readable representation of the entire software system** by combining static code analysis, Abstract Syntax Tree (AST) parsing, dependency graphs, repository intelligence, and Large Language Models (LLMs).
+**Understand. Visualize. Query. Predict.**
 
-The platform transforms raw source code into an **interactive architectural knowledge layer** that developers can query, analyze, visualize, and use for safer software evolution.
+Turn any software repository into a **machine-readable architecture map** using AST parsing, dependency graphs, RAG, and LLMs.
 
----
+<br/>
 
-## 🚀 Core Value Proposition
+![Status](https://img.shields.io/badge/STATUS-IN_DEVELOPMENT-8A2BE2?style=for-the-badge)
+![AI](https://img.shields.io/badge/AI-LLM%20%2B%20RAG-7C3AED?style=for-the-badge)
+![Backend](https://img.shields.io/badge/BACKEND-FastAPI-009688?style=for-the-badge)
+![Parsing](https://img.shields.io/badge/PARSING-Tree--sitter-F97316?style=for-the-badge)
+![Graph](https://img.shields.io/badge/GRAPH-Neo4j-008CC1?style=for-the-badge)
+![Frontend](https://img.shields.io/badge/FRONTEND-React-61DAFB?style=for-the-badge)
 
-Modern software systems become increasingly difficult to understand as their size and dependency complexity grows.
-
-A developer making a seemingly small change may need to understand:
-
-* Which files depend on the modified component?
-* Which functions or classes consume it?
-* What modules could be indirectly affected?
-* Where are the architectural bottlenecks?
-* What documentation is missing?
-* How does a particular feature flow through the system?
-* What could break if a particular function, class, or module changes?
-
-CodeSpec AI addresses these problems by combining **deterministic code analysis with AI-powered reasoning**.
-
-### Core Capabilities
-
-* **Repository Intelligence**
-  Ingests complete Git repositories and analyzes their structure, files, modules, classes, functions, imports, and relationships.
-
-* **Multi-Language AST Parsing**
-  Uses Tree-sitter-based parsers to extract structural information from supported programming languages without relying solely on regular expressions.
-
-* **Dependency Graph Construction**
-  Converts extracted relationships into a graph representation using Neo4j.
-
-* **Change Impact Analysis**
-  Determines which components may be affected when a file, class, function, or dependency changes.
-
-* **AI-Powered Architecture Understanding**
-  Uses LLMs and Retrieval-Augmented Generation (RAG) to reason over repository-specific context.
-
-* **Automatic Documentation Generation**
-  Generates technical explanations for modules, components, functions, dependencies, and architectural structures.
-
-* **Architecture Visualization**
-  Converts repository relationships into visual architectural representations that developers can explore.
-
-* **Developer-Focused Querying**
-  Allows developers to ask natural-language questions about an unfamiliar codebase.
+</p>
 
 ---
 
-# 🧠 The Core Idea
+## 🧠 What is CodeSpec AI?
 
-Traditional code-analysis tools usually operate at only one layer.
+Large codebases are difficult to understand.
+
+A developer joins an unfamiliar project and immediately faces questions like:
+
+> **"Where does this function get used?"**
+> **"What breaks if I change this file?"**
+> **"How does authentication flow through the system?"**
+> **"Which modules depend on this service?"**
+
+CodeSpec AI is designed to answer these questions by transforming a repository from **raw source code → structured architecture → searchable intelligence**.
 
 ```text
-Source Code
-    ↓
-Static Analysis
-    ↓
-Reports
-```
-
-CodeSpec AI combines several layers:
-
-```text
-                    ┌─────────────────────┐
-                    │   Git Repository    │
-                    └──────────┬──────────┘
-                               ↓
-                    ┌─────────────────────┐
-                    │ Repository Ingestion│
-                    └──────────┬──────────┘
-                               ↓
-                    ┌─────────────────────┐
-                    │  Source Extraction  │
-                    └──────────┬──────────┘
-                               ↓
-                    ┌─────────────────────┐
-                    │ Tree-sitter Parsing │
-                    └──────────┬──────────┘
-                               ↓
-              ┌────────────────┴────────────────┐
-              ↓                                 ↓
-      Structural Metadata                 Dependencies
-              ↓                                 ↓
-              └────────────────┬────────────────┘
-                               ↓
-                    ┌─────────────────────┐
-                    │   Neo4j Graph Layer │
-                    └──────────┬──────────┘
-                               ↓
-                    ┌─────────────────────┐
-                    │ Context Retrieval   │
-                    │       + RAG         │
-                    └──────────┬──────────┘
-                               ↓
-                    ┌─────────────────────┐
-                    │     LLM Reasoning   │
-                    └──────────┬──────────┘
-                               ↓
-          ┌────────────────────┼────────────────────┐
-          ↓                    ↓                    ↓
-    Impact Analysis      Documentation       Architecture
-                                                  Graph
-          └────────────────────┼────────────────────┘
-                               ↓
-                    ┌─────────────────────┐
-                    │   React Dashboard   │
-                    └─────────────────────┘
+                 ┌─────────────────────┐
+                 │    SOURCE CODE      │
+                 └──────────┬──────────┘
+                            ↓
+                 ┌─────────────────────┐
+                 │   TREE-SITTER AST   │
+                 └──────────┬──────────┘
+                            ↓
+              ┌─────────────┴─────────────┐
+              ↓                           ↓
+       STRUCTURE                     RELATIONSHIPS
+              ↓                           ↓
+       Files / Classes              Imports / Calls
+       Functions / Modules           Dependencies
+              └─────────────┬─────────────┘
+                            ↓
+                 ┌─────────────────────┐
+                 │    NEO4J GRAPH      │
+                 └──────────┬──────────┘
+                            ↓
+                 ┌─────────────────────┐
+                 │     RAG + LLM       │
+                 └──────────┬──────────┘
+                            ↓
+        ┌───────────────────┼───────────────────┐
+        ↓                   ↓                   ↓
+   IMPACT ANALYSIS     AI EXPLANATIONS     DOCUMENTATION
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            ↓
+                 ┌─────────────────────┐
+                 │   REACT DASHBOARD   │
+                 └─────────────────────┘
 ```
 
 ---
 
-# 📊 Feature Highlights
+# 🚀 The Core Idea
 
-## 1. Repository Ingestion
+Traditional tools often make developers **search through code**.
 
-CodeSpec AI can accept an entire software repository rather than requiring developers to manually provide individual files.
+CodeSpec AI aims to make the codebase **understandable as a system**.
+
+### From this:
+
+```text
+100s / 1000s of files
+        ↓
+Manual searching
+        ↓
+Manual dependency tracing
+        ↓
+Manual architecture reconstruction
+```
+
+### To this:
+
+```text
+Repository
+    ↓
+CodeSpec AI
+    ↓
+Architecture Knowledge Graph
+    ↓
+AI-powered reasoning
+    ↓
+Actionable developer insights
+```
+
+---
+
+# 🔥 What CodeSpec AI Can Do
+
+| Capability                     | What it does                                          |
+| ------------------------------ | ----------------------------------------------------- |
+| 📦 **Repository Intelligence** | Ingest and understand complete repositories           |
+| 🌳 **AST Parsing**             | Extract code structure using Tree-sitter              |
+| 🔗 **Dependency Mapping**      | Discover imports, calls, references and relationships |
+| 🕸️ **Architecture Graph**     | Represent the codebase using Neo4j                    |
+| 💥 **Impact Analysis**         | Identify potentially affected components              |
+| 🤖 **AI Understanding**        | Explain architecture using LLMs                       |
+| 🔍 **RAG Querying**            | Answer questions using repository-specific context    |
+| 📚 **Documentation**           | Generate technical explanations automatically         |
+| 📊 **Visualization**           | Explore architecture through an interactive dashboard |
+
+---
+
+# 🏗️ How It Works
+
+CodeSpec AI follows a **deterministic → intelligent** architecture.
+
+```text
+              ┌──────────────────┐
+              │   Git Repository  │
+              └────────┬─────────┘
+                       ↓
+              ┌──────────────────┐
+              │ Repository       │
+              │ Ingestion        │
+              └────────┬─────────┘
+                       ↓
+              ┌──────────────────┐
+              │ Tree-sitter      │
+              │ Parsing          │
+              └────────┬─────────┘
+                       ↓
+              ┌──────────────────┐
+              │ Code Structure   │
+              │ Extraction       │
+              └────────┬─────────┘
+                       ↓
+              ┌──────────────────┐
+              │ Dependency       │
+              │ Extraction       │
+              └────────┬─────────┘
+                       ↓
+              ┌──────────────────┐
+              │ Neo4j Knowledge  │
+              │ Graph            │
+              └────────┬─────────┘
+                       ↓
+              ┌──────────────────┐
+              │ Context          │
+              │ Retrieval        │
+              └────────┬─────────┘
+                       ↓
+              ┌──────────────────┐
+              │ RAG + LLM        │
+              └────────┬─────────┘
+                       ↓
+        ┌──────────────┼──────────────┐
+        ↓              ↓              ↓
+   Impact Analysis   AI Query      Documentation
+        │              │              │
+        └──────────────┼──────────────┘
+                       ↓
+              ┌──────────────────┐
+              │ React Dashboard  │
+              └──────────────────┘
+```
+
+---
+
+# 🌳 01 — Repository Intelligence
+
+The first step is turning a repository into something the system can process.
+
+### Pipeline
+
+```text
+Git URL / Repository
+        ↓
+Clone / Extract
+        ↓
+File Discovery
+        ↓
+Language Detection
+        ↓
+Supported Source Files
+```
 
 The ingestion layer handles:
 
-* Git repository cloning
-* Repository extraction
+* Git repository fetching
+* Repository validation
 * File discovery
 * Language identification
-* Workspace management
 * Unsupported-file filtering
-* Source-code preparation
-
-This creates a standardized input pipeline for the analysis engine.
+* Workspace preparation
 
 ---
 
-# 2. Multi-Language Code Parsing
+# 🌲 02 — AST-Based Code Understanding
 
-At the heart of CodeSpec AI is a **Tree-sitter-based parsing layer**.
+Instead of treating source code as plain text, CodeSpec AI uses **Tree-sitter** to understand its syntax structure.
 
-Rather than treating source code as plain text, CodeSpec AI converts it into structured syntax information.
-
-For example:
+Example:
 
 ```python
 class UserService:
@@ -157,248 +220,194 @@ class UserService:
         return repository.save(user)
 ```
 
-The parser can identify concepts such as:
+Instead of simply seeing text, CodeSpec AI can represent it as:
 
 ```text
 Class
- └── UserService
-      │
-      └── Function
-           └── create_user
-                │
-                └── Call
-                     └── repository.save()
+└── UserService
+    └── Function
+        └── create_user()
+            └── Call
+                └── repository.save()
 ```
 
-This structural representation allows CodeSpec AI to reason about software at a much deeper level than keyword matching.
+This provides structured information for downstream analysis.
 
 ---
 
-# 3. Language Parser Architecture
+# 🧩 03 — Unified Parser Architecture
 
-CodeSpec AI uses a common parser abstraction so that different programming languages can be processed through a unified interface.
+CodeSpec AI uses a common parser abstraction.
 
 ```text
-                    Base Parser
-                        │
-        ┌───────────────┼───────────────┐
-        ↓               ↓               ↓
- Python Parser     Java Parser     JavaScript Parser
-        │
-        ├── Class Extraction
-        ├── Function Extraction
-        ├── Import Extraction
-        ├── Call Extraction
-        └── Relationship Extraction
+                 Base Parser
+                      │
+        ┌─────────────┼─────────────┐
+        ↓             ↓             ↓
+     Python       JavaScript       Java
+     Parser         Parser        Parser
+        │             │             │
+        └─────────────┼─────────────┘
+                      ↓
+             Common Code Model
 ```
 
-The architecture is designed so that additional language parsers can be added without redesigning the entire analysis pipeline.
+Each parser can extract:
+
+```text
+📄 Files
+📦 Modules
+🏛 Classes
+⚙ Functions
+📥 Imports
+📞 Function Calls
+🔗 References
+🧬 Relationships
+```
+
+The architecture is designed so new language parsers can be added without rebuilding the entire system.
 
 ---
 
-# 4. Structural Code Extraction
+# 🕸️ 04 — Dependency Knowledge Graph
 
-The parser layer extracts important software entities such as:
+This is where CodeSpec AI moves beyond simple code search.
 
-### Files
-
-```text
-backend/
- ├── main.py
- ├── routers/
- └── services/
-```
-
-### Classes
-
-```text
-UserService
-AuthService
-DatabaseManager
-```
-
-### Functions
-
-```text
-create_user()
-authenticate()
-generate_token()
-```
-
-### Imports
-
-```text
-fastapi
-database
-services.auth
-models.user
-```
-
-### Function Calls
-
-```text
-AuthService → DatabaseManager
-UserRouter → UserService
-UserService → UserRepository
-```
-
-These entities become the foundation of the dependency graph.
-
----
-
-# 5. Dependency Graph Engine
-
-One of CodeSpec AI's major differentiators is its graph-based representation of the repository.
-
-Instead of storing relationships only as text, CodeSpec AI represents them as connected nodes and edges.
+Relationships become a **software knowledge graph**.
 
 Example:
 
 ```text
-┌─────────────┐
-│  UserRouter │
-└──────┬──────┘
-       │ calls
-       ↓
-┌─────────────┐
-│ UserService │
-└──────┬──────┘
-       │ calls
+┌──────────────┐
+│ User Router  │
+└──────┬───────┘
+       │ CALLS
        ↓
 ┌──────────────┐
-│ UserRepository│
+│ User Service │
 └──────┬───────┘
-       │ accesses
+       │ CALLS
        ↓
-┌─────────────┐
-│   Database  │
-└─────────────┘
+┌────────────────┐
+│ User Repository│
+└───────┬────────┘
+        │ ACCESSES
+        ↓
+┌──────────────┐
+│   Database   │
+└──────────────┘
 ```
 
-Neo4j provides the graph storage layer for these relationships.
-
----
-
-# 🔗 Dependency Intelligence
-
-CodeSpec AI can model relationships such as:
+### Relationships
 
 ```text
+CONTAINS
 IMPORTS
 CALLS
-CONTAINS
 DEPENDS_ON
+REFERENCES
 EXTENDS
 IMPLEMENTS
-REFERENCES
 ```
 
-This allows the system to move from:
-
-> "Which files exist?"
-
-to:
-
-> "How are these files connected?"
-
-That distinction is critical for architecture analysis.
+Stored and queried through **Neo4j**.
 
 ---
 
-# 💥 Change Impact Analysis
+# 💥 05 — Change Impact Analysis
 
-One of the primary objectives of CodeSpec AI is to answer:
+One of the key goals of CodeSpec AI:
 
 > **"If I change this component, what else could be affected?"**
 
-For example:
+Example:
 
 ```text
-Modified:
-UserService.createUser()
-
-        ↓
-
-Direct Dependencies
-        ↓
-
-UserController
-UserRouter
-UserRepository
-
-        ↓
-
-Indirect Dependencies
-        ↓
-
-Authentication Flow
-API Layer
-Database Layer
+          MODIFY
+            │
+            ↓
+    UserService.py
+            │
+      ┌─────┴─────┐
+      ↓           ↓
+ UserRouter   AuthService
+      │           │
+      └─────┬─────┘
+            ↓
+      API / Auth Flow
 ```
 
-The graph enables CodeSpec AI to traverse dependency relationships and identify potentially affected components.
+The graph can be traversed to identify:
+
+```text
+Changed Component
+       ↓
+Direct Dependents
+       ↓
+Indirect Dependents
+       ↓
+Potential Impact Zone
+```
+
+The AI layer can then explain **why those components may be affected**.
+
+> Impact analysis is intended as developer assistance; results should be validated against the actual code and tests.
 
 ---
 
-# 🧠 AI + RAG Architecture
+# 🤖 06 — RAG + LLM Intelligence
 
-Static analysis tells CodeSpec AI **what exists**.
+Static analysis tells us:
 
-The AI layer helps explain **what it means**.
+> **What exists?**
 
-The platform combines:
+AI helps answer:
+
+> **What does it mean?**
+
+CodeSpec AI combines:
 
 ```text
-Repository Metadata
-        +
 Source Code
-        +
+     +
+AST Metadata
+     +
 Dependency Graph
-        +
-Retrieved Context
-        ↓
-      RAG
-        ↓
-       LLM
-        ↓
+     +
+Repository Context
+     ↓
+   Retrieval
+     ↓
+     RAG
+     ↓
+    LLM
+     ↓
 Architecture Intelligence
 ```
 
-The Retrieval-Augmented Generation layer provides repository-specific context to the LLM instead of asking the model to reason about an entire codebase blindly.
-
-This helps ground AI responses in the actual project structure.
-
----
-
-# 🤖 AI-Powered Architecture Understanding
-
-Developers can ask questions such as:
+This allows repository-aware questions such as:
 
 ```text
-"How does authentication work in this project?"
+💬 "How does authentication work?"
 
-"What files are involved when a user registers?"
+💬 "What happens when a user registers?"
 
-"What depends on UserService?"
+💬 "What depends on UserService?"
 
-"Which modules are affected if this API changes?"
+💬 "Where is database access handled?"
 
-"Explain the architecture of the backend."
+💬 "Which components could be affected by this change?"
 
-"Where is database access handled?"
+💬 "Explain the backend architecture."
 ```
-
-CodeSpec AI retrieves relevant repository context before generating the response.
 
 ---
 
-# 📚 Automatic Documentation Generation
+# 📚 07 — Automatic Documentation
 
-CodeSpec AI can generate technical documentation from analyzed repository structures.
+CodeSpec AI can transform extracted repository knowledge into technical documentation.
 
-Possible documentation layers include:
-
-### File-Level
+### File Level
 
 ```text
 Purpose
@@ -407,275 +416,134 @@ Dependencies
 Exports
 ```
 
-### Class-Level
+### Class Level
 
 ```text
-Class purpose
+Purpose
 Methods
 Relationships
 Dependencies
 ```
 
-### Function-Level
+### Function Level
 
 ```text
 Purpose
 Parameters
-Return value
-External calls
-Potential dependencies
-```
-
-### Architecture-Level
-
-```text
-Major components
-Data flow
-Dependency relationships
-System boundaries
-```
-
-This reduces the manual effort required to understand and document legacy or unfamiliar systems.
-
----
-
-# 🏗 Architecture Visualization
-
-The dependency graph can be transformed into architectural diagrams.
-
-Example:
-
-```text
-                  ┌───────────────┐
-                  │   Frontend    │
-                  └───────┬───────┘
-                          │
-                          ↓
-                  ┌───────────────┐
-                  │  API Router   │
-                  └───────┬───────┘
-                          │
-              ┌───────────┴───────────┐
-              ↓                       ↓
-       ┌─────────────┐        ┌─────────────┐
-       │   Service   │        │ Auth Service│
-       └──────┬──────┘        └──────┬──────┘
-              │                      │
-              └──────────┬───────────┘
-                         ↓
-                  ┌─────────────┐
-                  │  Database   │
-                  └─────────────┘
-```
-
-The objective is to give developers an architectural view without requiring them to manually inspect hundreds of files.
-
----
-
-# ⚙️ Technical Architecture
-
-```mermaid
-graph TD
-
-A[Git Repository / ZIP] --> B[Repository Ingestion]
-
-B --> C[File Discovery & Filtering]
-
-C --> D[Language Detection]
-
-D --> E[Tree-sitter Parser Layer]
-
-E --> F[AST / Structural Extraction]
-
-F --> G[Entity & Relationship Builder]
-
-G --> H[(Neo4j Dependency Graph)]
-
-F --> I[Repository Metadata]
-
-H --> J[Context Retrieval]
-I --> J
-
-J --> K[RAG Pipeline]
-
-K --> L[LLM Reasoning Engine]
-
-L --> M[Impact Analysis]
-L --> N[Documentation Generation]
-L --> O[Architecture Explanation]
-
-H --> P[Graph Visualization]
-
-M --> Q[React Dashboard]
-N --> Q
-O --> Q
-P --> Q
-```
-
----
-
-# 🧩 System Modules
-
-CodeSpec AI is organized into multiple logical layers.
-
-## Layer 1 — Repository Ingestion
-
-Responsible for bringing source code into the system.
-
-Typical responsibilities:
-
-```text
-Git Fetching
-ZIP Extraction
-Workspace Management
-Repository Validation
-File Discovery
-```
-
----
-
-## Layer 2 — Parsing Engine
-
-Responsible for understanding source code syntax.
-
-```text
-Base Parser
-Python Parser
-Java Parser
-JavaScript Parser
-Additional Language Parsers
-```
-
-The parsers convert source code into structured entities.
-
----
-
-## Layer 3 — Dependency Extraction
-
-Responsible for discovering relationships between entities.
-
-```text
-Imports
-Classes
-Functions
+Return Value
 Calls
-References
-Inheritance
 Dependencies
 ```
 
----
-
-## Layer 4 — Graph Construction
-
-Responsible for storing repository relationships in Neo4j.
+### Architecture Level
 
 ```text
-Nodes
- ├── Repository
- ├── File
- ├── Class
- ├── Function
- └── Module
-
-Edges
- ├── CONTAINS
- ├── IMPORTS
- ├── CALLS
- ├── DEPENDS_ON
- └── REFERENCES
+Components
+Data Flow
+Dependencies
+System Boundaries
 ```
 
 ---
 
-## Layer 5 — AI Intelligence
+# 🎨 08 — Architecture Visualization
 
-Responsible for higher-level reasoning.
+The dependency graph can be converted into an interactive architecture view.
 
 ```text
-Context Retrieval
-      ↓
-RAG
-      ↓
-LLM
-      ↓
-Architecture Understanding
-      ↓
-Impact Analysis
-      ↓
-Documentation
+                 ┌──────────────┐
+                 │   Frontend   │
+                 └──────┬───────┘
+                        ↓
+                 ┌──────────────┐
+                 │ API Router   │
+                 └──────┬───────┘
+                        ↓
+             ┌──────────┴──────────┐
+             ↓                     ↓
+      ┌─────────────┐       ┌─────────────┐
+      │   Service   │       │ Auth Layer  │
+      └──────┬──────┘       └──────┬──────┘
+             │                     │
+             └──────────┬──────────┘
+                        ↓
+                 ┌──────────────┐
+                 │   Database   │
+                 └──────────────┘
 ```
+
+The objective is simple:
+
+**See the architecture without manually reading the entire repository.**
 
 ---
 
-## Layer 6 — API Layer
+# ⚙️ Tech Stack
 
-FastAPI exposes the system capabilities to the frontend and external clients.
-
-The API layer acts as the bridge between:
-
-```text
-Frontend
-   ↓
-FastAPI
-   ↓
-Analysis Services
-   ↓
-Graph + AI Infrastructure
-```
+| Layer              | Technology        |
+| ------------------ | ----------------- |
+| 🎨 Frontend        | React             |
+| ⚡ Backend          | FastAPI           |
+| 🌳 Parsing         | Tree-sitter       |
+| 🕸️ Graph          | Neo4j             |
+| 🤖 AI              | LLM + RAG         |
+| 📦 Repository      | Git / GitPython   |
+| 🔄 Workers         | Celery            |
+| ⚡ Queue / Cache    | Redis             |
+| 🔌 API             | REST              |
+| 🐳 Infrastructure  | Docker-compatible |
+| 🌐 Version Control | GitHub            |
 
 ---
 
-## Layer 7 — Visualization Layer
+# 🧱 Architecture Layers
 
-The React frontend provides an interactive interface for:
-
-* Repository analysis
-* Architecture exploration
-* Dependency visualization
-* Impact analysis
-* AI-generated explanations
-* Documentation
-* Search and exploration
+```text
+┌────────────────────────────────────────────┐
+│              React Dashboard               │
+├────────────────────────────────────────────┤
+│                 FastAPI                    │
+├────────────────────────────────────────────┤
+│          Analysis & AI Services            │
+├────────────────────────────────────────────┤
+│       RAG / Context Retrieval Layer        │
+├────────────────────────────────────────────┤
+│          Neo4j Knowledge Graph             │
+├────────────────────────────────────────────┤
+│       Dependency & Entity Extraction       │
+├────────────────────────────────────────────┤
+│           Tree-sitter Parsers              │
+├────────────────────────────────────────────┤
+│         Repository Ingestion               │
+└────────────────────────────────────────────┘
+```
 
 ---
 
 # 📁 Project Structure
 
-The project follows a modular backend architecture.
-
 ```text
 codespec-ai/
 │
 ├── backend/
-│   │
 │   ├── app/
-│   │   │
 │   │   ├── api/
-│   │   │
 │   │   ├── config/
-│   │   │
 │   │   ├── ingestion/
-│   │   │
 │   │   ├── parsers/
 │   │   │   ├── base.py
 │   │   │   ├── python_parser.py
 │   │   │   ├── javascript_parser.py
 │   │   │   └── ...
-│   │   │
 │   │   ├── graph/
-│   │   │
 │   │   ├── analysis/
-│   │   │
 │   │   ├── ai/
-│   │   │
 │   │   └── services/
 │   │
 │   ├── main.py
 │   └── requirements.txt
 │
 ├── frontend/
-│   │
 │   ├── src/
 │   ├── public/
 │   ├── package.json
@@ -684,597 +552,344 @@ codespec-ai/
 └── README.md
 ```
 
-> The exact directory structure may evolve as additional modules are implemented.
+---
+
+# 🔄 End-to-End Flow
+
+```text
+01  Repository
+        ↓
+02  Ingestion
+        ↓
+03  File Discovery
+        ↓
+04  Tree-sitter Parsing
+        ↓
+05  Entity Extraction
+        ↓
+06  Relationship Extraction
+        ↓
+07  Neo4j Graph
+        ↓
+08  Context Retrieval
+        ↓
+09  RAG
+        ↓
+10  LLM Reasoning
+        ↓
+11  Impact / Docs / Architecture
+        ↓
+12  React Dashboard
+```
 
 ---
 
-# 🔄 End-to-End Processing Pipeline
+# 📊 Current Development Status
 
-When a developer submits a repository, CodeSpec AI follows a structured pipeline.
-
-### Step 1 — Repository Submission
+### 🟢 Module 1 — Repository Intelligence
 
 ```text
-Git URL / Repository
-        ↓
-Repository Ingestion
+████████████████████████████  COMPLETE
 ```
 
-### Step 2 — File Discovery
+Implemented foundation:
+
+* Repository ingestion
+* File discovery
+* Tree-sitter integration
+* Base parser architecture
+* Language-specific parser architecture
+* Structural extraction
+* Dependency extraction
+* Background processing architecture
+* FastAPI backend foundation
+* Neo4j graph infrastructure
+* Celery + Redis infrastructure
+* Docker-compatible infrastructure
+
+### 🟡 Module 2 — AI & Impact Intelligence
+
+```text
+████████░░░░░░░░░░░░░░░░░░░░  IN PROGRESS
+```
+
+Planned / upcoming:
+
+* Graph-based impact analysis
+* Vector embeddings
+* Qdrant integration
+* Repository-aware RAG
+* LLM reasoning
+* AI architecture explanations
+* Documentation generation
+
+---
+
+# 🧪 Repository Test
+
+CodeSpec AI has been tested against a real software repository containing:
+
+```text
+79+
+Supported Source Files
+```
+
+The ingestion and parsing pipeline processes the repository to extract its structural information and relationships.
 
 ```text
 Repository
     ↓
-Supported Files
+79+ Source Files
     ↓
-Language Detection
-```
-
-### Step 3 — Parsing
-
-```text
-Source Code
+AST Parsing
     ↓
-Tree-sitter
-    ↓
-AST
-```
-
-### Step 4 — Entity Extraction
-
-```text
-AST
- ↓
-Files
-Classes
-Functions
-Imports
-Calls
-```
-
-### Step 5 — Relationship Extraction
-
-```text
 Entities
-   ↓
-Dependency Relationships
-```
-
-### Step 6 — Graph Construction
-
-```text
+    ↓
 Relationships
-      ↓
-Neo4j
-      ↓
-Dependency Graph
-```
-
-### Step 7 — Context Retrieval
-
-```text
-User Query
-     ↓
-Relevant Files
-     +
-Graph Relationships
-     +
-Code Context
-```
-
-### Step 8 — AI Reasoning
-
-```text
-Retrieved Context
-       ↓
-      RAG
-       ↓
-      LLM
-```
-
-### Step 9 — Intelligence Output
-
-```text
-Architecture Explanation
-Impact Analysis
-Documentation
-Dependency Information
-```
-
-### Step 10 — Visualization
-
-```text
-AI + Graph Results
-        ↓
-React Dashboard
-```
-
----
-
-# 🔍 Example: Change Impact Analysis
-
-Suppose a developer modifies:
-
-```text
-auth_service.py
-```
-
-CodeSpec AI can trace relationships such as:
-
-```text
-auth_service.py
-       │
-       ├── imported by → auth_router.py
-       │
-       ├── called by → login_controller.py
-       │
-       └── used by → user_service.py
-```
-
-The graph traversal can then identify potentially affected components.
-
-The system can present:
-
-```text
-Changed Component
-        ↓
-Direct Dependents
-        ↓
-Indirect Dependents
-        ↓
-Potential Impact Zone
-```
-
-The AI layer can then explain the result in natural language.
-
----
-
-# 🧪 Repository Analysis Example
-
-For a repository containing:
-
-```text
-79 supported source files
-```
-
-the ingestion and parser layers can process the repository and extract its structural information.
-
-The resulting knowledge model can contain:
-
-```text
-Files
-Classes
-Functions
-Imports
-Calls
-Dependencies
-Relationships
-```
-
-This transforms a raw repository into a structured software knowledge graph.
-
----
-
-# 🛠 Technology Stack
-
-| Layer                 | Technology                     |
-| --------------------- | ------------------------------ |
-| Frontend              | React                          |
-| Backend               | FastAPI                        |
-| Language Parsing      | Tree-sitter                    |
-| Graph Database        | Neo4j                          |
-| AI                    | LLM + RAG                      |
-| Repository Management | GitPython / Git                |
-| Background Processing | Celery                         |
-| Queue / Cache         | Redis                          |
-| API Communication     | REST                           |
-| Version Control       | Git / GitHub                   |
-| Containerization      | Docker-compatible architecture |
-
----
-
-# 🧠 Why Tree-sitter?
-
-Traditional approaches often rely heavily on:
-
-```text
-Regex
-+
-String Matching
-```
-
-This becomes unreliable when source code becomes complex.
-
-Tree-sitter provides syntax-aware parsing.
-
-Instead of asking:
-
-> "Does this file contain the word `class`?"
-
-CodeSpec AI can reason about:
-
-> "This node represents a class declaration containing these methods."
-
-This makes the extraction pipeline more structured and extensible.
-
----
-
-# 🕸 Why Neo4j?
-
-Software architecture is inherently relational.
-
-For example:
-
-```text
-Function A
-    ↓ calls
-Function B
-    ↓ accesses
-Database C
-```
-
-A graph database naturally represents these relationships.
-
-This makes graph traversal useful for questions such as:
-
-```text
-What depends on X?
-
-What does X depend on?
-
-What is the shortest dependency path?
-
-Which components are connected to X?
-
-What could be affected by changing X?
-```
-
----
-
-# 🤖 Why RAG Instead of Only an LLM?
-
-A general-purpose LLM does not automatically know the internal architecture of a user's repository.
-
-CodeSpec AI first retrieves relevant repository context:
-
-```text
-Repository
     ↓
-Parser
-    ↓
-Graph
-    ↓
-Retriever
-    ↓
-Relevant Context
-    ↓
-LLM
+Architecture Knowledge
 ```
-
-This grounds generated answers in the actual codebase.
-
-The LLM therefore acts as the **reasoning and explanation layer**, while deterministic parsing and graph analysis provide the underlying structural evidence.
 
 ---
 
-# 🔐 Reliability Philosophy
+# 🆚 The Problem → The Approach
 
-CodeSpec AI follows a hybrid intelligence approach.
-
-### Deterministic Layer
-
-Used for:
-
-```text
-Parsing
-Entity Extraction
-Dependency Detection
-Graph Construction
-Repository Structure
-```
-
-### AI Layer
-
-Used for:
-
-```text
-Explanation
-Natural Language Queries
-Documentation
-Architecture Summaries
-Reasoning
-```
-
-This separation is intentional.
-
-The system does not depend entirely on an LLM to understand the repository.
+| Traditional Workflow           | CodeSpec AI                    |
+| ------------------------------ | ------------------------------ |
+| 🔎 Search files manually       | 🌳 Parse code structurally     |
+| 📖 Read hundreds of files      | 🧠 Build repository context    |
+| 🔗 Trace dependencies manually | 🕸️ Graph relationships        |
+| 🤔 Guess change impact         | 💥 Analyze dependency paths    |
+| 📝 Write docs manually         | 🤖 AI-assisted documentation   |
+| 🗺️ Draw architecture manually | 📊 Generate architecture views |
+| 💬 Generic AI questions        | 🔍 Repository-aware answers    |
 
 ---
 
-# 📡 API Architecture
+# 💡 Why This Architecture?
 
-The backend exposes REST APIs through FastAPI.
+### Tree-sitter
 
-Example conceptual flow:
+Provides syntax-aware structural extraction instead of relying primarily on regex or text matching.
 
-```http
-POST /repository/analyze
-```
+### Neo4j
 
-Request:
-
-```json
-{
-  "repository_url": "https://github.com/example/project"
-}
-```
-
-Processing:
+Software systems are highly relational.
 
 ```text
-Repository
-    ↓
-Parser
-    ↓
-Graph
-    ↓
-AI Analysis
+A → CALLS → B
+B → DEPENDS_ON → C
+C → IMPORTS → D
 ```
 
-Possible response:
+Graphs make these relationships explicit and traversable.
 
-```json
-{
-  "status": "success",
-  "repository": "example/project",
-  "files_analyzed": 79,
-  "analysis": {
-    "architecture": "...",
-    "dependencies": [],
-    "impact_analysis": []
-  }
-}
-```
+### RAG
 
-> API routes and response schemas may change as implementation progresses.
-
----
-
-# 🖥 Developer Experience
-
-CodeSpec AI is designed around a simple workflow:
-
-```text
-1. Submit Repository
-        ↓
-2. Analyze Codebase
-        ↓
-3. Explore Architecture
-        ↓
-4. Inspect Dependencies
-        ↓
-5. Ask AI Questions
-        ↓
-6. Analyze Changes
-        ↓
-7. Generate Documentation
-```
-
-The goal is to make understanding an unfamiliar repository significantly easier.
-
----
-
-# 🆚 Problem vs Solution
-
-| Traditional Development               | CodeSpec AI                           |
-| ------------------------------------- | ------------------------------------- |
-| Manually inspect files                | Automated repository analysis         |
-| Search through code                   | Structural AST parsing                |
-| Manually trace dependencies           | Dependency graph                      |
-| Guess change impact                   | Graph-based impact analysis           |
-| Write documentation manually          | AI-assisted documentation             |
-| Read architecture diagrams separately | Generated architecture visualization  |
-| Generic AI answers                    | Repository-aware RAG                  |
-| Understand large projects slowly      | Centralized architecture intelligence |
-
----
-
-# 🏢 Enterprise & Scalability Vision
-
-CodeSpec AI is designed with a modular architecture so that individual layers can scale independently.
-
-```text
-                   Load Balancer
-                        │
-             ┌──────────┴──────────┐
-             ↓                     ↓
-        API Services          Worker Services
-             │                     │
-             └──────────┬──────────┘
-                        ↓
-                 Analysis Queue
-                        │
-              ┌─────────┴─────────┐
-              ↓                   ↓
-          Parser Workers      AI Workers
-              │                   │
-              ↓                   ↓
-           Neo4j              LLM/RAG
-```
-
-Potential scaling strategies include:
-
-* Asynchronous repository processing
-* Worker-based parsing
-* Redis-backed task queues
-* Distributed analysis jobs
-* Graph database scaling
-* Cached repository metadata
-* Incremental code analysis
-* CI/CD integration
-
-This allows the architecture to evolve from an academic prototype toward a larger developer-platform architecture.
-
----
-
-# 💰 Cost-Effectiveness Strategy
-
-CodeSpec AI separates expensive AI reasoning from deterministic processing.
-
-```text
-Parsing → Deterministic
-Graph → Deterministic
-Dependency Analysis → Deterministic
-
-AI → Used where reasoning is required
-```
-
-This avoids unnecessarily sending the entire repository to an LLM.
+The LLM should not blindly reason about an entire repository.
 
 Instead:
 
 ```text
-User Query
-    ↓
-Relevant Context Retrieval
-    ↓
-Small Context
-    ↓
+Question
+   ↓
+Retrieve relevant context
+   ↓
+Small, focused context
+   ↓
 LLM
 ```
 
-This approach can reduce unnecessary token consumption while keeping the AI layer focused on tasks where it provides the most value.
+This keeps the AI layer focused on the repository information relevant to the question.
+
+### Hybrid Intelligence
+
+```text
+DETERMINISTIC                 AI
+──────────────                ──────────────
+Parsing                       Explanation
+AST Extraction                Reasoning
+Dependencies                  Documentation
+Graph Construction            Natural Language
+Repository Structure          Architecture Summary
+```
+
+**CodeSpec AI does not ask an LLM to do everything.**
+
+It combines deterministic software analysis with AI reasoning.
 
 ---
 
-# 🔮 Future Intelligence Capabilities
+# 🚀 Scalability Vision
 
-The architecture can be extended toward:
+The architecture is designed so computationally expensive tasks can be processed asynchronously.
 
-* Predictive change-risk analysis
-* Code smell detection
-* Architecture drift detection
-* Technical debt analysis
-* Automated pull-request impact analysis
+```text
+                 Load Balancer
+                      │
+          ┌───────────┴───────────┐
+          ↓                       ↓
+      API Servers            Worker Pool
+                                  │
+                           ┌──────┴──────┐
+                           ↓             ↓
+                       Parser        AI Workers
+                       Workers           │
+                           │             ↓
+                           ↓            LLM
+                         Neo4j           │
+                                         ↓
+                                       RAG
+```
+
+Future scaling strategies include:
+
+* Asynchronous repository analysis
+* Celery worker scaling
+* Incremental analysis
+* Repository caching
+* Graph optimization
+* Distributed analysis jobs
 * CI/CD integration
-* GitHub pull-request analysis
-* Repository version comparison
-* Multi-repository dependency analysis
-* Team-level architecture analytics
-* Automated architecture documentation
-* Natural-language repository search
-* Historical dependency analysis
+* Pull-request analysis
+
+---
+
+# 💰 Cost-Aware AI Architecture
+
+CodeSpec AI separates deterministic processing from AI processing.
+
+```text
+             Repository
+                  ↓
+          Deterministic Layer
+                  ↓
+       ┌──────────┴──────────┐
+       ↓                     ↓
+     Parser                Graph
+       │                     │
+       └──────────┬──────────┘
+                  ↓
+            Context Retrieval
+                  ↓
+                 RAG
+                  ↓
+                 LLM
+```
+
+Instead of repeatedly sending an entire repository to an LLM, the system can retrieve **only the context required for a particular task**.
 
 ---
 
 # 🛣️ Roadmap
 
-## Phase 1 — Repository Intelligence
+```text
+MODULE 1
+Repository Intelligence
+████████████████████████████  ✅
 
-* [x] Repository ingestion architecture
-* [x] File discovery
-* [x] Base parser architecture
-* [x] Tree-sitter integration
-* [x] Language-specific parser architecture
+MODULE 2
+Graph + Impact Intelligence
+████████████░░░░░░░░░░░░░░░  🚧
 
-## Phase 2 — Structural Intelligence
+MODULE 3
+RAG + LLM Intelligence
+████░░░░░░░░░░░░░░░░░░░░░░░  🔜
 
-* [x] File extraction
-* [x] Class extraction
-* [x] Function extraction
-* [x] Import extraction
-* [x] Dependency extraction
-* [ ] Extended relationship analysis
+MODULE 4
+Developer Intelligence Platform
+░░░░░░░░░░░░░░░░░░░░░░░░░░  🔮
+```
 
-## Phase 3 — Graph Intelligence
+### Next Milestones
 
-* [ ] Neo4j integration
-* [ ] Repository graph generation
-* [ ] Dependency traversal
-* [ ] Graph-based impact analysis
-* [ ] Architecture visualization
-
-## Phase 4 — AI Intelligence
-
+* [ ] Extended graph relationships
+* [ ] Graph traversal engine
+* [ ] Change impact engine
+* [ ] Qdrant vector database
+* [ ] Embedding pipeline
 * [ ] Repository-aware RAG
-* [ ] LLM architecture explanations
-* [ ] Natural-language codebase queries
-* [ ] AI-generated documentation
-* [ ] Intelligent impact explanations
-
-## Phase 5 — Developer Platform
-
-* [ ] Interactive React dashboard
-* [ ] GitHub integration
-* [ ] Pull-request analysis
+* [ ] LLM integration
+* [ ] AI architecture explanations
+* [ ] Automatic documentation
+* [ ] Interactive dependency visualization
+* [ ] GitHub PR analysis
 * [ ] CI/CD integration
 * [ ] Incremental repository analysis
-* [ ] Enterprise-scale deployment
 
 ---
 
-# 🎯 Project Objective
+# 🎯 The Vision
 
-The long-term objective of CodeSpec AI is to create a **Software Architecture Intelligence Layer** that sits between source code and developers.
+CodeSpec AI is being built toward a **Software Architecture Intelligence Layer** between developers and their codebases.
 
-Instead of developers manually reconstructing the architecture of a project:
+```text
+                    SOURCE CODE
+                         │
+                         ↓
+                  ┌──────────────┐
+                  │ CodeSpec AI  │
+                  └──────┬───────┘
+                         ↓
+             ┌───────────────────────┐
+             │ Architecture Knowledge│
+             └───────────┬───────────┘
+                         ↓
+              ┌────────────────────┐
+              │ Developer Insights │
+              └────────────────────┘
+```
+
+### The goal:
+
+> **Turn codebases into living, searchable architecture knowledge.**
+
+---
+
+# 🔐 Engineering Principle
+
+AI-generated results are intended to **assist developers, not replace engineering judgment**.
+
+Structural analysis provides evidence from the repository, while AI-generated explanations may contain uncertainty.
+
+Critical decisions should always be validated against:
 
 ```text
 Source Code
-     ↓
-CodeSpec AI
-     ↓
-Architecture Knowledge
-     ↓
-Developer
+    +
+Tests
+    +
+Runtime Behavior
+    +
+Deployment Environment
 ```
-
-The platform turns the repository itself into a searchable, explainable, and continuously analyzable knowledge system.
-
----
-
-# 🧪 Research & Academic Scope
-
-CodeSpec AI combines multiple areas of computer science and software engineering:
-
-```text
-Software Engineering
-        +
-Compiler / AST Technology
-        +
-Graph Databases
-        +
-Natural Language Processing
-        +
-Large Language Models
-        +
-Retrieval-Augmented Generation
-        +
-Distributed Systems
-```
-
-This makes the project suitable for studying how AI can assist developers with **software comprehension, architecture recovery, dependency analysis, and change management**.
-
----
-
-# ⚠️ Important Disclaimer
-
-CodeSpec AI's AI-generated explanations and impact assessments are intended to assist developers rather than replace engineering judgment.
-
-Static analysis can identify structural relationships, while AI-generated reasoning may contain uncertainty.
-
-Developers should validate critical architectural and code-change decisions against the actual source code, tests, and deployment environment.
 
 ---
 
 # 👨‍💻 Project
 
-**CodeSpec AI — AI-Based Software Architecture & Impact Analysis System**
+### **CodeSpec AI**
 
-Built as a software-engineering and AI research project focused on making large codebases easier to understand, analyze, document, and evolve.
+**AI-Based Software Architecture & Impact Analysis System**
+
+Built as a software-engineering and AI research project exploring how ASTs, graph databases, RAG, LLMs, and distributed processing can improve software comprehension and change management.
 
 ```text
-Code → Structure → Graph → Context → Intelligence
+         CODE
+          ↓
+      STRUCTURE
+          ↓
+        GRAPH
+          ↓
+       CONTEXT
+          ↓
+     INTELLIGENCE
 ```
 
-**CodeSpec AI // Software Architecture Intelligence Layer**
+<p align="center">
+
+### ⚡ CodeSpec AI
+
+**Understand the Codebase. Understand the Impact.**
+
+</p>
