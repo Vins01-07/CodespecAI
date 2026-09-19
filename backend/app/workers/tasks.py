@@ -48,7 +48,7 @@ def _run_pipeline(
     logger.info("Found %d source files", len(file_paths))
 
     logger.info("Parsing source files …")
-    summaries = _registry.parse_files(file_paths)
+    summaries = _registry.parse_files(file_paths, base_dir=repo_dir)
     logger.info("Parsed %d / %d files successfully", len(summaries), len(file_paths))
 
     logger.info("Building Neo4j graph …")

@@ -36,7 +36,7 @@ class PythonParser(BaseParser):
         self, root: Node, source: bytes, file_path: str
     ) -> list[FunctionDef]:
         results: list[FunctionDef] = []
-        self._collect_functions(root, source, file_path, results, is_method=False)
+        self._collect_functions(root, source, file_path, results, is_method=False, class_name=None)
         return results
 
     def _collect_functions(
@@ -46,25 +46,31 @@ class PythonParser(BaseParser):
         file_path: str,
         results: list[FunctionDef],
         is_method: bool,
+        class_name: str | None = None,
     ) -> None:
         for child in node.children:
             if child.type == "function_definition":
                 results.append(
-                    self._parse_function(child, source, file_path, is_method)
+                    self._parse_function(child, source, file_path, is_method, class_name)
                 )
             elif child.type == "decorated_definition":
                 # decorated functions: decorator(s) + function_definition
                 for inner in child.children:
                     if inner.type == "function_definition":
                         results.append(
-                            self._parse_function(inner, source, file_path, is_method)
+                            self._parse_function(inner, source, file_path, is_method, class_name)
                         )
             elif child.type not in ("class_definition",):
                 # Recurse into module-level blocks but NOT into class bodies
-                self._collect_functions(child, source, file_path, results, is_method)
+                self._collect_functions(child, source, file_path, results, is_method, class_name)
 
     def _parse_function(
-        self, node: Node, source: bytes, file_path: str, is_method: bool
+        self,
+        node: Node,
+        source: bytes,
+        file_path: str,
+        is_method: bool,
+        class_name: str | None = None,
     ) -> FunctionDef:
         name = self._first_child_text(node, source, "identifier") or "<anonymous>"
         params = self._parse_params(node, source)
@@ -72,6 +78,8 @@ class PythonParser(BaseParser):
         body = node.child_by_field_name("body")
         docstring = self._extract_docstring_from_body(body, source) if body else None
         calls = self._walk_calls(body, source) if body else []
+        instantiations = self._extract_python_instantiations(body, source) if body else []
+        uses = self._extract_python_uses(node, body, source, instantiations)
 
         return FunctionDef(
             name=name,
@@ -82,7 +90,90 @@ class PythonParser(BaseParser):
             return_type=return_type,
             calls=calls,
             docstring=docstring,
+            class_name=class_name,
+            instantiations=instantiations,
+            uses=uses,
         )
+
+    def _extract_python_instantiations(self, body_node: Node, source: bytes) -> list[str]:
+        """Detect object instantiations like Calculator() or module.Calculator()."""
+        instantiations: list[str] = []
+
+        def _walk(n: Node) -> None:
+            if n.type == "call":
+                fn_node = n.child_by_field_name("function")
+                if fn_node:
+                    fn_text = self._node_text(fn_node, source).strip()
+                    # Check if target name ends with an uppercase identifier (PEP 8 class naming)
+                    last_part = fn_text.split(".")[-1]
+                    if last_part and last_part[0].isupper() and not last_part.isupper():
+                        instantiations.append(fn_text)
+            for child in n.children:
+                _walk(child)
+
+        _walk(body_node)
+        return list(dict.fromkeys(instantiations))
+
+    def _extract_python_uses(
+        self, func_node: Node, body_node: Node | None, source: bytes, instantiations: list[str]
+    ) -> list[str]:
+        """Collect class and type dependencies from parameters, return type, and body."""
+        uses: set[str] = set()
+        builtin_types = {
+            "int", "float", "str", "bool", "bytes", "list", "dict", "set",
+            "tuple", "None", "Any", "Optional", "Union", "Callable", "Iterable",
+            "Sequence", "Mapping", "object", "type", "self", "cls",
+        }
+
+        def _add_type_str(raw: str | None) -> None:
+            if not raw:
+                return
+            # Split out identifiers from complex annotations like Optional[User] or list[User]
+            import re
+            for token in re.findall(r"\b[A-Za-z_][A-Za-z0-9_]*\b", raw):
+                if token not in builtin_types and (token[0].isupper() or "_" in token):
+                    uses.add(token)
+
+        # 1. Parameter type annotations
+        params_node = func_node.child_by_field_name("parameters")
+        if params_node:
+            for child in params_node.children:
+                if child.type in ("typed_parameter", "typed_default_parameter"):
+                    type_node = child.child_by_field_name("type")
+                    if type_node:
+                        _add_type_str(self._node_text(type_node, source))
+
+        # 2. Return type annotation
+        ret_type = self._parse_return_type(func_node, source)
+        _add_type_str(ret_type)
+
+        # 3. Instantiations are also uses
+        for inst in instantiations:
+            cls_name = inst.split(".")[-1]
+            if cls_name not in builtin_types:
+                uses.add(cls_name)
+
+        # 4. Body type annotations (e.g. user: User = ...)
+        if body_node:
+            def _walk_body_types(n: Node) -> None:
+                if n.type == "type":
+                    _add_type_str(self._node_text(n, source))
+                elif n.type == "call":
+                    # Check isinstance(x, User) or issubclass(x, User)
+                    fn_node = n.child_by_field_name("function")
+                    if fn_node and self._node_text(fn_node, source) in ("isinstance", "issubclass"):
+                        args_node = n.child_by_field_name("arguments")
+                        if args_node and len(args_node.children) >= 3:
+                            # 2nd argument
+                            for arg in args_node.children[1:]:
+                                if arg.type == "identifier":
+                                    _add_type_str(self._node_text(arg, source))
+                for child in n.children:
+                    _walk_body_types(child)
+
+            _walk_body_types(body_node)
+
+        return sorted(uses)
 
     def _parse_params(self, func_node: Node, source: bytes) -> list[str]:
         params_node = func_node.child_by_field_name("parameters")
@@ -137,7 +228,7 @@ class PythonParser(BaseParser):
         docstring = self._extract_docstring_from_body(body, source) if body else None
         methods: list[FunctionDef] = []
         if body:
-            self._collect_functions(body, source, file_path, methods, is_method=True)
+            self._collect_functions(body, source, file_path, methods, is_method=True, class_name=name)
         return ClassDef(
             name=name,
             file_path=file_path,

@@ -59,20 +59,25 @@ class CSharpParser(BaseParser):
         source: bytes,
         file_path: str,
         results: list[FunctionDef],
+        class_name: str | None = None,
     ) -> None:
         for child in node.children:
             if child.type in _METHOD_TYPES:
-                results.append(self._parse_method(child, source, file_path))
+                results.append(self._parse_method(child, source, file_path, class_name))
             elif child.type not in _CLASS_TYPES:
-                self._walk_methods(child, source, file_path, results)
+                self._walk_methods(child, source, file_path, results, class_name)
 
-    def _parse_method(self, node: Node, source: bytes, file_path: str) -> FunctionDef:
+    def _parse_method(
+        self, node: Node, source: bytes, file_path: str, class_name: str | None = None
+    ) -> FunctionDef:
         name_node = node.child_by_field_name("name")
         name = self._node_text(name_node, source) if name_node else "<method>"
         params = self._parse_params(node, source)
         return_type = self._parse_return_type(node, source)
         body = node.child_by_field_name("body")
         calls = self._walk_calls(body, source) if body else []
+        instantiations = self._walk_instantiations(body, source) if body else []
+        uses = self._extract_csharp_uses(node, body, source, instantiations)
         docstring = self._extract_xmldoc(node, source)
         return FunctionDef(
             name=name,
@@ -83,7 +88,39 @@ class CSharpParser(BaseParser):
             return_type=return_type,
             calls=calls,
             docstring=docstring,
+            class_name=class_name,
+            instantiations=instantiations,
+            uses=uses,
         )
+
+    def _extract_csharp_uses(
+        self, node: Node, body_node: Node | None, source: bytes, instantiations: list[str]
+    ) -> list[str]:
+        uses: set[str] = set()
+        primitives = {
+            "bool", "byte", "sbyte", "char", "decimal", "double", "float", "int",
+            "uint", "nint", "nuint", "long", "ulong", "short", "ushort", "string",
+            "object", "void", "var", "this", "base",
+        }
+
+        for inst in instantiations:
+            c = inst.split(".")[-1]
+            if c not in primitives:
+                uses.add(c)
+
+        def _walk_types(n: Node) -> None:
+            if n.type == "identifier":
+                # Check if it's acting as a type identifier
+                parent = n.parent
+                if parent and parent.type in ("parameter", "variable_declaration", "cast_expression"):
+                    t = self._node_text(n, source)
+                    if t not in primitives and (t[0].isupper() or "_" in t):
+                        uses.add(t)
+            for child in n.children:
+                _walk_types(child)
+
+        _walk_types(node)
+        return sorted(uses)
 
     def _parse_params(self, node: Node, source: bytes) -> list[str]:
         params_node = node.child_by_field_name("parameters")
@@ -144,7 +181,7 @@ class CSharpParser(BaseParser):
         body = node.child_by_field_name("body") or node.child_by_field_name("declaration_list")
         methods: list[FunctionDef] = []
         if body:
-            self._walk_methods(body, source, file_path, methods)
+            self._walk_methods(body, source, file_path, methods, class_name=name)
         return ClassDef(
             name=name,
             file_path=file_path,

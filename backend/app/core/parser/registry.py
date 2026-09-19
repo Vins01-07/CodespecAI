@@ -65,7 +65,7 @@ class ParserRegistry:
                 return None
         return self._cache[ext]
 
-    def parse_file(self, path: Path) -> FileSummary | None:
+    def parse_file(self, path: Path, base_dir: Path | None = None) -> FileSummary | None:
         """
         Parse a single source file and return its FileSummary.
 
@@ -79,7 +79,7 @@ class ParserRegistry:
             logger.debug("No parser available for: %s", path)
             return None
         try:
-            summary = parser.parse(path)
+            summary = parser.parse(path, base_dir=base_dir)
             logger.debug(
                 "Parsed %s → %d funcs, %d classes, %d imports",
                 path.name,
@@ -95,14 +95,16 @@ class ParserRegistry:
             logger.error("Error parsing %s: %s", path, exc, exc_info=True)
             return None
 
-    def parse_files(self, paths: list[Path]) -> list[FileSummary]:
+    def parse_files(
+        self, paths: list[Path], base_dir: Path | None = None
+    ) -> list[FileSummary]:
         """
         Parse multiple files and return only successful results.
         Files that fail silently are skipped (errors are logged).
         """
         summaries: list[FileSummary] = []
         for path in paths:
-            summary = self.parse_file(path)
+            summary = self.parse_file(path, base_dir=base_dir)
             if summary is not None:
                 summaries.append(summary)
         return summaries

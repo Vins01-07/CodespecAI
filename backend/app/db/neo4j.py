@@ -25,3 +25,5 @@ def init_neo4j_schema():
         session.run("CREATE CONSTRAINT file_id IF NOT EXISTS FOR (f:File) REQUIRE (f.repo_url, f.path) IS UNIQUE")
         session.run("CREATE INDEX func_name IF NOT EXISTS FOR (fn:Function) ON (fn.name)")
         session.run("CREATE INDEX class_name IF NOT EXISTS FOR (c:Class) ON (c.name)")
+        session.run("CREATE INDEX func_id IF NOT EXISTS FOR (fn:Function) ON (fn.id)")
+        session.run("CREATE INDEX class_id IF NOT EXISTS FOR (c:Class) ON (c.id)")

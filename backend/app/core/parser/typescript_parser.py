@@ -97,6 +97,8 @@ class TypeScriptParser(BaseParser):
         return_type = self._parse_return_type(node, source)
         body = node.child_by_field_name("body")
         calls = self._walk_calls(body, source) if body else []
+        instantiations = self._walk_instantiations(body, source) if body else []
+        uses = self._extract_ts_uses(node, body, source, instantiations)
         docstring = self._extract_jsdoc(node, source)
         return FunctionDef(
             name=name,
@@ -107,6 +109,8 @@ class TypeScriptParser(BaseParser):
             return_type=return_type,
             calls=calls,
             docstring=docstring,
+            instantiations=instantiations,
+            uses=uses,
         )
 
     def _parse_arrow(
@@ -116,6 +120,8 @@ class TypeScriptParser(BaseParser):
         return_type = self._parse_return_type(node, source)
         body = node.child_by_field_name("body")
         calls = self._walk_calls(body, source) if body else []
+        instantiations = self._walk_instantiations(body, source) if body else []
+        uses = self._extract_ts_uses(node, body, source, instantiations)
         return FunctionDef(
             name=name,
             file_path=file_path,
@@ -125,7 +131,45 @@ class TypeScriptParser(BaseParser):
             return_type=return_type,
             calls=calls,
             docstring=None,
+            instantiations=instantiations,
+            uses=uses,
         )
+
+    def _extract_ts_uses(
+        self, node: Node, body_node: Node | None, source: bytes, instantiations: list[str]
+    ) -> list[str]:
+        """Collect referenced types and classes in TypeScript/JavaScript."""
+        uses: set[str] = set()
+        builtin_types = {
+            "string", "number", "boolean", "any", "void", "unknown", "never",
+            "null", "undefined", "symbol", "bigint", "object", "Function",
+            "Array", "Record", "Promise", "this",
+        }
+
+        for inst in instantiations:
+            c = inst.split(".")[-1]
+            if c not in builtin_types:
+                uses.add(c)
+
+        def _walk_types(n: Node) -> None:
+            if n.type == "type_identifier":
+                t = self._node_text(n, source)
+                if t not in builtin_types:
+                    uses.add(t)
+            elif n.type == "binary_expression":
+                # Check `x instanceof User`
+                op = n.child_by_field_name("operator")
+                if op and self._node_text(op, source) == "instanceof":
+                    right = n.child_by_field_name("right")
+                    if right and right.type == "identifier":
+                        t = self._node_text(right, source)
+                        if t not in builtin_types:
+                            uses.add(t)
+            for child in n.children:
+                _walk_types(child)
+
+        _walk_types(node)
+        return sorted(uses)
 
     def _parse_params(self, node: Node, source: bytes) -> list[str]:
         params_node = node.child_by_field_name("parameters")
@@ -208,6 +252,8 @@ class TypeScriptParser(BaseParser):
                     params = self._parse_params(child, source)
                     rt = self._parse_return_type(child, source)
                     calls = self._walk_calls(fn_body, source) if fn_body else []
+                    instantiations = self._walk_instantiations(fn_body, source) if fn_body else []
+                    uses = self._extract_ts_uses(child, fn_body, source, instantiations)
                     methods.append(
                         FunctionDef(
                             name=fn_name,
@@ -218,6 +264,9 @@ class TypeScriptParser(BaseParser):
                             return_type=rt,
                             calls=calls,
                             docstring=self._extract_jsdoc(child, source),
+                            class_name=name,
+                            instantiations=instantiations,
+                            uses=uses,
                         )
                     )
         return ClassDef(
@@ -243,6 +292,8 @@ class TypeScriptParser(BaseParser):
                         for t in inner.children:
                             if t.is_named and t.type not in ("implements",):
                                 heritage.append(self._node_text(t, source))
+                    elif inner.is_named and inner.type not in ("extends", "implements"):
+                        heritage.append(self._node_text(inner, source))
         return heritage
 
     # ------------------------------------------------------------------

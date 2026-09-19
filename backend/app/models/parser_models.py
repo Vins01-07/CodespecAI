@@ -11,6 +11,18 @@ class FunctionDef:
     return_type: str | None = None
     calls: list[str] = field(default_factory=list)
     docstring: str | None = None
+    id: str | None = None
+    class_name: str | None = None
+    instantiations: list[str] = field(default_factory=list)
+    uses: list[str] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        norm_path = self.file_path.replace("\\", "/")
+        if not self.id:
+            if self.class_name:
+                self.id = f"{norm_path}::{self.class_name}::{self.name}"
+            else:
+                self.id = f"{norm_path}::{self.name}"
 
 
 @dataclass
@@ -22,6 +34,12 @@ class ClassDef:
     bases: list[str] = field(default_factory=list)
     methods: list[FunctionDef] = field(default_factory=list)
     docstring: str | None = None
+    id: str | None = None
+
+    def __post_init__(self) -> None:
+        norm_path = self.file_path.replace("\\", "/")
+        if not self.id:
+            self.id = f"{norm_path}::{self.name}"
 
 
 @dataclass
@@ -39,3 +57,6 @@ class FileSummary:
     functions: list[FunctionDef] = field(default_factory=list)
     classes: list[ClassDef] = field(default_factory=list)
     imports: list[ImportDef] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        self.path = self.path.replace("\\", "/")

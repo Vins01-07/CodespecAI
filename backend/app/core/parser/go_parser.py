@@ -48,6 +48,8 @@ class GoParser(BaseParser):
         return_type = self._parse_result(node, source)
         body = node.child_by_field_name("body")
         calls = self._walk_calls(body, source) if body else []
+        instantiations = self._walk_instantiations(body, source) if body else []
+        uses = self._extract_go_uses(node, body, source, instantiations)
         return FunctionDef(
             name=name,
             file_path=file_path,
@@ -57,21 +59,37 @@ class GoParser(BaseParser):
             return_type=return_type,
             calls=calls,
             docstring=self._extract_go_comment(node, source),
+            instantiations=instantiations,
+            uses=uses,
         )
 
     def _parse_method(self, node: Node, source: bytes, file_path: str) -> FunctionDef:
         name_node = node.child_by_field_name("name")
         name = self._node_text(name_node, source) if name_node else "<method>"
         receiver = node.child_by_field_name("receiver")
-        receiver_text = ""
+        receiver_type = ""
         if receiver:
-            receiver_text = self._node_text(receiver, source).strip("() ")
+            # Extract receiver type: e.g. (c *Calculator) -> Calculator
+            for child in receiver.children:
+                if child.type == "parameter_declaration":
+                    t = child.child_by_field_name("type")
+                    if t:
+                        receiver_type = self._node_text(t, source).lstrip("*").strip()
+            if not receiver_type:
+                receiver_type = self._node_text(receiver, source).strip("() *")
+
         params = self._parse_params(node.child_by_field_name("parameters"), source)
         return_type = self._parse_result(node, source)
         body = node.child_by_field_name("body")
         calls = self._walk_calls(body, source) if body else []
+        instantiations = self._walk_instantiations(body, source) if body else []
+        uses = self._extract_go_uses(node, body, source, instantiations)
+        if receiver_type:
+            uses.append(receiver_type)
+            uses = sorted(set(uses))
+
         return FunctionDef(
-            name=f"{receiver_text}.{name}" if receiver_text else name,
+            name=name,
             file_path=file_path,
             line_start=node.start_point[0] + 1,
             line_end=node.end_point[0] + 1,
@@ -79,7 +97,37 @@ class GoParser(BaseParser):
             return_type=return_type,
             calls=calls,
             docstring=self._extract_go_comment(node, source),
+            class_name=receiver_type or None,
+            instantiations=instantiations,
+            uses=uses,
         )
+
+    def _extract_go_uses(
+        self, node: Node, body_node: Node | None, source: bytes, instantiations: list[str]
+    ) -> list[str]:
+        uses: set[str] = set()
+        primitives = {
+            "bool", "string", "int", "int8", "int16", "int32", "int64",
+            "uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
+            "byte", "rune", "float32", "float64", "complex64", "complex128",
+            "error", "any",
+        }
+
+        for inst in instantiations:
+            c = inst.split(".")[-1]
+            if c not in primitives:
+                uses.add(c)
+
+        def _walk_types(n: Node) -> None:
+            if n.type == "type_identifier":
+                t = self._node_text(n, source)
+                if t not in primitives and (t[0].isupper() or "_" in t):
+                    uses.add(t)
+            for child in n.children:
+                _walk_types(child)
+
+        _walk_types(node)
+        return sorted(uses)
 
     def _parse_params(self, params_node: Node | None, source: bytes) -> list[str]:
         if not params_node:
@@ -131,6 +179,15 @@ class GoParser(BaseParser):
                             results.append(
                                 self._parse_type_spec(spec, source, file_path)
                             )
+        # Attach receiver methods to their class
+        methods = [
+            self._parse_method(child, source, file_path)
+            for child in root.children
+            if child.type == "method_declaration"
+        ]
+        for cls in results:
+            cls.methods = [m for m in methods if m.class_name == cls.name]
+
         return results
 
     def _parse_type_spec(
@@ -138,12 +195,26 @@ class GoParser(BaseParser):
     ) -> ClassDef:
         name_node = spec_node.child_by_field_name("name")
         name = self._node_text(name_node, source) if name_node else "<type>"
+        bases: list[str] = []
+        type_node = spec_node.child_by_field_name("type")
+        if type_node:
+            # Check embedded fields for inheritance
+            for child in type_node.children:
+                if child.type == "field_declaration_list":
+                    for field_decl in child.children:
+                        if field_decl.type == "field_declaration":
+                            # If no explicit field name, it's an embedded struct/interface
+                            if not field_decl.child_by_field_name("name"):
+                                t = field_decl.child_by_field_name("type")
+                                if t:
+                                    bases.append(self._node_text(t, source).lstrip("*").strip())
+
         return ClassDef(
             name=name,
             file_path=file_path,
             line_start=spec_node.start_point[0] + 1,
             line_end=spec_node.end_point[0] + 1,
-            bases=[],
+            bases=bases,
             methods=[],
             docstring=self._extract_go_comment(spec_node.parent, source)
             if spec_node.parent

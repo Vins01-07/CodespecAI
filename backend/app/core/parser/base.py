@@ -65,18 +65,28 @@ class BaseParser(ABC):
     # Public API
     # ------------------------------------------------------------------
 
-    def parse(self, file_path: Path) -> FileSummary:
+    def parse(self, file_path: Path, base_dir: Path | None = None) -> FileSummary:
         """Parse a source file and return a structured FileSummary."""
         source = file_path.read_bytes()
         tree: Tree = self._parser.parse(source)
         root = tree.root_node
 
-        functions = self._extract_functions(root, source, str(file_path))
-        classes = self._extract_classes(root, source, str(file_path))
+        if base_dir:
+            try:
+                norm_path = file_path.resolve().relative_to(base_dir.resolve()).as_posix()
+            except ValueError:
+                norm_path = file_path.as_posix()
+        else:
+            norm_path = file_path.as_posix()
+
+        norm_path = norm_path.replace("\\", "/")
+
+        functions = self._extract_functions(root, source, norm_path)
+        classes = self._extract_classes(root, source, norm_path)
         imports = self._extract_imports(root, source)
 
         return FileSummary(
-            path=str(file_path),
+            path=norm_path,
             language=self.language,
             functions=functions,
             classes=classes,
@@ -155,6 +165,7 @@ class BaseParser(ABC):
         """
         Recursively collect all call_expression identifiers under `node`.
         Returns bare function names like 'save', 'os.path.join', etc.
+        Does not include explicit object creations (new_expression, etc.).
         """
         calls: list[str] = []
 
@@ -182,3 +193,47 @@ class BaseParser(ABC):
 
         _walk(node)
         return calls
+
+    @staticmethod
+    def _walk_instantiations(node: "Node", source: bytes) -> list[str]:
+        """
+        Recursively collect class/object instantiations under `node`:
+        - JS/TS: new_expression (e.g. `new Calculator()`)
+        - Java/C#: object_creation_expression (e.g. `new Calculator()`)
+        - Go: composite_literal (e.g. `Calculator{}`)
+        """
+        instantiations: list[str] = []
+
+        def _walk(n: "Node") -> None:
+            if n.type == "new_expression":
+                # JS/TS: (new_expression constructor: (identifier))
+                ctor = n.child_by_field_name("constructor")
+                if ctor:
+                    instantiations.append(
+                        source[ctor.start_byte : ctor.end_byte]
+                        .decode("utf-8", errors="replace")
+                        .strip()
+                    )
+            elif n.type == "object_creation_expression":
+                # Java / C#: type field
+                type_node = n.child_by_field_name("type")
+                if type_node:
+                    instantiations.append(
+                        source[type_node.start_byte : type_node.end_byte]
+                        .decode("utf-8", errors="replace")
+                        .strip()
+                    )
+            elif n.type == "composite_literal":
+                # Go: type: (type_identifier)
+                type_node = n.child_by_field_name("type")
+                if type_node:
+                    instantiations.append(
+                        source[type_node.start_byte : type_node.end_byte]
+                        .decode("utf-8", errors="replace")
+                        .strip()
+                    )
+            for child in n.children:
+                _walk(child)
+
+        _walk(node)
+        return instantiations
