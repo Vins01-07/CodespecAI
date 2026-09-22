@@ -1,29 +1,62 @@
 :root {
-    --bg-primary: #151515;
-    --bg-sidebar: #191918;
-    --bg-topbar: #181817;
+    /* Obsidian Sage Palette */
+    --app-background: #121312;
+    --sidebar-background: #171916;
+    --topbar-background: #151714;
 
-    --bg-card: #20201e;
-    --bg-card-hover: #272724;
+    --card-background: #1D201B;
+    --card-background-hover: #252921;
+    --card-border: #363A32;
 
-    --border: #3a3934;
-    --border-soft: #292925;
+    --graph-background: #171A17;
+    --graph-grid: #282C26;
 
-    --text-primary: #f1f1eb;
-    --text-secondary: #b8b8ad;
-    --text-muted: #77776f;
+    --primary: #A8B39A;
+    --primary-hover: #B8C2AA;
+    --secondary: #9C927B;
 
-    --accent-green: #9cad70;
-    --accent-green-soft: #7e9660;
+    --text-primary: #E7E8DF;
+    --text-secondary: #A8ACA0;
+    --text-muted: #70756C;
 
-    --accent-yellow: #c9ad63;
-    --accent-blue: #8198b8;
-    --accent-red: #d86d5e;
+    --success: #91A78A;
+    --warning: #B69A67;
+    --danger: #B87870;
 
-    --sidebar-width: 220px;
-    --topbar-height: 72px;
+    --active-background: #2B3028;
+    --active-border: #727D68;
 
-    --radius-sm: 6px;
-    --radius-md: 8px;
-    --radius-lg: 10px;
+    --graph-frontend: #9BA8B0;
+    --graph-service: #91A78A;
+    --graph-database: #A49A82;
+    --graph-cache: #B87870;
+    --graph-external: #8F9A8C;
+
+    /* Semantic / Compatibility Aliases */
+    --bg-primary: var(--app-background);
+    --bg-sidebar: var(--sidebar-background);
+    --bg-topbar: var(--topbar-background);
+    --bg-card: var(--card-background);
+    --bg-card-hover: var(--card-background-hover);
+    --border: var(--card-border);
+    --border-soft: #252822;
+
+    --accent-green: var(--primary);
+    --accent-yellow: var(--secondary);
+    --accent-blue: var(--graph-frontend);
+    --accent-red: var(--danger);
+
+    /* Layout & Dimensions */
+    --sidebar-width: 205px;
+    --topbar-height: 56px;
+    --content-padding: 22px;
+    --card-gap: 14px;
+    --border-radius: 7px;
+    --radius-sm: 4px;
+    --radius-md: 7px;
+    --radius-lg: 7px;
+
+    /* Effects */
+    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.26);
+    --glow: none;
 }
