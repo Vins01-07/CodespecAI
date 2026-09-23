@@ -1,0 +1,141 @@
+{
+  "name": "CodeSpecAI Benchmark Suite",
+  "version": "1.0.0",
+  "description": "Standard multi-format evaluation dataset for CodeSpecAI RAG pipeline",
+  "repository_id": "test-repo",
+  "items": [
+    {
+      "question_id": "q1_auth_token",
+      "repository_id": "test-repo",
+      "question": "How does the AuthService validate user JWT tokens?",
+      "relevant_files": [
+        "src/auth/service.py",
+        "src/auth/token_util.py"
+      ],
+      "relevant_symbols": [
+        "AuthService.validate_token",
+        "decode_jwt"
+      ],
+      "relevant_sections": [],
+      "relevant_pages": [],
+      "relevance_grades": {
+        "src/auth/service.py": 3,
+        "src/auth/token_util.py": 2,
+        "src/config/jwt.py": 1
+      },
+      "ground_truth_answer": "AuthService.validate_token decodes the JWT using decode_jwt, verifies the signature against the secret key, and checks token expiration.",
+      "expected_concepts": [
+        "validate_token",
+        "JWT",
+        "decode_jwt",
+        "expiration"
+      ],
+      "metadata": {
+        "category": "source_code",
+        "difficulty": "medium"
+      }
+    },
+    {
+      "question_id": "q2_db_connection",
+      "repository_id": "test-repo",
+      "question": "Where is the database connection pool initialized and managed?",
+      "relevant_files": [
+        "src/db/connection.py",
+        "src/config/settings.py"
+      ],
+      "relevant_symbols": [
+        "get_connection_pool",
+        "init_db"
+      ],
+      "relevant_sections": [],
+      "relevant_pages": [],
+      "relevance_grades": {
+        "src/db/connection.py": 3,
+        "src/config/settings.py": 2
+      },
+      "ground_truth_answer": "The connection pool is created in src/db/connection.py via get_connection_pool using configurations from settings.py.",
+      "expected_concepts": [
+        "connection pool",
+        "get_connection_pool",
+        "settings"
+      ],
+      "metadata": {
+        "category": "source_code",
+        "difficulty": "easy"
+      }
+    },
+    {
+      "question_id": "q3_architecture_doc",
+      "repository_id": "test-repo",
+      "question": "What is the recommended deployment flow according to the architecture documentation?",
+      "relevant_files": [
+        "docs/architecture.md"
+      ],
+      "relevant_symbols": [],
+      "relevant_sections": [
+        "Deployment Pipeline",
+        "Production Setup"
+      ],
+      "relevant_pages": [],
+      "relevance_grades": {
+        "docs/architecture.md": 3
+      },
+      "ground_truth_answer": "According to docs/architecture.md, deployment proceeds via CI/CD building Docker containers, running migrations, and rolling updates to Kubernetes clusters.",
+      "expected_concepts": [
+        "Docker",
+        "CI/CD",
+        "Kubernetes",
+        "migrations"
+      ],
+      "metadata": {
+        "category": "documentation",
+        "difficulty": "medium"
+      }
+    },
+    {
+      "question_id": "q4_spec_pdf",
+      "repository_id": "test-repo",
+      "question": "What security compliance rules are outlined in the security specification PDF?",
+      "relevant_files": [
+        "specs/security_compliance.pdf"
+      ],
+      "relevant_symbols": [],
+      "relevant_sections": [],
+      "relevant_pages": [
+        4,
+        5
+      ],
+      "relevance_grades": {
+        "specs/security_compliance.pdf": 3
+      },
+      "ground_truth_answer": "Pages 4 and 5 specify mandatory TLS 1.3 encryption, AES-256 for data at rest, and bi-annual key rotation.",
+      "expected_concepts": [
+        "TLS 1.3",
+        "AES-256",
+        "key rotation"
+      ],
+      "metadata": {
+        "category": "pdf",
+        "difficulty": "hard"
+      }
+    },
+    {
+      "question_id": "q5_insufficient_context",
+      "repository_id": "test-repo",
+      "question": "How does the QuantumPaymentProcessor process cryptocurrency microtransactions?",
+      "relevant_files": [],
+      "relevant_symbols": [],
+      "relevant_sections": [],
+      "relevant_pages": [],
+      "relevance_grades": {},
+      "ground_truth_answer": "INSUFFICIENT CONTEXT: No relevant context found for QuantumPaymentProcessor in the repository.",
+      "expected_concepts": [
+        "INSUFFICIENT CONTEXT"
+      ],
+      "metadata": {
+        "category": "insufficient_context",
+        "difficulty": "easy"
+      }
+    }
+  ]
+}

@@ -17,3 +17,4 @@ tree-sitter-go>=0.21.0
 tree-sitter-c-sharp>=0.21.0
 pytest>=8.2.0
 httpx>=0.27.0
+pypdf>=4.0.0

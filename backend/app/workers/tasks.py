@@ -42,10 +42,19 @@ def _run_pipeline(
     repo_name: str,
     branch: str = "main",
 ) -> dict:
-    """Scan → parse → graph-build for a directory that is already on disk."""
-    logger.info("Scanning %s …", repo_dir)
+    """Scan → classify → parse → graph-build for a directory that is already on disk."""
+    logger.info("Classifying repository files in %s …", repo_dir)
+    classification_res = _scanner.scan_and_classify(repo_dir, repository_id=repo_url)
+    logger.info(
+        "Classification complete: %d total, %d processable, %d unsupported",
+        classification_res.summary.total_files_scanned,
+        classification_res.summary.processable_files,
+        classification_res.summary.unsupported_files,
+    )
+
+    logger.info("Scanning source files in %s …", repo_dir)
     file_paths = _scanner.scan(repo_dir)
-    logger.info("Found %d source files", len(file_paths))
+    logger.info("Found %d source files for AST parsing", len(file_paths))
 
     logger.info("Parsing source files …")
     summaries = _registry.parse_files(file_paths, base_dir=repo_dir)
@@ -61,6 +70,9 @@ def _run_pipeline(
         "branch": branch,
         "files_scanned": len(file_paths),
         "files_parsed": len(summaries),
+        "files_classified": classification_res.summary.total_files_scanned,
+        "processable_files": classification_res.summary.processable_files,
+        "classification_summary": classification_res.summary.counts_by_type,
         **stats,
     }
 

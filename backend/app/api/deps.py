@@ -12,9 +12,11 @@ from neo4j import Session
 
 from app.core.graph.builder import GraphBuilder
 from app.core.graph.neo4j_client import get_session
+from app.core.rag.generation.rag_service import RAGService
 
 # Reuse a single GraphBuilder per process (thread-safe, stateless)
 _graph_builder = GraphBuilder()
+_rag_service: RAGService | None = None
 
 
 def get_neo4j_session() -> Generator[Session, None, None]:
@@ -26,3 +28,12 @@ def get_neo4j_session() -> Generator[Session, None, None]:
 def get_graph_builder() -> GraphBuilder:
     """FastAPI dependency: returns the shared GraphBuilder singleton."""
     return _graph_builder
+
+
+def get_rag_service() -> RAGService:
+    """FastAPI dependency: returns the shared RAGService singleton."""
+    global _rag_service
+    if _rag_service is None:
+        _rag_service = RAGService()
+    return _rag_service
+

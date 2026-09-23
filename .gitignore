@@ -23,4 +23,12 @@ Thumbs.db
 
 # CodeSpec Workspace / Temp data
 workspace/
-backend/workspace/
+backend/workspace/
+.pytest_cache/
+backend/.pytest_cache/
+clean_test_output.txt
+backend/clean_test_output.txt
+backend/evaluation/reports/eval_*.json
+backend/evaluation/reports/eval_*.md
+
+

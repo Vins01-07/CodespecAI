@@ -76,7 +76,9 @@ app.include_router(repos.router,    prefix=prefix)
 app.include_router(graph.router,    prefix=prefix)
 app.include_router(impact.router,   prefix=prefix)
 app.include_router(chat.router,     prefix=prefix)
+app.include_router(chat.router,     prefix="/api")
 app.include_router(diagrams.router, prefix=prefix)
+
 
 
 # ---------------------------------------------------------------------------
