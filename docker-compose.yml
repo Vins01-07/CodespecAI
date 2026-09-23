@@ -1,0 +1,107 @@
+version: "3.9"
+
+# ---------------------------------------------------------------------------
+# CodeSpec AI — Full Stack
+#
+# Services:
+#   neo4j         — graph database (bolt :7687, browser :7474)
+#   redis         — Celery broker + result backend
+#   backend       — FastAPI + Uvicorn (hot-reload in dev)
+#   celery-worker — Celery worker (same image, different CMD)
+# ---------------------------------------------------------------------------
+
+services:
+
+  # ─── Neo4j ───────────────────────────────────────────────────────────────
+  neo4j:
+    image: neo4j:5
+    container_name: codespec-neo4j
+    ports:
+      - "7474:7474" # Neo4j Browser (HTTP)
+      - "7687:7687" # Bolt protocol
+    environment:
+      NEO4J_AUTH: neo4j/password123
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "-O", "-", "http://localhost:7474" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ─── Redis ───────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: codespec-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ─── FastAPI Backend ─────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: codespec-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override to use Docker service names
+      NEO4J_URI: bolt://neo4j:7687
+      REDIS_URL: redis://redis:6379/0
+      REPO_WORKSPACE_DIR: /app/workspace/repos
+    volumes:
+      - ./backend/app:/app/app # hot-reload: mount source
+      - repo_workspace:/app/workspace/repos
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── Celery Worker ───────────────────────────────────────────────────────
+  celery-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: codespec-celery
+    command: >
+      celery -A app.workers.celery_app worker --loglevel=info --concurrency=2 --queues=celery
+    env_file:
+      - ./backend/.env
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      REDIS_URL: redis://redis:6379/0
+      REPO_WORKSPACE_DIR: /app/workspace/repos
+    volumes:
+      - ./backend/app:/app/app
+      - repo_workspace:/app/workspace/repos
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+# ---------------------------------------------------------------------------
+# Named volumes
+# ---------------------------------------------------------------------------
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  redis_data:
+  repo_workspace:

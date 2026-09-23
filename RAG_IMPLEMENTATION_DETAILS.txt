@@ -1,0 +1,1404 @@
+================================================================================
+CODESPECAI RAG PIPELINE — IMPLEMENTATION DETAILS
+================================================================================
+
+Project: CodeSpec AI Backend
+Repository Root: CodespecAI
+Stack: FastAPI, Neo4j Graph DB, Redis, Celery Workers, Python 3.13, Tree-sitter
+Purpose: Detailed technical implementation record for each phase of the RAG pipeline.
+
+Note: Future phases will be added incrementally as specifications are provided.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+1. Architecture Context & Ingestion Flow
+2. Phase 1: Repository Content Classification & Filtering [COMPLETED]
+3. Phase 2: Multi-format Content Parsing [COMPLETED]
+4. Phase 3: Semantic Chunking [COMPLETED]
+5. Phase 4: Embeddings and Vector Storage [COMPLETED]
+6. Phase 5: Graph-aware Retrieval [COMPLETED]
+7. Phase 6: Hybrid Retrieval [COMPLETED]
+8. Phase 7: LLM Abstraction and Initial Provider [COMPLETED]
+9. Phase 8: Context Builder and End-to-End RAG [COMPLETED]
+10. Phase 9: FastAPI Integration [COMPLETED]
+11. Phase 10: RAG Evaluation & Benchmarking Layer [COMPLETED]
+12. Subsequent Phases [To Be Added]
+
+================================================================================
+1. ARCHITECTURE CONTEXT & INGESTION FLOW
+================================================================================
+CodeSpec AI ingests code repositories (via Git clone or ZIP upload) and constructs
+a multi-layered code intelligence backend combining:
+  1. Structural Code Knowledge Graph (Neo4j): AST entities, call graphs, imports,
+     type hierarchies.
+  2. Dense RAG Engine: Semantic retrieval across all repository contents (source
+     code, markdown docs, architecture PDFs, configs, plain text).
+
+Prior to Phase 1:
+  - Repositories were fetched via GitFetcher or ZipHandler to REPO_WORKSPACE_DIR.
+  - RepoScanner.scan() scanned only supported source code extensions (.py, .js, .ts, etc.).
+  - ParserRegistry parsed source files with Tree-sitter.
+  - GraphBuilder loaded symbols into Neo4j.
+  - Non-source files (READMEs, specs, configs, PDFs) were ignored, and no file
+    classification existed for downstream RAG.
+
+Phase 1 Goal:
+  Extend the repository ingestion pipeline so that every file in the repository
+  is normalized and classified into structured categories before downstream RAG
+  processing, while strictly preserving existing AST and Neo4j graph operations.
+
+================================================================================
+2. PHASE 1: REPOSITORY CONTENT CLASSIFICATION & FILTERING [STATUS: COMPLETED]
+================================================================================
+
+2.1 Objectives & Deliverables
+------------------------------
+  - Add a clean file classification and filtering layer.
+  - Classify files into 6 canonical categories:
+      * source_code
+      * markdown
+      * pdf
+      * plain_text
+      * config
+      * unsupported
+  - Ignore generated, vendor, and binary content:
+      * .git, node_modules, .venv, __pycache__, dist, build, coverage, etc.
+      * Binary/executable files (.exe, .dll, .so, .bin, .pyc, .zip, media, etc.)
+  - Make extension handling configurable rather than hardcoded throughout the code.
+  - Preserve rich metadata for every processable file:
+      * repository_id
+      * file_path (normalized with forward slashes)
+      * file_name
+      * extension
+      * language (when applicable)
+      * file_type
+      * size_bytes
+      * is_processable
+  - Preserve all existing repository ingestion behavior with zero regressions.
+  - Add comprehensive unit tests.
+
+2.2 Components & Implementation Details
+---------------------------------------
+
+A. Typed Models & Schemas (app/models/classification.py):
+   - FileType(str, Enum):
+     Values:
+       * "source_code"
+       * "markdown"
+       * "pdf"
+       * "plain_text"
+       * "config"
+       * "unsupported"
+   - ClassifiedFile(BaseModel):
+       * repository_id: str - Unique repo URL or slug
+       * file_path: str - Relative path inside repository, normalized with '/'
+       * file_name: str - Base filename including extension
+       * extension: str - Lowercase extension with leading dot (e.g. '.py')
+       * language: Optional[str] - Programming or markup language (e.g. 'python', 'yaml')
+       * file_type: FileType - Category enum
+       * size_bytes: Optional[int] - File size on disk in bytes
+       * is_processable: bool - True for source_code, markdown, pdf, plain_text, config; False for unsupported
+   - ClassificationSummary(BaseModel):
+       * total_files_scanned: int
+       * processable_files: int
+       * unsupported_files: int
+       * counts_by_type: dict[str, int]
+       * counts_by_language: dict[str, int]
+   - RepositoryClassificationResult(BaseModel):
+       * repository_id: str
+       * files: list[ClassifiedFile]
+       * summary: ClassificationSummary
+   - Re-exported in app/models/__init__.py for clean project-wide imports.
+
+B. Configurable Extension Rules (app/core/ingestion/config.py):
+   - ClassificationConfig(BaseModel):
+     Centralizes all extension and directory definitions.
+       * source_code_extensions: dict[str, str]
+         Maps 35+ extensions to canonical language names:
+         - Python: .py, .pyi -> "python"
+         - JavaScript: .js, .jsx, .mjs, .cjs -> "javascript"
+         - TypeScript: .ts, .tsx, .mts, .cts -> "typescript"
+         - Java: .java -> "java"
+         - Go: .go -> "go"
+         - C#: .cs -> "csharp"
+         - C/C++: .c, .h, .cpp, .cc, .cxx, .hpp, .hxx -> "c" / "cpp"
+         - Rust: .rs -> "rust"
+         - Ruby: .rb -> "ruby"
+         - PHP: .php -> "php"
+         - Swift: .swift -> "swift"
+         - Kotlin: .kt, .kts -> "kotlin"
+         - Scala: .scala -> "scala"
+         - Shell: .sh, .bash, .zsh -> "shell"
+         - SQL: .sql -> "sql"
+         - Web: .html, .htm -> "html"; .css, .scss, .sass, .less -> "css"
+       * markdown_extensions: set[str]
+         - .md, .markdown, .mdown, .mkd, .mdx
+       * pdf_extensions: set[str]
+         - .pdf (explicitly designated as processable document, never ignored)
+       * plain_text_extensions: set[str]
+         - .txt, .text, .log, .rst, .asciidoc, .adoc
+       * config_extensions: dict[str, str]
+         - .json, .jsonc, .json5 -> "json"
+         - .yaml, .yml -> "yaml"
+         - .toml -> "toml"
+         - .ini, .cfg -> "ini"; .conf -> "config"
+         - .xml -> "xml"
+         - .properties -> "properties"
+       * config_filenames: dict[str, str]
+         - Exact filenames: Dockerfile, Makefile, Procfile, .editorconfig,
+           .env.example, docker-compose.yml, docker-compose.yaml
+       * ignored_directories: set[str]
+         - .git, .svn, .hg, node_modules, __pycache__, .venv, venv, env,
+           dist, build, coverage, .next, .nuxt, vendor, target, bin, obj,
+           .idea, .vscode, .pytest_cache, .mypy_cache, .ruff_cache, .tox,
+           .nyc_output, htmlcov, .turbo, .parcel-cache
+       * ignored_files: set[str]
+         - Lockfiles: package-lock.json, yarn.lock, pnpm-lock.yaml,
+           poetry.lock, pipfile.lock, cargo.lock, composer.lock, gemfile.lock
+         - OS metadata: .ds_store, thumbs.db, desktop.ini
+       * ignored_binary_extensions: set[str]
+         - Executables/libraries: .exe, .dll, .so, .dylib, .bin, .msi, .com, .sys, .drv
+         - Bytecode/compiled: .pyc, .pyo, .pyd, .class, .o, .obj, .a, .lib, .beam
+         - Archives: .zip, .tar, .gz, .bz2, .xz, .7z, .rar, .jar, .war, .ear, .whl, .egg
+         - Media/fonts: .png, .jpg, .jpeg, .gif, .ico, .bmp, .tiff, .webp,
+           .mp3, .wav, .ogg, .mp4, .avi, .mov, .mkv, .webm,
+           .woff, .woff2, .ttf, .eot, .otf
+         - Database files: .db, .sqlite, .sqlite3
+       * Dynamic API:
+         - add_custom_extension(ext, file_type, language) allows runtime extension
+           customization without editing source code.
+         - classify(file_name, ext) -> tuple[FileType, Optional[str]]
+         - is_ignored_directory(dir_name) -> bool
+         - is_ignored_file(file_name) -> bool
+         - is_ignored_extension(ext) -> bool
+         - should_ignore_path(path) -> bool
+
+C. Filtering Layer (app/core/ingestion/filters.py):
+   - Preserves legacy constants for backward compatibility:
+     * IGNORED_DIRECTORIES
+     * IGNORED_FILES
+     * SUPPORTED_EXTENSIONS
+     * IGNORED_BINARY_EXTENSIONS
+   - should_ignore(path: Path, config: Optional[ClassificationConfig] = None) -> bool:
+     1. Checks if any directory part is in ignored_directories.
+     2. Checks if path.name is in ignored_files.
+     3. Checks if extension is in ignored_binary_extensions (excluding .pdf).
+     4. Performs null-byte heuristic content check for extensionless files.
+
+D. Classification Engine (app/core/ingestion/classifier.py):
+   - FileClassifier class:
+     * classify_file(file_path, repo_root, repository_id) -> Optional[ClassifiedFile]:
+       Calculates normalized forward-slash relative path, applies ignore checks,
+       determines FileType and language, fetches size in bytes.
+     * classify_repository(root_dir, repository_id) -> list[ClassifiedFile]:
+       Traverses filesystem using os.walk. Prunes dirnames in-place so ignored
+       directories (like node_modules and .git) are skipped entirely before descent.
+       Returns sorted list of ClassifiedFile items.
+     * classify_repository_result(root_dir, repository_id) -> RepositoryClassificationResult:
+       Computes full summary statistics (total, processable, unsupported, by type, by language).
+     * get_processable_files(files) -> list[ClassifiedFile]:
+       Extracts files eligible for Phase 2 processing (file_type != UNSUPPORTED).
+
+E. Scanner Integration (app/core/ingestion/scanner.py):
+   - RepoScanner class:
+     * scan(root_dir) -> list[Path]:
+       Preserves 100% backward compatibility for AST parsing callers and tests.
+     * classify_repository(root_dir, repository_id) -> list[ClassifiedFile]:
+       Delegates to internal FileClassifier.
+     * scan_and_classify(root_dir, repository_id) -> RepositoryClassificationResult:
+       Returns full classification result container.
+
+F. Celery Ingestion Pipeline Integration (app/workers/tasks.py):
+   - Updated _run_pipeline(repo_dir, repo_url, repo_name, branch):
+     * Runs _scanner.scan_and_classify() to classify all repository files.
+     * Logs classification counts.
+     * Runs _scanner.scan() to pass source code paths to ParserRegistry and GraphBuilder.
+     * Returns pipeline result dictionary with new classification fields while
+       strictly preserving all previous keys:
+       {
+         "repo_url": repo_url,
+         "repo_name": repo_name,
+         "branch": branch,
+         "files_scanned": len(file_paths),
+         "files_parsed": len(summaries),
+         "files_classified": classification_res.summary.total_files_scanned,
+         "processable_files": classification_res.summary.processable_files,
+         "classification_summary": classification_res.summary.counts_by_type,
+         **stats,
+       }
+
+G. Ingestion Testing CLI (app/core/ingestion/test_ingestion.py):
+   - Enhanced the CLI tool to print both AST source files and RAG classification breakdown.
+
+2.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_classification.py
+Total Tests in Backend Suite: 37 (21 Module 1 tests + 16 Phase 1 classification tests)
+Test Results: 37 PASSED, 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+  1. test_source_code_classification: Python, TS, TSX, JS, JSX, Java, Go, C#, C++, Rust.
+  2. test_markdown_classification: .md, .markdown, .mdx, .mkd.
+  3. test_pdf_classification: .pdf classified as PDF, marked processable.
+  4. test_plain_text_classification: .txt, .text, .log, .rst.
+  5. test_config_classification: .json, .yaml, .yml, .toml, .cfg, .ini, .xml.
+  6. test_special_config_filenames: Dockerfile, Makefile, Procfile, .editorconfig, docker-compose.yml.
+  7. test_unsupported_classification: Unknown extensions (.xyz, .custom) marked UNSUPPORTED.
+  8. test_ignored_directories: .git, node_modules, .venv, dist, build, coverage, .next, etc.
+  9. test_ignored_lockfiles_and_os_metadata: package-lock.json, yarn.lock, .DS_Store, Thumbs.db.
+  10. test_ignored_binary_and_executable_extensions: .exe, .dll, .so, .sys, .pyc, .zip, .png, .mp4, etc.
+  11. test_pdf_is_not_ignored: Confirms PDF files pass filtering.
+  12. test_dynamic_custom_extension_addition: Runtime extension registration.
+  13. test_custom_ignored_directory_and_extension: Custom ignore rules.
+  14. test_repository_classification_end_to_end: Full temporary repo walk with mixed file types.
+  15. test_repo_scanner_scan_backward_compatibility: Verifies scan() behavior is intact.
+  16. test_filters_backward_compatibility: Verifies existing filter exports.
+  17. tests/test_module1.py (21 tests): Full regression check on AST and graph ingestion.
+
+================================================================================
+3. PHASE 2: MULTI-FORMAT CONTENT PARSING [STATUS: COMPLETED]
+================================================================================
+
+3.1 Objectives & Deliverables
+------------------------------
+  - Convert supported repository files (classified in Phase 1) into a unified,
+    normalized document representation for RAG while preserving rich format-specific
+    source metadata.
+  - Implement format-specific parsers for:
+      * 1. Source code (Python, TypeScript, JavaScript, Java, Go, C#, C++, etc.)
+      * 2. Markdown (.md, .markdown, .mdx)
+      * 3. PDF (.pdf)
+      * 4. Plain text (.txt, .text, .log, .rst)
+      * 5. Configuration files (.json, .yaml, .toml, .ini, .cfg, Dockerfile, Makefile)
+  - Key Requirements Fulfilled:
+      * Reuse Phase 1 file classification (ClassifiedFile, FileType).
+      * Preserve PDF 1-indexed page numbers.
+      * Preserve Markdown hierarchical heading and section breadcrumbs.
+      * Preserve source code AST symbol IDs, class/method boundaries, and line spans.
+      * Preserve config format and structured key metadata.
+      * Keep parsing library choices isolated behind parser interfaces.
+      * Handle empty, unreadable, malformed, and binary files gracefully without
+        crashing repository ingestion.
+      * Store parser errors as structured metadata.
+
+3.2 Components & Implementation Details
+---------------------------------------
+
+A. Normalized Document Schema (app/models/rag_models.py):
+   - NormalizedDocument(BaseModel):
+       * repository_id: str
+       * file_path: str (normalized with forward slashes)
+       * file_type: FileType
+       * language: Optional[str]
+       * content: str (extracted code/text block)
+       * start_line: Optional[int]
+       * end_line: Optional[int]
+       * page_number: Optional[int] (1-indexed, for PDFs)
+       * section: Optional[str] (e.g. heading breadcrumb, class/function scope, config key)
+       * symbol: Optional[str] (e.g. AST symbol ID 'path::ClassName::methodName')
+       * metadata: dict[str, Any] (docstrings, parameters, return types, total pages)
+   - ParserError(BaseModel):
+       * file_path: str
+       * error_type: str (e.g. 'FileNotFound', 'EmptyFile', 'ReadError', 'PdfReadError', 'SyntaxWarning')
+       * message: str
+       * timestamp: str (ISO format)
+   - ParseResult(BaseModel):
+       * file_path: str
+       * documents: list[NormalizedDocument]
+       * errors: list[ParserError]
+       * is_successful: bool
+   - RepositoryParseResult(BaseModel):
+       * repository_id: str
+       * documents: list[NormalizedDocument]
+       * errors: list[ParserError]
+       * total_documents: int
+       * total_errors: int
+       * documents_by_type: dict[str, int]
+   - Re-exported in app/models/__init__.py.
+
+B. Parser Base Interface & Utilities (app/core/rag/parsers/base.py):
+   - BaseContentParser(ABC):
+       * Abstract method: parse(file: ClassifiedFile, repo_root: Path) -> ParseResult
+   - read_text_safely(path: Path) -> tuple[Optional[str], Optional[str]]:
+       * Tries utf-8, utf-8-sig, latin-1, cp1252 encodings.
+       * Returns (content, error_message) cleanly without raising unhandled exceptions.
+
+C. Source Code Parser (app/core/rag/parsers/code_parser.py):
+   - SourceCodeParser(BaseContentParser):
+       * Reuses Tree-sitter ParserRegistry from app/core/parser/registry.py.
+       * Parses classes, methods, and functions into discrete NormalizedDocument records.
+       * Sets exact 1-indexed start_line and end_line slices from the source file.
+       * Populates symbol (unique AST symbol ID) and section (e.g. 'class AuthService', 'method AuthService.validate').
+       * Extracts docstring, parameters, return_type, and calls into metadata.
+       * For script-like code or languages without Tree-sitter grammars (HTML, CSS, Shell, SQL, Rust),
+         gracefully extracts module-level documents with accurate line ranges.
+
+D. Markdown Parser (app/core/rag/parsers/markdown_parser.py):
+   - MarkdownParser(BaseContentParser):
+       * Uses regex heading matching while ignoring markdown comments and lines within ``` code blocks.
+       * Builds hierarchical breadcrumbs across heading levels:
+         e.g., 'CodeSpec AI > Architecture > Graph Engine'.
+       * Emits NormalizedDocument per section with exact line ranges.
+       * Captures introductory text preceding the first heading as 'Overview' section.
+       * Flat Markdown files without headings produce a single 'document' section.
+
+E. PDF Parser (app/core/rag/parsers/pdf_parser.py):
+   - PdfParser(BaseContentParser):
+       * Uses pypdf.PdfReader isolated behind the interface.
+       * Iterates page by page: sets page_number = idx + 1 (1-indexed).
+       * Captures page text, total page count, and section = 'Page N'.
+       * Isolates corrupted, encrypted, or empty PDFs, recording a structured ParserError
+         without crashing ingestion.
+
+F. Plain Text Parser (app/core/rag/parsers/text_parser.py):
+   - PlainTextParser(BaseContentParser):
+       * Reads plain text (.txt, .log, .rst, etc.) using safe multi-encoding fallback.
+       * Sets start_line = 1 and end_line = total_lines, section = 'text'.
+
+G. Configuration Parser (app/core/rag/parsers/config_parser.py):
+   - ConfigParser(BaseContentParser):
+       * Handles JSON, YAML, TOML, INI, CFG, Dockerfile, Makefile, Procfile.
+       * For INI/CFG: splits by [section] headers, preserving section-level line ranges.
+       * For JSON/YAML: extracts top_level_keys into metadata.
+       * Never crashes on malformed syntax; logs SyntaxWarning error while preserving raw document.
+
+H. Content Parsing Service (app/core/rag/parsers/service.py):
+   - ContentParsingService:
+       * Maps FileType to the corresponding parser instance.
+       * parse_file(file, repo_root): Catches all unexpected exceptions and records
+         Structured ParserErrors, guaranteeing zero ingestion crashes.
+       * parse_repository(files, repo_root): Iterates over all processable files,
+         aggregating all NormalizedDocument instances, recording errors, and returning
+         a typed RepositoryParseResult.
+
+3.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_rag_parsers.py
+Total Tests in Backend Suite: 48 (21 Module 1 tests + 16 Phase 1 tests + 11 Phase 2 tests)
+Test Results: 48 PASSED, 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+  1. test_python_source_code_parsing: Functions, classes, methods, symbol IDs, docstrings, parameters.
+  2. test_typescript_source_code_parsing: TypeScript class and method parsing with line ranges.
+  3. test_markdown_parsing_with_heading_hierarchy: Multi-level headings with code fences ignored.
+  4. test_markdown_without_headings: Single document fallback.
+  5. test_pdf_parsing_preserves_page_numbers: Two-page PDF verification with 1-indexed page_number.
+  6. test_plain_text_parsing: Line count and content preservation.
+  7. test_config_parsing_json: JSON format and top-level key metadata.
+  8. test_config_parsing_ini_sections: INI section-based document emission.
+  9. test_empty_files_do_not_crash: Empty Python, Markdown, Text files return EmptyFile errors gracefully.
+  10. test_malformed_and_corrupt_files_isolated: Corrupt PDF and malformed JSON isolate errors without crashing.
+  11. test_batch_repository_parsing_never_crashes: Multi-file repository parse verifying document aggregation and error isolation.
+
+================================================================================
+4. PHASE 3: SEMANTIC CHUNKING [STATUS: COMPLETED]
+================================================================================
+
+4.1 Objectives & Deliverables
+------------------------------
+  - Create a unified chunking service producing retrieval-ready chunks from
+    normalized repository content.
+  - Implement content-aware chunking strategies:
+      * 1. Source code: Prefer function/method/class boundaries, preserve symbol
+           and line ranges, avoid splitting functions unnecessarily.
+      * 2. Markdown/documentation: Prefer heading/section boundaries, preserve
+           section hierarchy breadcrumbs.
+      * 3. PDF: Preserve 1-indexed page numbers, chunk extracted text semantically.
+      * 4. Plain text / config: Sensible text chunking with overlap where appropriate.
+  - Deliverable Requirements Fulfilled:
+      * Unique deterministic chunk_id for every chunk.
+      * Full source traceability (repository_id, file_path, file_type, language,
+        start_line, end_line, page_number, section, symbol, parent_metadata).
+      * Configurable chunk size and overlap (ChunkingConfig).
+      * Zero unnecessary duplication of content.
+      * Filter out empty or meaningless chunks (< min_chunk_size).
+      * Chunk model designed for vector database ingestion (with optional embedding
+        and to_vector_payload() method).
+      * Fully decoupled from embedding and retrieval.
+
+4.2 Components & Implementation Details
+---------------------------------------
+
+A. Retrieval Chunk Model (app/models/chunk_models.py):
+   - RAGChunk(BaseModel):
+       * chunk_id: str - Deterministic hash (repo_id + file_path + anchor + index + digest)
+       * repository_id: str - Target repository identifier
+       * file_path: str - Normalized relative path with '/'
+       * file_type: FileType - Category enum
+       * language: Optional[str] - Programming or format language
+       * content: str - Payload text/code
+       * start_line: Optional[int] - 1-indexed start line
+       * end_line: Optional[int] - 1-indexed end line
+       * page_number: Optional[int] - 1-indexed page number (for PDFs)
+       * section: Optional[str] - Heading breadcrumb or class/function scope
+       * symbol: Optional[str] - AST symbol identifier
+       * chunk_index: int - Sequential index within the parent document (0, 1, 2...)
+       * total_chunks: int - Total chunks from the parent document
+       * char_count: int - Length of content in characters
+       * token_count: int - Estimated tokens (~4 chars / token heuristic)
+       * parent_metadata: dict[str, Any] - Preserved AST and document metadata
+       * embedding: Optional[list[float]] - Reserved for vector embedding (Phase 4)
+       * to_vector_payload() -> dict[str, Any] - Ready for vector database ingestion
+   - ChunkingResult(BaseModel):
+       * repository_id: str
+       * total_documents_processed: int
+       * total_chunks_produced: int
+       * chunks: list[RAGChunk]
+       * chunks_by_type: dict[str, int]
+   - Re-exported in app/models/__init__.py.
+
+B. Configurable Chunking Parameters (app/core/rag/chunking/config.py):
+   - ChunkingConfig(BaseModel):
+       * chunk_size: int = 1000 - Target characters for general text/markdown/pdf/config
+       * chunk_overlap: int = 150 - Overlap between partitioned segments
+       * min_chunk_size: int = 20 - Minimum characters for valid non-empty chunks
+       * code_chunk_size: int = 1500 - Leeway threshold for functions/classes before splitting
+       * code_chunk_overlap: int = 200 - Line-based character overlap when splitting oversized code
+       * estimate_tokens(text: str) -> int - Robust token count estimator
+
+C. Semantic Chunking Service (app/core/rag/chunking/service.py):
+   - SemanticChunkingService:
+       * Deterministic Chunk ID Generator:
+         format: {file_path}:{anchor}:{chunk_index}:{hash_digest}
+         guarantees stable, reproducible IDs across identical ingest runs.
+       * _chunk_source_code:
+         If code <= code_chunk_size, emits 1 atomic chunk preserving exact symbol,
+         section, start_line, and end_line without unnecessary splitting.
+         If oversized, splits along lines with line-based overlap, recalculating
+         start_line and end_line for every slice.
+       * _chunk_markdown:
+         If section <= chunk_size, emits 1 chunk preserving the full breadcrumb.
+         If oversized, splits on paragraph breaks (\n\n) then sentences, preserving
+         the section breadcrumb on every resulting chunk.
+       * _chunk_pdf:
+         If page text <= chunk_size, emits 1 chunk with page_number.
+         If oversized, splits semantically, preserving page_number on every chunk.
+       * _chunk_text_or_config:
+         Splits recursively by delimiters (\n\n, \n, ;, ,, space) with overlap.
+         Preserves INI sections and config metadata.
+       * Filter:
+         Drops any chunk shorter than min_chunk_size, preventing noise.
+       * chunk_documents(documents, repository_id):
+         Batch processor returning full ChunkingResult.
+
+4.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_chunking.py
+Total Tests in Backend Suite: 60 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 tests)
+Test Results: 60 PASSED, 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+  1. test_source_code_function_preserved_atomically: Functions within code_chunk_size kept as 1 chunk.
+  2. test_oversized_source_code_splits_with_line_ranges: Code > code_chunk_size split with updated start_line/end_line.
+  3. test_markdown_preserves_section_hierarchy: Heading breadcrumbs maintained in chunks.
+  4. test_oversized_markdown_splits_paragraphs_preserving_section: Paragraph splitting retains breadcrumb.
+  5. test_pdf_chunking_preserves_page_number: 1-indexed page_number preserved.
+  6. test_oversized_pdf_page_splits_preserving_page_number: All sub-chunks retain page_number.
+  7. test_plain_text_chunking: Multi-line plain text chunks with line numbers.
+  8. test_config_chunking_preserves_section: INI section preserved in chunk.
+  9. test_empty_and_noise_chunks_filtered: Content < min_chunk_size dropped cleanly.
+  10. test_deterministic_chunk_ids: Idempotent and reproducible chunk IDs.
+  11. test_vector_payload_compatibility: to_vector_payload() produces valid dictionary.
+  12. test_batch_chunk_documents: Batch processing returns typed ChunkingResult.
+
+================================================================================
+5. PHASE 4: EMBEDDINGS AND VECTOR STORAGE [STATUS: COMPLETED]
+================================================================================
+
+5.1 Objectives & Deliverables
+------------------------------
+  - Embed RAG chunks generated in Phase 3 and persist them in a vector store for
+    semantic retrieval.
+  - Reused existing infrastructure: Neo4j 5 native vector indexes (no duplicate
+    database containers introduced).
+  - Implemented pluggable embedding service abstraction (Mock, OpenAI, Gemini).
+  - Implemented pluggable vector store abstraction (Neo4jVectorStore, InMemoryVectorStore).
+  - Enforced repository_id as a mandatory isolation/filter field on all queries and stores.
+  - Supported re-indexing a repository without creating duplicate vectors.
+  - Handled embedding and vector store failures gracefully.
+  - Zero hardcoded secrets/API keys (configured strictly through environment variables).
+
+5.2 Components & Implementation Details
+---------------------------------------
+
+A. Vector Models (app/models/vector_models.py):
+   - VectorSearchResult(BaseModel):
+       * chunk: RAGChunk - The matched chunk
+       * score: float - Normalized cosine similarity score (0.0 to 1.0)
+   - VectorStoreStats(BaseModel):
+       * total_chunks: int - Total vectors in the collection
+       * repository_chunks: int - Vectors for the specified repository
+       * index_name: str - Collection/index name
+       * dimensions: int - Vector dimensionality (e.g. 1536)
+   - IndexingResult(BaseModel):
+       * repository_id: str
+       * chunks_indexed: int
+       * dimensions: int
+       * provider: str
+       * index_name: str
+       * is_successful: bool
+       * error: Optional[str]
+   - Re-exported in app/models/__init__.py.
+
+B. Embedding Service Layer (app/core/rag/embeddings/):
+   - BaseEmbeddingService(ABC) (base.py):
+       * embed_text(text: str) -> list[float]
+       * embed_batch(texts: Sequence[str]) -> list[list[float]]
+       * embed_chunk(chunk: RAGChunk) -> RAGChunk
+       * embed_chunks(chunks: list[RAGChunk], batch_size: int = 64) -> list[RAGChunk]
+       * dimension and model_name properties
+   - MockEmbeddingService (mock_embedding.py):
+       * Deterministic hash-based unit-normalized vectors.
+       * Fast, offline, zero network or API key requirements.
+   - OpenAIEmbeddingService (openai_embedding.py):
+       * Uses httpx to call OpenAI embeddings endpoint (text-embedding-3-small).
+       * Reads OPENAI_API_KEY from environment or settings.
+   - GeminiEmbeddingService (gemini_embedding.py):
+       * Uses httpx to call Google Gemini embeddings API (text-embedding-004).
+       * Reads GEMINI_API_KEY from environment or settings.
+   - Factory (factory.py):
+       * get_embedding_service(provider=None, model_name=None, dimensions=None)
+
+C. Vector Store Layer (app/core/rag/vector_store/):
+   - BaseVectorStore(ABC) (base.py):
+       * create_or_get_collection(name: str, dimensions: int) -> bool
+       * upsert_chunks(chunks: list[RAGChunk], repository_id: str) -> int
+       * delete_repository(repository_id: str) -> int
+       * similarity_search(query_embedding: list[float], repository_id: str, top_k: int = 5, min_score: float = 0.0) -> list[VectorSearchResult]
+       * count_chunks(repository_id: Optional[str] = None) -> int
+       * get_stats(repository_id: Optional[str] = None) -> VectorStoreStats
+   - Neo4jVectorStore (neo4j_vector.py):
+       * Reuses Neo4j 5 native vector index procedures:
+         CREATE VECTOR INDEX rag_chunk_embeddings IF NOT EXISTS
+         FOR (c:RAGChunk) ON (c.embedding)
+         OPTIONS {indexConfig: {`vector.dimensions`: 1536, `vector.similarity_function`: 'cosine'}}
+       * Query via Cypher:
+         CALL db.index.vector.queryNodes($index_name, $fetch_k, $query_embedding)
+         YIELD node, score
+         WHERE node.repository_id = $repo_id AND score >= $min_score
+         RETURN node, score ORDER BY score DESC LIMIT $top_k
+       * Links RAGChunk nodes to existing File nodes: (c)-[:EXTRACTED_FROM]->(f:File).
+       * Re-indexing clean: automatically removes previous RAGChunk nodes for the
+         repository before upserting, eliminating duplicate vectors.
+   - InMemoryVectorStore (in_memory_vector.py):
+       * Memory-efficient dictionary storage partitioned strictly by repository_id.
+       * Exact cosine similarity with score normalized to [0.0, 1.0].
+       * Enables fast, offline test suite execution without active databases.
+   - Factory (factory.py):
+       * get_vector_store(provider=None, index_name=None, dimensions=None)
+
+D. Indexing Coordinator (app/core/rag/indexing_service.py):
+   - IndexingService:
+       * Coordinates batch embedding generation and vector store upserting.
+       * Exposes index_chunks(), delete_repository(), and similarity_search().
+       * Ensures repository_id isolation and handles exceptions without crashing.
+
+E. Configuration (app/config.py & backend/.env.example):
+   - Added VECTOR_STORE_PROVIDER ("neo4j" | "in_memory")
+   - Added VECTOR_INDEX_NAME ("rag_chunk_embeddings")
+   - Added VECTOR_DIMENSIONS (1536)
+   - Added EMBEDDING_PROVIDER ("mock" | "openai" | "gemini")
+   - Added EMBEDDING_MODEL_NAME ("text-embedding-3-small")
+   - Added OPENAI_API_KEY and GEMINI_API_KEY placeholders in .env.example (no secrets).
+
+5.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_embeddings_and_vector_store.py
+Total Tests in Backend Suite: 71 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 + 11 Phase 4 tests)
+Test Results: 71 PASSED, 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+  1. test_mock_embedding_service_dimensions_and_normalization: 384-dim unit-normalized vectors.
+  2. test_mock_embedding_determinism: Identical text produces identical vector.
+  3. test_mock_embedding_batch: Batch vector generation maintains ordering.
+  4. test_embed_chunk_attaches_vector: embed_chunk attaches embedding to RAGChunk.
+  5. test_api_keys_not_hardcoded_error: Safeguard verifying missing API keys raise clear errors.
+  6. test_in_memory_vector_store_crud: Upsert, similarity search, count, delete operations.
+  7. test_repository_isolation_never_leaks: Queries for repo_A never return chunks from repo_B.
+  8. test_reindexing_prevents_duplicate_vectors: Re-indexing updates vectors without duplicates.
+  9. test_neo4j_vector_store_cypher_execution: Mock Neo4j driver verifying index, upsert, and delete Cypher.
+  10. test_indexing_service_end_to_end: Full pipeline from chunks to search results.
+  11. test_indexing_service_graceful_failure_handling: Database errors caught and reported gracefully.
+
+================================================================================
+6. PHASE 5: GRAPH-AWARE RETRIEVAL [STATUS: COMPLETED]
+================================================================================
+
+6.1 Objectives & Deliverables
+------------------------------
+  - Use the existing CodeSpecAI Neo4j architecture and code knowledge graph as a
+    structured retrieval source for repository context.
+  - Implement a reusable GraphRetriever independent of vector retrieval and LLM generation.
+  - Reuse existing Neo4j connection and configuration (app.db.neo4j / get_session).
+  - Do not duplicate graph ingestion logic (reusing GraphBuilder AST graph).
+  - Enforce repository-scoped isolation on all graph queries (repo_url / repository_id).
+  - Given relevant files, symbols, or chunks, retrieve related:
+      * classes
+      * functions / methods
+      * imports
+      * calls (CALLS, CALLED_BY)
+      * dependencies (USES, INSTANTIATES, EXTENDS)
+      * files / modules (DEFINES, IMPORTS, IMPORTED_BY)
+      * shortest structural path discovery between symbols
+  - Return normalized retrieval results with:
+      * repository_id
+      * file_path
+      * symbol
+      * relationship
+      * direction ("outgoing", "incoming", "bidirectional")
+      * depth (traversal hop distance)
+      * related entity (id, name, type, file_path, line_start, line_end, docstring, signature)
+      * useful source metadata
+  - Safe Cypher query construction with full parameterization and error handling.
+  - Comprehensive unit tests with mocked Neo4j responses and conditional integration test.
+
+6.2 Components & Implementation Details
+---------------------------------------
+
+A. Typed Models & Schemas (app/models/graph_retrieval_models.py):
+   - GraphRelationshipType (str, Enum):
+       * Calls: CALLS, CALLED_BY
+       * Hierarchy: EXTENDS, EXTENDED_BY, HAS_METHOD, METHOD_OF
+       * Dependencies: USES, USED_BY, INSTANTIATES, INSTANTIATED_BY
+       * Structure: DEFINES, DEFINED_IN, IMPORTS, IMPORTED_BY, CONTAINS, CONTAINED_IN
+   - GraphNodeEntity (BaseModel):
+       * id: str - Unique symbol ID (e.g. 'services/auth.py::AuthService::validate') or file path
+       * name: str - Entity name (e.g. 'validate')
+       * type: str - Entity type label ('Function', 'Class', 'File', etc.)
+       * file_path: Optional[str] - Relative file path in repository
+       * line_start: Optional[int] - Start line number
+       * line_end: Optional[int] - End line number
+       * docstring: Optional[str] - Entity docstring
+       * signature: Optional[str] - Formatted parameter and return type signature
+       * properties: dict[str, Any] - Node properties
+   - GraphRetrievalResult (BaseModel):
+       * repository_id: str
+       * file_path: Optional[str]
+       * symbol: Optional[str]
+       * relationship: str
+       * direction: str ("outgoing" | "incoming" | "bidirectional")
+       * depth: int
+       * related_entity: GraphNodeEntity
+       * metadata: dict[str, Any]
+   - GraphContextSummary (BaseModel):
+       * Aggregates results for a focal symbol or file.
+       * Helper accessors: get_calls(), get_callers(), get_dependencies(), get_defined_symbols(), get_imports().
+       * to_text_summary() -> str: Formatted Markdown code graph block for context augmentation.
+
+B. Graph Retrieval Service (app/core/rag/retrieval/graph_retriever.py):
+   - GraphRetriever:
+       * Constructor accepts optional driver or session_factory for flexible injection and testing.
+       * Defaults to app.db.neo4j.get_session() in production.
+       * strict mode: when False (default), logs errors and returns empty lists; when True,
+         raises GraphConnectionError or GraphRetrievalError.
+   - Retrieval Methods:
+       1. get_symbol_context(symbol, repository_id, depth=1, relationship_types=None, file_path=None, limit=50):
+          Queries outgoing and incoming relationships for symbol, normalizes incoming
+          relationships (e.g. CALLS -> CALLED_BY, EXTENDS -> EXTENDED_BY), supports
+          multi-hop expansion up to depth hops with cycle prevention.
+       2. get_file_context(file_path, repository_id, include_imports=True, include_definitions=True, limit=50):
+          Queries defined classes/functions (DEFINES), outgoing file imports (IMPORTS),
+          and incoming file imports (IMPORTED_BY). Normalizes file paths across platforms.
+       3. get_chunk_context(chunk, depth=1, limit=30):
+          Extracts chunk.symbol -> chunk.parent_metadata -> chunk.file_path, providing
+          seamless progressive fallback from fine-grained symbol to file-level context.
+       4. get_batch_context(symbols=(), file_paths=(), repository_id="", depth=1):
+          Bulk context retrieval across multiple symbols and files with deduplication.
+       5. find_path_between_symbols(source_symbol, target_symbol, repository_id, max_depth=3):
+          Executes shortestPath Cypher query to discover relationship chains between symbols.
+       6. get_hierarchical_context(symbol_or_file, repository_id, depth=1):
+          High-level convenience method returning a structured GraphContextSummary.
+
+C. Safe Cypher & Error Handling:
+   - Full parameterization: all symbols, file paths, repository IDs, and limits passed via $params.
+   - Dynamic path depth safely clamped (max_depth between 1 and 5).
+   - Relationship filters validated against ALLOWED_RELATIONSHIPS whitelist.
+   - Try/except blocks handling ServiceUnavailable and Neo4jError gracefully.
+
+6.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_graph_retrieval.py
+Total Tests in Backend Suite: 87 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 + 11 Phase 4 + 16 Phase 5)
+Test Results: 86 PASSED, 1 SKIPPED (live Neo4j integration test), 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+   1. test_get_symbol_context_outgoing_calls: Outgoing CALLS relationship correctly normalized.
+   2. test_get_symbol_context_incoming_callers: Incoming CALLS normalized to CALLED_BY with source metadata.
+   3. test_get_symbol_context_dependencies: EXTENDS inheritance hierarchy correctly retrieved.
+   4. test_get_symbol_context_with_filter: relationship_types filtering works properly.
+   5. test_get_file_context_definitions_and_imports: DEFINES, IMPORTS, and IMPORTED_BY all resolved.
+   6. test_get_file_context_path_normalization: Windows backslashes normalized to forward slashes.
+   7. test_get_chunk_context_resolves_symbol: Resolves chunk's symbol when present.
+   8. test_get_chunk_context_fallback_to_file: Falls back to file-level context when chunk has no symbol.
+   9. test_get_batch_context_deduplication: Multiple queries deduplicated across symbols and files.
+   10. test_find_path_between_symbols: shortestPath discovery between source and target symbols.
+   11. test_graph_context_summary_helpers_and_formatting: Helper methods and Markdown rendering.
+   12. test_neo4j_service_unavailable_handled_gracefully: ServiceUnavailable returns empty list (non-crashing).
+   13. test_neo4j_service_unavailable_raises_in_strict_mode: ServiceUnavailable raises GraphConnectionError.
+   14. test_neo4j_query_error_raises_in_strict_mode: Neo4jError raises GraphRetrievalError.
+   15. test_empty_query_inputs_return_empty_list: Safe handling of empty/whitespace inputs.
+   16. test_live_neo4j_integration: Marked with conditional skip when live Neo4j is offline.
+
+================================================================================
+7. PHASE 6: HYBRID RETRIEVAL [STATUS: COMPLETED]
+================================================================================
+
+7.1 Objectives & Deliverables
+------------------------------
+  - Implement a unified retrieval pipeline combining semantic vector search and Neo4j
+    graph retrieval into a single HybridRetriever service.
+  - Architecture Flow:
+      User Query
+         ↓
+      Query preprocessing (symbol & file candidate extraction)
+         ↓
+      Vector retrieval ─────┐
+                            ├──> Result fusion, deduplication & ranking (RRF / Weighted)
+      Graph retrieval ──────┘
+         ↓
+      Top relevant ranked context
+  - Perform repository-scoped vector search via IndexingService.similarity_search.
+  - Identify useful files, symbols, and entities from vector hits and preprocessed query.
+  - Use those seeds to perform relevant Neo4j graph expansion via GraphRetriever.
+  - Merge vector and graph results and remove duplicates using canonical entity keys.
+  - Rank results using configurable strategies (Reciprocal Rank Fusion / RRF or Weighted Linear).
+  - Preserve rich source metadata and provenance (sources: vector, graph, hybrid; raw scores, ranks, relationships).
+  - Return a typed RetrievalResult model containing a ranked list of RetrievedItem models.
+  - Configurable parameters: top_k, vector_top_k, vector_min_score, graph_expansion_depth,
+    graph_limit_per_seed, ranking_strategy, vector_weight, graph_weight, rrf_k.
+  - Strictly enforce multi-tenant repository isolation: filter out any cross-repository leaks.
+  - Gracefully handle vector store or Neo4j outages (fallback to single available source).
+  - Keep the retrieval layer decoupled from FastAPI routes and do not call LLMs yet.
+  - Comprehensive unit testing across all operational and edge scenarios.
+
+7.2 Components & Implementation Details
+---------------------------------------
+
+A. Typed Models & Schemas (app/models/retrieval_models.py):
+   - RetrievalSourceType (str, Enum):
+       * "vector", "graph", "hybrid"
+   - RetrievalProvenance (BaseModel):
+       * sources: list[str] - List of retrieval sources ('vector', 'graph')
+       * vector_score: Optional[float] - Raw cosine similarity score
+       * vector_rank: Optional[int] - 1-based original rank in vector search
+       * graph_score: Optional[float] - Relevance score from graph expansion
+       * graph_rank: Optional[int] - 1-based original rank in graph search
+       * graph_relationships: list[str] - Graph edges connecting to seed (e.g. CALLS, EXTENDS)
+       * focal_seed: Optional[str] - Seed symbol or file that triggered graph expansion
+   - RetrievedItem (BaseModel):
+       * id: str - Unique chunk ID or graph entity ID
+       * repository_id: str - Scoped repository identifier
+       * file_path: str - Relative file path in repository
+       * symbol: Optional[str] - AST symbol identifier if applicable
+       * file_type: str - Classification category
+       * content: str - Code snippet, docstring, or structured structural context
+       * start_line: Optional[int] - Starting line number
+       * end_line: Optional[int] - Ending line number
+       * score: float - Final fused ranking score
+       * rank: int - Final position in ranked results (1-indexed)
+       * provenance: RetrievalProvenance - Full traceability audit trail
+       * metadata: dict[str, Any] - Language, signatures, docstrings
+   - HybridRetrievalConfig (BaseModel):
+       * top_k: int = 10
+       * vector_top_k: int = 10
+       * vector_min_score: float = 0.0
+       * include_graph_expansion: bool = True
+       * graph_expansion_depth: int = 1
+       * graph_limit_per_seed: int = 10
+       * ranking_strategy: str = "rrf" ("rrf" | "weighted")
+       * vector_weight: float = 0.6
+       * graph_weight: float = 0.4
+       * rrf_k: int = 60
+   - RetrievalResult (BaseModel):
+       * query: str
+       * repository_id: str
+       * items: list[RetrievedItem]
+       * total_results: int
+       * vector_hit_count: int
+       * graph_hit_count: int
+       * fused_hybrid_count: int
+       * strategy_used: str
+       * to_context_string(max_tokens=None) -> str: Formatted Markdown code context block.
+
+B. Hybrid Retrieval Service (app/core/rag/retrieval/hybrid_retriever.py):
+   - HybridRetriever:
+       * Coordinates IndexingService and GraphRetriever.
+       * query(query, repository_id, config=None) -> RetrievalResult
+   - Pipeline Execution Steps:
+       1. Validation: Checks non-empty query and repository_id.
+       2. Query Preprocessing: Uses regex to extract potential symbols (CamelCase, snake_case,
+          dotted symbols) and file paths (.py, .ts, etc.) from query text to act as direct graph seeds.
+       3. Vector Retrieval: Queries vector store strictly scoped to repository_id.
+       4. Graph Expansion: Collects seeds from top vector hits and query candidates. Expands
+          each seed via GraphRetriever.get_symbol_context() and get_file_context().
+       5. Fusion & Deduplication: Groups candidates by canonical key (file_path::symbol or
+          file_path::chunk_id). Overlapping candidates are merged into "hybrid" items with
+          dual provenance and enriched metadata.
+       6. Ranking:
+          - Reciprocal Rank Fusion (RRF): score = sum(weight / (k + rank)).
+          - Weighted Linear: score = w_vec * vector_score + w_graph * graph_score.
+       7. Repository Isolation: Strictly verifies item.repository_id == repository_id.
+       8. Fault Tolerance: Vector store failures fall back gracefully to graph retrieval;
+          Neo4j failures fall back gracefully to vector search; neither crashes the pipeline.
+
+7.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_hybrid_retrieval.py
+Total Tests in Backend Suite: 97 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 + 11 Phase 4 + 16 Phase 5 + 10 Phase 6)
+Test Results: 96 PASSED, 1 SKIPPED (live Neo4j integration test), 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+   1. test_vector_only_retrieval: Correctly retrieves and formats vector-only results.
+   2. test_graph_only_retrieval: Preprocessed symbol queries trigger graph expansion when vector hits are empty.
+   3. test_overlapping_hybrid_fusion: Overlapping vector and graph results merge into hybrid items with dual provenance.
+   4. test_unrelated_repository_isolation: Leaked chunks/nodes from other repositories are strictly rejected.
+   5. test_ranking_strategies_rrf_and_weighted: Validates RRF dual-boost ranking and Weighted linear scoring.
+   6. test_deduplication_of_identical_keys: Duplicate chunks for the same symbol are deduplicated cleanly.
+   7. test_empty_query_and_empty_repo: Safe handling of empty queries and repository IDs without throwing errors.
+   8. test_vector_failure_falls_back_to_graph: Runtime vector DB failure falls back to graph retrieval.
+   9. test_graph_failure_falls_back_to_vector: Neo4j offline/error falls back gracefully to vector search.
+   10. test_to_context_string_formatting: Markdown context formatting for prompt injection.
+
+================================================================================
+8. PHASE 7: LLM ABSTRACTION AND INITIAL PROVIDER [STATUS: COMPLETED]
+================================================================================
+
+8.1 Objectives & Deliverables
+------------------------------
+  - Add a provider-agnostic LLM service that can initially use cloud LLMs (OpenAI, Gemini)
+    and can later be switched to local LLMs (Ollama) without changing the RAG pipeline.
+  - Architectural decoupling:
+      HybridRetriever (Phase 6)
+            ↓
+      ContextBuilder
+            ↓
+      BaseLLMProvider interface
+            ↓
+      Configured Provider (Mock, OpenAI, Gemini, Ollama)
+            ↓
+      GenerationResult (Answer + Citations + Traceability)
+  - Ensure the RAG pipeline depends strictly on the BaseLLMProvider interface, never
+    directly on a specific vendor SDK.
+  - Configure provider, model, API keys, and timeouts via environment/configuration.
+  - Zero hardcoded credentials or API keys.
+  - Structure the provider layer so local providers (Ollama) can be added or switched
+    without modifying retrieval, chunking, vector storage, Neo4j, or context building.
+  - Define typed models for generated answers (Citation, LLMResponse, BuiltContext, GenerationResult).
+  - Implement timeout, configuration, and API status error handling.
+  - Comprehensive unit testing using a deterministic MockLLMProvider and mocked HTTP clients.
+
+8.2 Components & Implementation Details
+---------------------------------------
+
+A. Typed Models & Schemas (app/models/generation_models.py):
+   - Citation (BaseModel):
+       * index: int - 1-based index matching [1], [2] in answer text
+       * file_path: str - Repository file path
+       * symbol: Optional[str] - Symbol name if applicable
+       * start_line: Optional[int] - Start line number
+       * end_line: Optional[int] - End line number
+       * snippet: str - Preview excerpt of cited code
+       * score: float - Retrieval score
+       * sources: list[str] - Retrieval channels ('vector', 'graph')
+   - LLMResponse (BaseModel):
+       * content: str - Generated text answer
+       * model: str - Model name used
+       * provider: str - Provider name ('mock', 'openai', 'gemini', 'ollama')
+       * prompt_tokens: Optional[int]
+       * completion_tokens: Optional[int]
+       * total_tokens: Optional[int]
+       * finish_reason: Optional[str]
+       * raw_response: Optional[dict[str, Any]]
+   - BuiltContext (BaseModel):
+       * system_prompt: str - System instructions and role prompt
+       * user_prompt: str - Formatted user query with numbered context blocks
+       * citations: list[Citation] - Structured citation list
+       * estimated_tokens: int - Approximate token count
+   - GenerationResult (BaseModel):
+       * answer: str - Final generated response
+       * query: str - Original user query
+       * repository_id: str - Target repository ID
+       * citations: list[Citation] - Citations referenced
+       * retrieval_result: RetrievalResult - Underlying Phase 6 retrieval result
+       * provider: str - Provider name
+       * model: str - Model name
+       * tokens_used: Optional[int]
+       * is_successful: bool
+       * error: Optional[str]
+
+B. Context Builder (app/core/rag/generation/context_builder.py):
+   - ContextBuilder:
+       * Formats items from RetrievalResult into numbered context blocks:
+         [1] File: `services/auth.py` | Symbol: `login` | Lines: 10–15 | Source: vector, graph
+       * Extracts Citation objects matching context numbers.
+       * Handles empty retrieval results gracefully with specific prompt instructing
+         the LLM that no matching codebase context was found.
+       * Enforces max_context_chars (default 24000) to protect against context window overflow.
+
+C. Provider-Agnostic LLM Layer (app/core/rag/generation/):
+   - BaseLLMProvider (base.py):
+       * Abstract base class defining provider_name, model_name, generate(), health_check().
+       * Custom exceptions: LLMError, LLMConfigurationError, LLMTimeoutError, LLMAPIError.
+   - MockLLMProvider (providers/mock_provider.py):
+       * Fast, deterministic, offline mock for development and CI/CD.
+       * Supports custom static responses or dynamic generator functions with bracket citations.
+   - OpenAILLMProvider (providers/openai_provider.py):
+       * Uses httpx to call OpenAI Chat Completions endpoint.
+       * Reads OPENAI_API_KEY from settings/env; maps timeout and HTTP status codes to custom exceptions.
+   - GeminiLLMProvider (providers/gemini_provider.py):
+       * Uses httpx to call Google Gemini generateContent REST endpoint.
+       * Reads GEMINI_API_KEY from settings/env.
+   - OllamaLLMProvider (providers/ollama_provider.py):
+       * Uses httpx to call local Ollama REST API (http://localhost:11434/api/chat).
+       * Allows zero-code-change switching to local open-source models (llama3, mistral, etc.).
+   - Factory (factory.py):
+       * get_llm_provider(provider=None, model_name=None, **kwargs) -> BaseLLMProvider.
+       * Reads settings.LLM_PROVIDER and settings.LLM_MODEL_NAME.
+
+D. RAG Generation Orchestrator (app/core/rag/generation/service.py):
+   - RAGGenerationService:
+       * Coordinates HybridRetriever -> ContextBuilder -> BaseLLMProvider -> GenerationResult.
+       * Dependency-injected components allow swapping retrieval, context formatting, or LLM providers.
+       * Exception isolation: when strict=False (default), provider failures return failed GenerationResult
+         without crashing upstream callers.
+
+E. Configuration (app/config.py & backend/.env.example):
+   - Added LLM_PROVIDER ("mock" | "openai" | "gemini" | "ollama")
+   - Added LLM_MODEL_NAME ("gpt-4o-mini")
+   - Added LLM_TEMPERATURE (0.2)
+   - Added LLM_MAX_TOKENS (1500)
+   - Added LLM_REQUEST_TIMEOUT (30.0)
+   - Added OLLAMA_BASE_URL ("http://localhost:11434")
+   - Added LLM_BASE_URL (optional custom endpoint override)
+
+8.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_llm_generation.py
+Total Tests in Backend Suite: 111 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 + 11 Phase 4 + 16 Phase 5 + 10 Phase 6 + 14 Phase 7)
+Test Results: 110 PASSED, 1 SKIPPED (live Neo4j integration test), 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+   1. test_context_builder_formats_prompt_and_citations: Verified numbered [1], [2] prompt blocks and citations.
+   2. test_context_builder_empty_retrieval: Graceful handling of empty context with fallback instructions.
+   3. test_context_builder_budget_truncation: Truncates oversized items to fit token budget.
+   4. test_mock_llm_provider_generation: Default deterministic generation referencing citations.
+   5. test_mock_llm_provider_custom_response: Custom response configuration.
+   6. test_provider_factory_resolution: Correct provider instantiation for mock, openai, gemini, ollama, and fallback.
+   7. test_openai_missing_key_raises_configuration_error: Missing OpenAI key raises LLMConfigurationError.
+   8. test_gemini_missing_key_raises_configuration_error: Missing Gemini key raises LLMConfigurationError.
+   9. test_openai_timeout_mapped_to_llm_timeout_error: Request timeout maps to LLMTimeoutError.
+   10. test_openai_http_error_mapped_to_llm_api_error: HTTP 500 error maps to LLMAPIError.
+   11. test_ollama_http_mock_response: Local Ollama REST response parsed into normalized LLMResponse.
+   12. test_rag_generation_service_end_to_end: Full pipeline from retrieval to context to answer with citations.
+   13. test_rag_generation_service_failure_gracefully_handled: Provider error returns failed GenerationResult.
+   14. test_rag_generation_service_strict_mode_raises: Strict mode re-raises provider exceptions.
+
+================================================================================
+9. PHASE 8: CONTEXT BUILDER AND END-TO-END RAG [STATUS: COMPLETED]
+================================================================================
+
+9.1 Objectives & Deliverables
+------------------------------
+  - Connect the Phase 6 HybridRetriever to the Phase 7 provider-agnostic BaseLLMProvider.
+  - Implement an enhanced ContextBuilder service:
+      * Accepts existing HybridRetriever RetrievalResult.
+      * Builds a compact, structured context for the LLM.
+      * Preserves full provenance for every context item: repository_id, file_path,
+        file_type, symbol, line range (start_line to end_line), PDF page_number,
+        and documentation section.
+      * Removes duplicate and redundant retrieval results (exact content matches and
+        span subsumption where a broader line range encompasses a narrower one).
+      * Enforces configurable context/token limits (max_context_chars, max_tokens)
+        with graceful truncation.
+  - Create an end-to-end RAG orchestration service (RAGService):
+      * Pipeline flow:
+          query
+            ↓
+          HybridRetriever
+            ↓
+          ContextBuilder
+            ↓
+          BaseLLMProvider (LLMService)
+            ↓
+          RAGResponse
+  - Grounding & Anti-hallucination Prompting:
+      * STRICT_RAG_SYSTEM_PROMPT directs model to answer ONLY using supplied context.
+      * Prohibits inventing or extrapolating repository facts.
+      * Mandates explicit fallback prefix ("INSUFFICIENT CONTEXT: ...") when the retrieved
+        context is inadequate.
+      * Requires bracket citations ([1], [2]) mapped to concrete source items.
+  - Return typed, structured RAGResponse containing:
+      * answer: str
+      * sources: list[RAGSourceItem] with full provenance
+      * retrieval_metadata: RAGMetadata (timing, counts, provider, model)
+      * is_insufficient_context: bool flag detecting lack of context
+  - Keep orchestration 100% provider-agnostic (works with Mock, OpenAI, Gemini, Ollama).
+  - Robust error handling (strict mode vs. non-strict graceful degradation).
+  - Comprehensive unit testing across all key behaviors.
+
+9.2 Components & Implementation Details
+---------------------------------------
+
+A. Provenance Enrichment in Retrieval Models (app/models/retrieval_models.py):
+   - RetrievedItem:
+       * Extended with page_number: Optional[int] = None (for PDF documents).
+       * Extended with section: Optional[str] = None (for Markdown documentation sections).
+       * Preserves file_type, symbol, start_line, end_line, score, sources, graph_relationships.
+   - HybridRetriever._fuse_results (app/core/rag/retrieval/hybrid_retriever.py):
+       * Populates page_number and section from vector metadata into RetrievedItem.
+
+B. Structured RAG Response Models (app/models/generation_models.py):
+   - RAGSourceItem (BaseModel):
+       * index: int - 1-based reference number matching [1], [2] in answer text.
+       * repository_id: str - Target repository identifier.
+       * file_path: str - Path to file within repository.
+       * file_type: Optional[str] - Categorized file type ('source_code', 'markdown', 'pdf', etc.).
+       * symbol: Optional[str] - Function, class, or symbol name.
+       * start_line: Optional[int] - Start line number (1-indexed).
+       * end_line: Optional[int] - End line number (1-indexed).
+       * page_number: Optional[int] - PDF page number if applicable.
+       * section: Optional[str] - Markdown section hierarchy if applicable.
+       * score: float - Retrieval relevance/fusion score.
+       * sources: list[str] - Provenance channels (['vector'], ['graph'], or both).
+       * snippet: str - Preview excerpt of cited content.
+   - RAGMetadata (BaseModel):
+       * query: str - User's original query.
+       * repository_id: str - Scoped repository.
+       * provider: str - LLM provider ('mock', 'openai', 'gemini', 'ollama').
+       * model: str - Model name used.
+       * retrieval_latency_ms: float - Milliseconds spent in retrieval.
+       * generation_latency_ms: float - Milliseconds spent in context building and LLM generation.
+       * total_latency_ms: float - Overall end-to-end pipeline latency.
+       * total_retrieved_items: int - Raw items returned by retriever.
+       * total_context_items: int - Deduplicated items packed into prompt.
+       * tokens_used: Optional[int] - Total tokens consumed if reported by provider.
+   - RAGResponse (BaseModel):
+       * answer: str - Grounded answer from LLM.
+       * sources: list[RAGSourceItem] - Structured provenance list for UI and API consumers.
+       * retrieval_metadata: RAGMetadata - Execution and timing telemetry.
+       * is_successful: bool - Pipeline execution status.
+       * is_insufficient_context: bool - Flagged True when LLM reports context is insufficient.
+       * error_message: Optional[str] - Error description if failed.
+
+C. ContextBuilder Service Enhancements (app/core/rag/generation/context_builder.py):
+   - Deduplication Engine (_deduplicate_items):
+       * Exact Content Matching: Hashes normalized item content to discard identical chunks.
+       * Line Range Subsumption: If an item shares the same file_path and symbol, checks whether
+         its line range is fully enclosed by an already-included item.
+   - Provenance Header Formatting:
+       * Builds structured headers for each context item:
+         --- Context Item [1] ---
+         Repository: <repo_id> | File: <file_path> | Type: <file_type>
+         Symbol: <symbol> | Lines: <start>-<end> | Page: <page> | Section: <section>
+         Score: 0.85 | Sources: vector, graph
+         Graph relationships: [relationships if any]
+         ```<lang>
+         <content>
+         ```
+   - Budget Management:
+       * Respects max_context_chars and max_tokens.
+       * Truncates oversized items with [Content truncated to fit token budget...] notices.
+   - Anti-Hallucination Grounding Prompt (STRICT_RAG_SYSTEM_PROMPT):
+       * Directs the LLM to act as a precise repository code intelligence assistant.
+       * Explicitly forbids inventing files, methods, parameters, or behaviors not in context.
+       * Mandates prefixing answers with "INSUFFICIENT CONTEXT: ..." when the repository context
+         does not contain the necessary information.
+       * Enforces bracket citation tags ([1], [2]) linking statements directly to source items.
+
+D. RAG Service Orchestrator (app/core/rag/generation/rag_service.py):
+   - RAGService:
+       * Coordinates query -> HybridRetriever -> ContextBuilder -> BaseLLMProvider -> RAGResponse.
+       * Measures fine-grained timing for retrieval, generation, and total pipeline execution.
+       * Detects insufficient context keywords ("insufficient context", "not enough context",
+         "cannot answer based on the provided context") to automatically set
+         RAGResponse.is_insufficient_context = True.
+       * Exception Handling:
+           - In strict=False mode (default): returns graceful RAGResponse with is_successful=False
+             and descriptive error_message.
+           - In strict=True mode: re-raises underlying exceptions for caller-level handling.
+   - Convenience function:
+       * query_rag(query, repository_id, **kwargs) -> RAGResponse.
+
+9.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_end_to_end_rag.py
+Total Tests in Backend Suite: 119 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 + 11 Phase 4 + 16 Phase 5 + 10 Phase 6 + 14 Phase 7 + 8 Phase 8)
+Test Results: 118 PASSED, 1 SKIPPED (live Neo4j integration test), 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+   1. test_end_to_end_rag_with_relevant_context:
+      Full pipeline execution with relevant vector & graph items; verifies structured answer,
+      RAGSourceItem provenance (file_path, symbol, lines, page_number, section), and RAGMetadata.
+   2. test_end_to_end_rag_empty_retrieval:
+      When retrieval returns 0 items, verifies graceful fallback, empty sources, and
+      is_insufficient_context flag set to True.
+   3. test_context_builder_removes_duplicate_and_subsumed_results:
+      Verifies that exact duplicate chunks and subsumed line-span chunks (e.g., lines 12-18
+      enclosed by lines 10-30) are eliminated from the assembled context.
+   4. test_context_builder_respects_token_and_char_limits:
+      Verifies that oversized retrieved items are safely truncated to fit within the configured
+      max_context_chars threshold without crashing.
+   5. test_rag_service_llm_failure_non_strict:
+      Verifies that provider API/timeout errors return is_successful=False with an informative
+      error_message without crashing the application.
+   6. test_rag_service_llm_failure_strict:
+      Verifies that strict=True re-raises LLMAPIError / LLMError to the caller.
+   7. test_rag_service_detects_insufficient_context_from_llm:
+      Verifies that when the LLM outputs "INSUFFICIENT CONTEXT: ...", the service automatically
+      flags response.is_insufficient_context = True.
+   8. test_context_builder_grounding_system_prompt:
+      Verifies that the assembled prompt contains anti-hallucination constraints and citations instructions.
+
+================================================================================
+10. PHASE 9: FASTAPI INTEGRATION [STATUS: COMPLETED]
+================================================================================
+
+10.1 Objectives & Deliverables
+------------------------------
+  - Expose the existing RAG pipeline through FastAPI at POST /api/chat (and /api/v1/chat).
+  - Requirements satisfied:
+      1. Thin route handler: delegating all retrieval and generation to RAGService.
+      2. Route -> RAG service only: no retrieval or LLM logic in the route itself.
+      3. Input validation: strict checks for repository_id and query (empty, whitespace,
+         path traversal, null bytes, missing fields).
+      4. Preserves full source metadata and provenance in response:
+         index, repository_id, file_path, file_type, symbol, line range (start_line to end_line),
+         page_number, section, snippet, score, sources channels.
+      5. Error and edge-case handling:
+         * Invalid repository: HTTP 400 Bad Request (empty/whitespace/traversal) or 422 (missing).
+         * Empty query: HTTP 400 Bad Request (empty/whitespace) or 422 (missing).
+         * No retrieval results: HTTP 200 OK with grounded response, sources=[], is_insufficient_context=True.
+         * Retrieval failure: HTTP 503 Service Unavailable with descriptive details.
+         * LLM failure: HTTP 502 Bad Gateway (API error) or 504 Gateway Timeout (timeout).
+      6. Existing API conventions followed: APIRouter tags, Depends dependency injection,
+         retaining legacy placeholder endpoints for backwards compatibility.
+      7. Dual prefix support: mounted under both /api and /api/v1.
+      8. 100% test coverage for API endpoints with zero modifications to frontend or earlier phases.
+
+10.2 Components & Implementation Details
+---------------------------------------
+
+A. Request & Response Schemas (app/models/generation_models.py):
+   - ChatRequest (BaseModel):
+       * repository_id: str - Target repository ID or clone URL.
+       * query: str - User's question or search query.
+   - ChatResponse (BaseModel):
+       * answer: str - Synthesized grounded answer.
+       * sources: list[RAGSourceItem] - Provenance source units (repo, path, type, symbol, lines, page, section, snippet, score, sources).
+       * retrieval_metadata: Optional[RAGMetadata] - Execution telemetry (latency, hits, model, provider).
+       * is_insufficient_context: bool - Flag indicating if repository context was insufficient.
+
+B. Dependency Injection (app/api/deps.py):
+   - get_rag_service() -> RAGService:
+       * Lazily provides the shared RAGService singleton.
+       * Supports clean override in test suites via app.dependency_overrides[get_rag_service].
+
+C. Route Handler (app/api/routes/chat.py):
+   - chat_query(body: ChatRequest, rag_service: RAGService = Depends(get_rag_service)):
+       * Thin, declarative route handler.
+       * Validates repository_id and query.
+       * Dispatches directly to rag_service.answer_query(clean_query, clean_repo_id).
+       * Maps exceptions and unsuccessful pipeline outcomes to standard HTTP status codes:
+           - 400 Bad Request: empty/whitespace/path traversal inputs.
+           - 422 Unprocessable Entity: missing required fields.
+           - 502 Bad Gateway: LLM provider API errors or configuration failures.
+           - 503 Service Unavailable: Neo4j / vector retrieval failures.
+           - 504 Gateway Timeout: LLM provider timeout.
+       * Retains legacy /ask and /sync-docs endpoints for backwards compatibility.
+
+D. FastAPI Router Registration (app/main.py):
+   - Mounted chat.router under:
+       * prefix="/api" (enabling POST /api/chat)
+       * prefix=settings.API_V1_PREFIX (enabling POST /api/v1/chat)
+
+10.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_api_chat.py
+Total Tests in Backend Suite: 132 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 + 11 Phase 4 + 16 Phase 5 + 10 Phase 6 + 14 Phase 7 + 8 Phase 8 + 13 Phase 9)
+Test Results: 131 PASSED, 1 SKIPPED (live Neo4j integration test), 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+   1. test_chat_endpoint_success_with_sources:
+      POST /api/chat returns HTTP 200, grounded answer, and full source provenance.
+   2. test_chat_endpoint_empty_query:
+      Empty or whitespace query returns HTTP 400 with descriptive error detail.
+   3. test_chat_endpoint_missing_query:
+      Missing query returns HTTP 422 Unprocessable Entity.
+   4. test_chat_endpoint_empty_repository_id:
+      Empty or whitespace repository_id returns HTTP 400 Bad Request.
+   5. test_chat_endpoint_missing_repository_id:
+      Missing repository_id returns HTTP 422 Unprocessable Entity.
+   6. test_chat_endpoint_invalid_repository_path_traversal:
+      Path traversal or invalid path repository_id returns HTTP 400 Bad Request.
+   7. test_chat_endpoint_no_retrieval_results:
+      Zero retrieval hits returns HTTP 200 with sources=[] and is_insufficient_context=True.
+   8. test_chat_endpoint_retrieval_failure_raises_503:
+      Retrieval layer exception maps cleanly to HTTP 503 Service Unavailable.
+   9. test_chat_endpoint_retrieval_failure_via_response_raises_503:
+      Non-strict retrieval failure reported in RAGResponse maps to HTTP 503.
+   10. test_chat_endpoint_llm_failure_raises_502:
+      LLM provider exception maps cleanly to HTTP 502 Bad Gateway.
+   11. test_chat_endpoint_llm_failure_via_response_raises_502:
+      Non-strict LLM failure reported in RAGResponse maps to HTTP 502.
+   12. test_chat_endpoint_llm_timeout_raises_504:
+      LLM timeout maps cleanly to HTTP 504 Gateway Timeout.
+   13. test_chat_endpoint_dual_prefix_mount:
+      Both POST /api/chat and POST /api/v1/chat route identically to RAG pipeline.
+
+================================================================================
+11. PHASE 10: RAG EVALUATION & BENCHMARKING LAYER [STATUS: COMPLETED]
+================================================================================
+
+11.1 Objectives & Deliverables
+------------------------------
+  - Add a dedicated, offline evaluation and benchmarking subsystem on top of the
+    existing CodeSpecAI RAG pipeline.
+  - Requirements satisfied:
+      1. Isolated subsystem architecture: completely self-contained under backend/evaluation/,
+         zero modifications or restructurings to production app/ services.
+      2. Benchmark dataset format:
+         * question_id, repository_id, question
+         * relevant_files, relevant_symbols, relevant_sections, relevant_pages
+         * optional relevance_grades (graded relevance for NDCG)
+         * ground_truth_answer, expected_concepts
+      3. Information Retrieval (IR) metrics calculated for EXISTING retrieval pipeline:
+         * Precision@K
+         * Recall@K
+         * Hit Rate@K
+         * MRR@K (Mean Reciprocal Rank)
+         * NDCG@K (Normalized Discounted Cumulative Gain, binary & graded)
+      4. Strategy-specific evaluations:
+         * Vector retrieval (vector search only)
+         * Graph retrieval (graph expansion and context)
+         * Hybrid retrieval (unified vector + graph rank fusion)
+      5. Configurable K cutoffs: evaluated across K=5, K=10, and custom thresholds.
+      6. Generation quality evaluation for EXISTING RAG pipeline:
+         * Faithfulness / Groundedness (detects hallucinations, verifies claims in context)
+         * Answer Relevance (intent and keyword alignment with user question)
+         * Context Relevance (signal-to-noise ratio in retrieved snippets)
+         * Citation Correctness (validity of [k] tags, alignment with ground truth files)
+         * Answer Completeness (coverage of expected concepts / ground truth facts)
+      7. Performance and latency benchmarking:
+         * Vector retrieval latency
+         * Graph retrieval latency
+         * Hybrid retrieval latency
+         * Context construction latency
+         * LLM generation latency
+         * Total end-to-end query latency
+         * Repository indexing profiling (files, chunks, embedding times)
+         * Statistical distributions: Mean, Median (P50), P95, Min, Max
+      8. Evaluation runner and CLI (python -m evaluation.runner):
+         * Offline mode support with in-memory vector store for instant testing
+         * Live mode support against production databases
+         * Generates machine-readable JSON artifacts (eval_results_<id>.json, latest.json)
+         * Generates human-readable Markdown reports (eval_report_<id>.md, latest.md)
+         * Preserves full experiment configuration metadata (dataset version, model, K, timestamp)
+      9. Comprehensive documentation:
+         * Detailed reproducibility guide in backend/evaluation/README.md.
+      10. Comprehensive unit tests:
+         * Hand-crafted mathematical verification for all metric calculations in backend/tests/test_evaluation.py.
+
+11.2 Components & Implementation Details
+---------------------------------------
+
+A. Benchmark Dataset Models & Data (evaluation/datasets/):
+   - BenchmarkItem (BaseModel):
+       * question_id, repository_id, question
+       * relevant_files, relevant_symbols, relevant_sections, relevant_pages
+       * relevance_grades: dict[str, int] (1 to 3 weights for graded NDCG)
+       * ground_truth_answer, expected_concepts
+       * Matching helpers: is_file_relevant(path), is_symbol_relevant(sym), get_grade(id)
+   - BenchmarkDataset (BaseModel):
+       * name, version, description, repository_id, items: list[BenchmarkItem]
+       * JSON persistence helpers: from_file(path), to_file(path)
+   - sample_benchmark.json:
+       * Realistic multi-format benchmark dataset with source code, symbol, multi-file,
+         markdown docs, PDF specifications, and insufficient context scenarios.
+
+B. Retrieval Metrics & Evaluator (evaluation/retrieval/):
+   - metrics.py:
+       * precision_at_k(retrieved, relevant, k)
+       * recall_at_k(retrieved, relevant, k)
+       * hit_rate_at_k(retrieved, relevant, k)
+       * reciprocal_rank_at_k(retrieved, relevant, k)
+       * ndcg_at_k(retrieved, relevance_map, k)
+       * compute_retrieval_metrics(retrieved, relevant, k, grades) -> RetrievalMetricsResult
+   - evaluator.py:
+       * RetrievalEvaluator(retriever, default_k_values)
+       * Evaluates vector, graph, and hybrid strategies independently
+       * Computes macro-averages per strategy and per K threshold
+       * Produces FullRetrievalReport with query-level and summary metrics
+
+C. Generation Quality Metrics & Evaluator (evaluation/generation/):
+   - metrics.py:
+       * calculate_faithfulness(answer, sources, is_insufficient_context) -> (score, reason)
+       * calculate_answer_relevance(question, answer) -> (score, reason)
+       * calculate_context_relevance(sources, benchmark_item) -> (score, reason)
+       * calculate_citation_correctness(answer, sources, benchmark_item) -> (score, reason)
+       * calculate_answer_completeness(answer, benchmark_item) -> (score, reason)
+       * compute_generation_metrics(rag_response, benchmark_item) -> GenerationMetricsResult
+   - evaluator.py:
+       * GenerationEvaluator(rag_service)
+       * Runs benchmark questions through RAGService.answer_query()
+       * Computes macro-averaged scores and generates FullGenerationReport
+
+D. Performance & Latency Benchmarking (evaluation/performance/):
+   - benchmark.py:
+       * LatencyStats: count, mean_ms, median_ms, p95_ms, min_ms, max_ms
+       * PerformanceBenchmark: profiles vector, graph, hybrid, context, and LLM durations
+       * FullPerformanceReport & IndexingPerformanceReport
+
+E. Reporting & Orchestration (evaluation/reports/, evaluation/runner.py):
+   - generator.py:
+       * ExperimentConfig: preserves dataset, model, provider, K, and timestamp
+       * ReportGenerator: exports structured JSON and readable Markdown tables
+   - runner.py:
+       * EvaluationRunner: coordinates retrieval, generation, and performance suites
+       * CLI support: python -m evaluation.runner [--dataset ...] [--k 5 10] [--offline]
+       * Instant offline evaluation via create_offline_retriever() using in-memory store
+
+F. Documentation (evaluation/README.md):
+   - Complete technical guide detailing formulas, dataset schema, execution options,
+     and reproducibility instructions.
+
+11.3 Verification & Test Coverage
+--------------------------------
+Test File: backend/tests/test_evaluation.py
+Total Tests in Backend Suite: 147 (21 Module 1 + 16 Phase 1 + 11 Phase 2 + 12 Phase 3 + 11 Phase 4 + 16 Phase 5 + 10 Phase 6 + 14 Phase 7 + 8 Phase 8 + 13 Phase 9 + 15 Phase 10)
+Test Results: 146 PASSED, 1 SKIPPED (live Neo4j integration test), 0 FAILED (100% pass rate)
+
+Verified Scenarios:
+   1. test_precision_at_k: Precision calculation on known hand-crafted sequences.
+   2. test_recall_at_k: Recall calculation including boundary and empty cases.
+   3. test_hit_rate_at_k: Hit rate returns 1.0 on hit, 0.0 otherwise.
+   4. test_reciprocal_rank_at_k: MRR calculation with rank 1, 2, 3 hits and misses.
+   5. test_ndcg_at_k_binary_and_graded: NDCG calculation with graded (1.0 perfect, 0.68 reversed) and binary relevance.
+   6. test_compute_retrieval_metrics_container: Composite metrics container calculation.
+   7. test_faithfulness_grounded_vs_hallucinated: Distinguishes grounded claims (>=0.8) from hallucinations (<0.3).
+   8. test_answer_relevance: Measures query term intent alignment.
+   9. test_context_relevance: Measures signal-to-noise ratio in retrieved context.
+   10. test_citation_correctness: Validates [k] index existence and ground truth alignment.
+   11. test_answer_completeness: Evaluates expected concept coverage.
+   12. test_benchmark_dataset_parsing: Validates BenchmarkDataset JSON serialization and loading.
+   13. test_retrieval_evaluator_vector_graph_hybrid: Multi-strategy retrieval evaluation.
+   14. test_latency_stats_calculation: Validates mean, median, P95, and extremes calculation.
+   15. test_evaluation_runner_generates_json_and_markdown: Full runner execution and artifact generation.
+
+================================================================================
+12. SUBSEQUENT PHASES [TO BE ADDED]
+================================================================================
+Implementation details for subsequent phases will be documented here as specifications
+are provided by the user.
+
+- Phase 11: Production Caching & Dynamic Context Pruning (Pending specification)
+================================================================================
+
+
+
+
+
+
+
+
+
