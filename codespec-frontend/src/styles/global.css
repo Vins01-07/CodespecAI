@@ -1,11 +1,58 @@
 @import "./variables.css";
 @import "./theme.css";
 
+/* =========================
+   BASE & RESET
+   ========================= */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    background: var(--app-background);
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+/* Custom Obsidian Sage Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--app-background);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2b3028;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3e463b;
+}
+
+/* Typography & Inputs */
+input, select, textarea, button {
+    font-family: inherit;
+}
+
+/* =========================
+   APP SHELL
+   ========================= */
+
 .app-shell {
     display: flex;
     width: 100%;
     min-height: 100vh;
     background: var(--app-background);
+    position: relative;
 }
 
 /* =========================
@@ -18,79 +65,64 @@
     left: 0;
     width: var(--sidebar-width);
     height: 100vh;
-
     display: flex;
     flex-direction: column;
-
     background: var(--sidebar-background);
     border-right: 1px solid var(--card-border);
-
     z-index: 100;
+    transition: transform 0.2s ease, width 0.2s ease;
 }
 
 .sidebar-brand {
     height: var(--topbar-height);
-
     display: flex;
     align-items: center;
     gap: 10px;
-
     padding: 0 18px;
-
     border-bottom: 1px solid var(--card-border);
-
     font-size: 15px;
     font-weight: 600;
     letter-spacing: -0.2px;
     color: var(--text-primary);
+    flex-shrink: 0;
 }
 
 .brand-mark {
     width: 26px;
     height: 26px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border: 1.5px solid var(--secondary);
     border-radius: 5px;
-
     color: var(--secondary);
     font-size: 13px;
     font-weight: 700;
+    flex-shrink: 0;
 }
 
 .sidebar-nav {
     display: flex;
     flex-direction: column;
-
-    padding: 14px 8px;
+    padding: 12px 8px;
     gap: 3px;
     overflow-y: auto;
+    flex: 1;
 }
 
 .sidebar-link {
     height: 38px;
-
     display: flex;
     align-items: center;
     gap: 10px;
-
     padding: 0 12px;
-
     border: 1px solid transparent;
     border-radius: var(--border-radius);
-
     color: var(--text-secondary);
-
     font-size: 13px;
     font-weight: 500;
-
-    transition:
-        background 0.15s ease,
-        color 0.15s ease,
-        border-color 0.15s ease;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .sidebar-link:hover {
@@ -102,6 +134,7 @@
     background: var(--active-background);
     border-color: var(--active-border);
     color: var(--text-primary);
+    font-weight: 600;
 }
 
 .sidebar-link.active svg {
@@ -110,30 +143,24 @@
 
 .sidebar-footer {
     margin: auto 10px 14px;
-
-    padding: 12px 10px;
-
+    padding: 10px 10px;
     display: flex;
-    gap: 10px;
-
+    gap: 9px;
     background: var(--card-background);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius);
+    flex-shrink: 0;
 }
 
 .pro-mark {
-    width: 24px;
-    height: 24px;
-
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border: 1.5px solid var(--secondary);
-    border-radius: 5px;
-
+    border-radius: 4px;
     color: var(--secondary);
     font-size: 11px;
     font-weight: 700;
@@ -148,7 +175,6 @@
     align-items: center;
     justify-content: space-between;
     gap: 6px;
-
     font-size: 11px;
     font-weight: 600;
     color: var(--text-primary);
@@ -156,40 +182,34 @@
 
 .pro-badge {
     padding: 1px 4px;
-
     border: 1px solid var(--card-border);
     border-radius: 3px;
-
     color: var(--text-secondary);
     font-size: 9px;
 }
 
 .pro-content p {
-    margin: 6px 0 8px;
-
+    margin: 4px 0 6px;
     color: var(--text-muted);
-    font-size: 11px;
-    line-height: 1.4;
+    font-size: 10.5px;
+    line-height: 1.35;
 }
 
 .upgrade-button {
     padding: 0;
-
     background: transparent;
+    border: none;
     color: var(--secondary);
-
     cursor: pointer;
-
     font-size: 11px;
     font-weight: 500;
-}
-
-.upgrade-button span {
-    margin-left: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 /* =========================
-   MAIN
+   MAIN LAYOUT & TOPBAR
    ========================= */
 
 .main-shell {
@@ -198,28 +218,22 @@
     margin-left: var(--sidebar-width);
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    transition: margin-left 0.2s ease, width 0.2s ease;
 }
-
-/* =========================
-   TOPBAR
-   ========================= */
 
 .topbar {
     position: sticky;
     top: 0;
-
     height: var(--topbar-height);
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: 0 var(--content-padding);
-
     background: var(--topbar-background);
     border-bottom: 1px solid var(--card-border);
-
     z-index: 90;
+    flex-shrink: 0;
 }
 
 .topbar-left,
@@ -229,18 +243,29 @@
 }
 
 .topbar-left {
-    gap: 16px;
+    gap: 14px;
+    flex: 1;
+    max-width: 540px;
 }
 
-.menu-button,
+.menu-button {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 6px;
+}
+
 .topbar-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-
     background: transparent;
     color: var(--text-secondary);
-
     cursor: pointer;
     border: none;
     border-radius: var(--border-radius);
@@ -254,33 +279,26 @@
 }
 
 .search-box {
-    width: min(400px, 38vw);
+    width: 100%;
+    max-width: 380px;
     height: 34px;
-
     display: flex;
     align-items: center;
     gap: 8px;
-
     padding: 0 10px;
-
     background: var(--card-background);
     border: 1px solid var(--card-border);
     border-radius: var(--border-radius);
-
     color: var(--text-muted);
 }
 
 .search-box input {
     flex: 1;
-
     min-width: 0;
-
     border: 0;
     outline: 0;
-
     background: transparent;
     color: var(--text-primary);
-
     font-size: 12px;
 }
 
@@ -290,18 +308,17 @@
 
 .search-shortcut {
     padding: 2px 5px;
-
     border: 1px solid var(--card-border);
     border-radius: 3px;
-
     color: var(--text-muted);
-
     font-size: 10px;
     font-family: inherit;
+    flex-shrink: 0;
 }
 
 .topbar-right {
-    gap: 12px;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .topbar-icon {
@@ -310,12 +327,10 @@
 
 .notification-dot {
     position: absolute;
-    top: 4px;
-    right: 4px;
-
+    top: 5px;
+    right: 5px;
     width: 6px;
     height: 6px;
-
     border-radius: 50%;
     background: var(--primary);
 }
@@ -324,9 +339,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-
-    margin-left: 6px;
-
+    margin-left: 4px;
     color: var(--text-secondary);
     font-size: 12px;
     cursor: pointer;
@@ -335,19 +348,16 @@
 .profile-avatar {
     width: 28px;
     height: 28px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 50%;
-
     background: var(--active-background);
     color: var(--primary);
     border: 1px solid var(--card-border);
-
     font-size: 11px;
     font-weight: 600;
+    flex-shrink: 0;
 }
 
 .profile-name {
@@ -356,13 +366,16 @@
 }
 
 /* =========================
-   PAGE
+   PAGE CONTENT CONTAINER
    ========================= */
 
 .page-content {
     flex: 1;
     padding: var(--content-padding);
     background: var(--app-background);
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 /* =========================
@@ -391,6 +404,7 @@
     border-radius: 4px;
     border: 1px solid transparent;
     line-height: 1;
+    white-space: nowrap;
 }
 
 .cs-badge-default {
@@ -437,6 +451,7 @@
     color: var(--text-primary);
     cursor: pointer;
     transition: all 0.15s ease;
+    white-space: nowrap;
 }
 
 .cs-btn:hover {
@@ -483,7 +498,7 @@
 /* Metrics Row */
 .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
     gap: var(--card-gap);
     width: 100%;
 }
@@ -502,22 +517,69 @@
     gap: var(--card-gap);
 }
 
-@media (max-width: 1120px) {
+/* =========================
+   GLOBAL RESPONSIVENESS
+   ========================= */
+
+@media (max-width: 1200px) {
     .dashboard-main-grid {
         grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
     :root {
-        --sidebar-width: 180px;
+        --sidebar-width: 190px;
+        --content-padding: 16px;
+        --card-gap: 12px;
+    }
+}
+
+@media (max-width: 860px) {
+    :root {
+        --sidebar-width: 64px;
+        --content-padding: 14px;
+    }
+
+    .sidebar-brand span,
+    .sidebar-link span,
+    .sidebar-footer {
+        display: none;
+    }
+
+    .sidebar-brand {
+        justify-content: center;
+        padding: 0;
+    }
+
+    .sidebar-link {
+        justify-content: center;
+        padding: 0;
     }
 
     .profile-name {
         display: none;
     }
 
-    .page-content {
-        padding: 16px;
+    .search-box {
+        max-width: 220px;
+    }
+
+    .search-shortcut {
+        display: none;
+    }
+}
+
+@media (max-width: 580px) {
+    :root {
+        --content-padding: 10px;
+    }
+
+    .topbar-left {
+        gap: 8px;
+    }
+
+    .search-box {
+        display: none;
     }
 }

@@ -8,12 +8,13 @@ function Modal({ isOpen, onClose, title, children }) {
             style={{
                 position: "fixed",
                 inset: 0,
-                backgroundColor: "rgba(0, 0, 0, 0.7)",
+                backgroundColor: "rgba(0, 0, 0, 0.75)",
+                backdropFilter: "blur(4px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 zIndex: 1000,
-                padding: "20px",
+                padding: "16px",
             }}
             onClick={onClose}
         >
@@ -21,9 +22,13 @@ function Modal({ isOpen, onClose, title, children }) {
                 className="cs-card"
                 style={{
                     width: "100%",
-                    maxWidth: "520px",
-                    padding: "20px",
+                    maxWidth: "540px",
+                    maxHeight: "90vh",
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: "18px 20px",
                     position: "relative",
+                    overflow: "hidden",
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -32,9 +37,10 @@ function Modal({ isOpen, onClose, title, children }) {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginBottom: "16px",
+                        marginBottom: "14px",
                         borderBottom: "1px solid var(--card-border)",
                         paddingBottom: "12px",
+                        flexShrink: 0,
                     }}
                 >
                     <h3
@@ -56,12 +62,23 @@ function Modal({ isOpen, onClose, title, children }) {
                             color: "var(--text-muted)",
                             cursor: "pointer",
                             padding: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            borderRadius: "4px",
                         }}
                     >
                         <X size={18} />
                     </button>
                 </div>
-                <div>{children}</div>
+                <div
+                    style={{
+                        overflowY: "auto",
+                        maxHeight: "calc(90vh - 80px)",
+                        paddingRight: "2px",
+                    }}
+                >
+                    {children}
+                </div>
             </div>
         </div>
     );
