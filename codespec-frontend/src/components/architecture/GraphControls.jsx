@@ -36,17 +36,17 @@ function GraphControls({
     };
 
     const buttonStyle = {
-        width: "32px",
-        height: "32px",
+        width: "30px",
+        height: "30px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "rgba(29, 32, 27, 0.9)",
+        background: "#09090b",
         border: "1px solid var(--card-border)",
-        borderRadius: "var(--border-radius)",
+        borderRadius: "var(--radius-sm)",
         color: "var(--text-secondary)",
         cursor: "pointer",
-        transition: "all 0.15s ease",
+        transition: "all 0.12s ease",
         padding: 0,
     };
 
@@ -56,13 +56,12 @@ function GraphControls({
             style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: "6px",
-                background: "rgba(23, 25, 22, 0.85)",
-                backdropFilter: "blur(6px)",
-                padding: "6px",
-                borderRadius: "var(--border-radius)",
+                gap: "5px",
+                background: "#09090b",
                 border: "1px solid var(--card-border)",
-                boxShadow: "0 4px 14px rgba(0, 0, 0, 0.35)",
+                padding: "5px",
+                borderRadius: "var(--radius-sm)",
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.6)",
             }}
         >
             <button

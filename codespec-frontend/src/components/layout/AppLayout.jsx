@@ -34,7 +34,7 @@ function AppLayout() {
                 .sidebar-backdrop {
                     position: fixed;
                     inset: 0;
-                    background: rgba(0, 0, 0, 0.7);
+                    background: rgba(0, 0, 0, 0.8);
                     backdrop-filter: blur(6px);
                     z-index: 95;
                 }
@@ -45,7 +45,7 @@ function AppLayout() {
                         top: 10px;
                         left: 10px;
                         bottom: 10px;
-                        width: 250px;
+                        width: 240px;
                         z-index: 100;
                     }
                 }

@@ -1,49 +1,54 @@
 :root {
-    /* Dark Titanium & Violet Purple Palette (Matches Purple Silk Background) */
-    --app-background: #0c0d12;
-    --sidebar-background: rgba(15, 16, 21, 0.95);
-    --topbar-background: rgba(13, 14, 19, 0.88);
+    /* Pure Dark Obsidian / Pitch Black Theme (Exact reference match) */
+    --app-background: #000000;
+    --sidebar-background: #050505;
+    --topbar-background: rgba(0, 0, 0, 0.95);
 
-    --card-background: rgba(20, 22, 29, 0.85);
-    --card-background-gradient: linear-gradient(155deg, rgba(26, 28, 38, 0.85) 0%, rgba(14, 15, 21, 0.96) 100%);
-    --card-background-hover: rgba(30, 33, 44, 0.92);
-    --card-border: rgba(255, 255, 255, 0.07);
-    --card-border-gold: rgba(139, 92, 246, 0.22);
-    --card-border-glow: rgba(139, 92, 246, 0.12);
+    --card-background: #09090b;
+    --card-background-gradient: #09090b;
+    --card-background-hover: #0f0f13;
+    --card-border: #1e1e24;
+    --card-border-strong: #2c2c36;
+    --card-border-gold: rgba(139, 92, 246, 0.35);
+    --card-border-glow: rgba(139, 92, 246, 0.15);
 
-    --graph-background: #0d0e14;
-    --graph-grid: rgba(139, 92, 246, 0.04);
+    --graph-background: #000000;
+    --graph-grid: rgba(255, 255, 255, 0.04);
 
-    /* Violet & Purple Accent Tones */
+    /* Purple Primary Accent & Reference Tones */
     --primary: #8b5cf6;
     --primary-light: #a78bfa;
-    --primary-solid: #7c3aed;
-    --primary-hover: #c4b5fd;
-    --primary-gradient: linear-gradient(135deg, #c4b5fd 0%, #7c3aed 100%);
+    --primary-solid: #8b5cf6;
+    --primary-hover: #9f75ff;
+    --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
     --secondary: #a78bfa;
 
     --gold-accent: #8b5cf6;
     --gold-bright: #c4b5fd;
     --gold-muted: #6d28d9;
-    --gold-soft-bg: rgba(139, 92, 246, 0.10);
+    --gold-soft-bg: rgba(139, 92, 246, 0.12);
 
-    --text-primary: #f8f9fa;
-    --text-secondary: #9da4b0;
-    --text-muted: #646b79;
+    /* High Contrast Typography */
+    --text-primary: #ffffff;
+    --text-secondary: #8e8e98;
+    --text-muted: #585862;
 
-    --success: #34d399;
-    --warning: #fbbf24;
-    --danger: #f87171;
+    /* Semantic Status Accents */
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
 
-    --active-background: #7c3aed;
-    --active-color: #ffffff;
-    --active-border: rgba(139, 92, 246, 0.5);
+    /* Active Navigation State (Dark purple container from reference) */
+    --active-background: #191428;
+    --active-color: #c4b5fd;
+    --active-border: #3b2866;
 
+    /* Graph & Component Accents */
     --graph-frontend: #8b5cf6;
     --graph-service: #a78bfa;
     --graph-database: #38bdf8;
     --graph-cache: #f472b6;
-    --graph-external: #34d399;
+    --graph-external: #22c55e;
 
     /* Semantic / Compatibility Aliases */
     --bg-primary: var(--app-background);
@@ -52,37 +57,39 @@
     --bg-card: var(--card-background);
     --bg-card-hover: var(--card-background-hover);
     --border: var(--card-border);
-    --border-soft: rgba(255, 255, 255, 0.05);
+    --border-soft: #18181c;
 
     --accent-green: var(--success);
     --accent-yellow: var(--warning);
     --accent-blue: #60a5fa;
     --accent-red: var(--danger);
-    --accent-purple: #a78bfa;
+    --accent-purple: #8b5cf6;
     --accent-gold: #8b5cf6;
 
     /* Layout & Dimensions */
-    --sidebar-width: 230px;
-    --sidebar-dock-width: 74px;
+    --sidebar-width: 240px;
+    --sidebar-dock-width: 70px;
     --topbar-height: 64px;
     --content-padding: 24px;
     --card-gap: 16px;
-    --border-radius: 16px;
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
-    --radius-full: 9999px;
 
-    /* Effects — Refined depth shadows with soft violet ambient highlight */
-    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.35), 0 10px 30px -4px rgba(0, 0, 0, 0.45);
-    --card-glow: 0 0 24px rgba(139, 92, 246, 0.08);
+    /* Neo-Brutalist Sharp Rectangular Borders (Reference standard) */
+    --border-radius: 4px;
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    --radius-xl: 6px;
+    --radius-full: 4px;
+
+    /* Effects — Sharp Depth */
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    --card-glow: none;
     --glow: none;
 
-    /* Premium animation tokens */
+    /* Animation tokens */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --duration-fast: 0.15s;
-    --duration-normal: 0.25s;
-    --duration-slow: 0.4s;
+    --duration-fast: 0.12s;
+    --duration-normal: 0.2s;
+    --duration-slow: 0.3s;
 }

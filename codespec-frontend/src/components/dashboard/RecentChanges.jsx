@@ -77,7 +77,7 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
             <div className="changes-header">
                 <div className="changes-title-wrap">
                     <div className="icon-accent icon-accent--indigo">
-                        <GitCommit size={16} strokeWidth={2} />
+                        <GitCommit size={15} strokeWidth={2.2} />
                     </div>
                     <div className="changes-header-text">
                         <span className="changes-title">Recent Code Changes</span>
@@ -86,19 +86,19 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                 </div>
 
                 <div className="changes-header-actions">
-                    <div className="filter-pill-select">
-                        <Calendar size={12} />
+                    <div className="filter-pill-select font-mono">
+                        <Calendar size={11} />
                         <span>Last 7 Days</span>
-                        <ChevronDown size={12} />
+                        <ChevronDown size={11} />
                     </div>
 
                     <button className="filter-pill-btn" type="button">
-                        <Filter size={12} />
+                        <Filter size={11} />
                         <span>Filter</span>
                     </button>
 
-                    <Badge variant="primary" className="changes-count-badge">
-                        {changes.length} events
+                    <Badge variant="primary" className="changes-count-badge font-mono">
+                        {changes.length} EVENTS
                     </Badge>
                 </div>
             </div>
@@ -108,10 +108,10 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                     <table className="changes-table">
                         <thead>
                             <tr>
-                                <th>Name / Event</th>
-                                <th>Module / File</th>
-                                <th>Author</th>
-                                <th style={{ textAlign: "right" }}>Timestamp</th>
+                                <th>EVENT / DESCRIPTION</th>
+                                <th>FILE PATH</th>
+                                <th>AUTHOR</th>
+                                <th style={{ textAlign: "right" }}>TIMESTAMP</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -122,7 +122,7 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                                         <td>
                                             <div className="table-item-name">
                                                 <div className="change-icon-wrap">
-                                                    <Icon size={14} />
+                                                    <Icon size={13} />
                                                 </div>
                                                 <span className="change-title-text" title={item.title}>
                                                     {item.title}
@@ -130,17 +130,17 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                                             </div>
                                         </td>
                                         <td>
-                                            <span className="change-file" title={item.file}>
+                                            <span className="change-file font-mono" title={item.file}>
                                                 {item.file}
                                             </span>
                                         </td>
                                         <td>
-                                            <span className="change-author-badge">
+                                            <span className="change-author-badge font-mono">
                                                 {item.author}
                                             </span>
                                         </td>
                                         <td style={{ textAlign: "right" }}>
-                                            <span className="change-time">{item.time}</span>
+                                            <span className="change-time font-mono">{item.time}</span>
                                         </td>
                                     </tr>
                                 );
@@ -155,20 +155,20 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                         return (
                             <div key={item.id} className="change-item">
                                 <div className="change-icon-wrap">
-                                    <Icon size={14} />
+                                    <Icon size={13} />
                                 </div>
                                 <div className="change-content">
                                     <div className="change-title-row">
                                         <span className="change-title-text" title={item.title}>
                                             {item.title}
                                         </span>
-                                        <span className="change-time">{item.time}</span>
+                                        <span className="change-time font-mono">{item.time}</span>
                                     </div>
                                     <div className="change-meta-row">
-                                        <span className="change-file" title={item.file}>
+                                        <span className="change-file font-mono" title={item.file}>
                                             {item.file}
                                         </span>
-                                        <span className="change-author">• {item.author}</span>
+                                        <span className="change-author font-mono">• {item.author}</span>
                                     </div>
                                 </div>
                             </div>
@@ -179,10 +179,10 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
 
             <style>{`
                 .recent-changes-card {
-                    padding: 18px 22px;
+                    padding: 14px 18px;
                     display: flex;
                     flex-direction: column;
-                    gap: 14px;
+                    gap: 12px;
                     border-radius: var(--border-radius);
                 }
                 .changes-header {
@@ -195,134 +195,128 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                 .changes-title-wrap {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                }
-                .changes-icon-badge {
-                    width: 36px;
-                    height: 36px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 12px;
-                    background: rgba(167, 139, 250, 0.15);
-                    border: 1px solid rgba(167, 139, 250, 0.3);
-                    color: var(--primary);
+                    gap: 9px;
                 }
                 .changes-header-text {
                     display: flex;
                     flex-direction: column;
                 }
                 .changes-title {
-                    font-size: 15px;
-                    font-weight: 700;
+                    font-size: 14px;
+                    font-weight: 800;
                     color: #ffffff;
                     letter-spacing: -0.2px;
                 }
                 .changes-subtitle {
-                    font-size: 11.5px;
+                    font-size: 11px;
                     color: var(--text-muted);
                 }
                 .changes-header-actions {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
+                    gap: 6px;
                     flex-wrap: wrap;
                 }
                 .filter-pill-select {
                     display: inline-flex;
                     align-items: center;
-                    gap: 6px;
-                    padding: 6px 12px;
-                    border-radius: 9999px;
-                    background: rgba(255, 255, 255, 0.05);
-                    border: 1px solid rgba(255, 255, 255, 0.09);
+                    gap: 5px;
+                    padding: 5px 10px;
+                    border-radius: var(--radius-sm);
+                    background: #090a0f;
+                    border: 1px solid var(--card-border);
                     color: var(--text-secondary);
-                    font-size: 11.5px;
+                    font-size: 11px;
                     font-weight: 600;
                     cursor: pointer;
+                    transition: all 0.15s ease;
                 }
                 .filter-pill-select:hover {
                     color: #ffffff;
-                    background: rgba(255, 255, 255, 0.09);
+                    border-color: rgba(255, 255, 255, 0.15);
                 }
                 .changes-count-badge {
-                    font-size: 11px;
-                    padding: 3px 8px;
+                    font-size: 10px;
+                    padding: 2px 6px;
                 }
                 .changes-table-container {
-                    width: 100%;
                     overflow-x: auto;
+                    border: 1px solid var(--card-border);
+                    border-radius: var(--radius-sm);
+                    background: #090a0f;
                 }
                 .changes-table {
                     width: 100%;
                     border-collapse: collapse;
-                    font-size: 12px;
+                    font-size: 11.5px;
+                    text-align: left;
                 }
                 .changes-table th {
-                    text-align: left;
                     padding: 8px 12px;
-                    color: var(--text-muted);
-                    font-size: 11px;
+                    font-size: 10px;
                     font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                    letter-spacing: 0.08em;
+                    color: var(--text-muted);
+                    background: #0d0e14;
+                    border-bottom: 1px solid var(--card-border);
+                    font-family: "JetBrains Mono", monospace;
                 }
-                .change-row {
-                    transition: background 0.15s ease;
-                }
-                .change-row:hover {
-                    background: rgba(255, 255, 255, 0.04);
-                }
-                .change-row td {
-                    padding: 10px 12px;
+                .changes-table td {
+                    padding: 9px 12px;
                     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-                    vertical-align: middle;
+                    color: var(--text-secondary);
+                }
+                .change-row:hover td {
+                    background: rgba(124, 58, 237, 0.06);
+                    color: var(--text-primary);
                 }
                 .table-item-name {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    gap: 8px;
                 }
                 .change-icon-wrap {
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 9px;
-                    background: rgba(255, 255, 255, 0.04);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                    color: var(--primary);
+                    width: 22px;
+                    height: 22px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    border-radius: var(--radius-sm);
+                    background: rgba(124, 58, 237, 0.15);
+                    border: 1px solid rgba(139, 92, 246, 0.3);
+                    color: #c4b5fd;
                     flex-shrink: 0;
                 }
                 .change-title-text {
-                    font-size: 12.5px;
                     font-weight: 600;
                     color: #ffffff;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 180px;
                 }
                 .change-file {
-                    font-family: "JetBrains Mono", monospace;
+                    color: #949db0;
                     font-size: 11px;
-                    color: var(--text-secondary);
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                    max-width: 160px;
+                    display: inline-block;
                 }
                 .change-author-badge {
-                    display: inline-block;
-                    padding: 2px 8px;
-                    border-radius: 9999px;
-                    background: rgba(167, 139, 250, 0.1);
-                    border: 1px solid rgba(167, 139, 250, 0.2);
-                    color: var(--primary);
-                    font-size: 11px;
+                    padding: 1px 5px;
+                    background: #141620;
+                    border: 1px solid var(--card-border);
+                    border-radius: var(--radius-sm);
+                    color: var(--text-secondary);
+                    font-size: 10px;
                     font-weight: 600;
                 }
                 .change-time {
-                    font-size: 11px;
                     color: var(--text-muted);
-                    font-weight: 500;
+                    font-size: 10.5px;
                 }
-
-                /* List layout fallback */
                 .changes-list {
                     display: flex;
                     flex-direction: column;
@@ -331,16 +325,11 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                 .change-item {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
-                    padding: 8px 12px;
-                    border-radius: 12px;
-                    background: rgba(255, 255, 255, 0.02);
-                    border: 1px solid rgba(255, 255, 255, 0.04);
-                    transition: background 0.15s ease, border-color 0.15s ease;
-                }
-                .change-item:hover {
-                    background: rgba(255, 255, 255, 0.05);
-                    border-color: rgba(167, 139, 250, 0.3);
+                    gap: 10px;
+                    padding: 8px 10px;
+                    background: #090a0f;
+                    border: 1px solid var(--card-border);
+                    border-radius: var(--radius-sm);
                 }
                 .change-content {
                     flex: 1;
@@ -350,12 +339,17 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
+                    gap: 8px;
                 }
                 .change-meta-row {
                     display: flex;
                     align-items: center;
                     gap: 6px;
                     margin-top: 2px;
+                }
+                .change-author {
+                    font-size: 10.5px;
+                    color: var(--text-muted);
                 }
             `}</style>
         </Card>

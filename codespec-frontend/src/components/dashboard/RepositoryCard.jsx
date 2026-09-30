@@ -4,7 +4,6 @@ import {
     GitCommit,
     Clock,
     Code2,
-    Layers,
 } from "lucide-react";
 import Card from "../common/Card";
 import Badge from "../common/Badge";
@@ -24,7 +23,7 @@ function RepositoryCard({
             <div className="repo-header-main">
                 <div className="repo-header-identity">
                     <div className="repo-icon-wrap">
-                        <FolderGit2 size={20} strokeWidth={2} />
+                        <FolderGit2 size={18} strokeWidth={2.2} />
                     </div>
                     <div className="repo-title-wrap">
                         <div className="repo-title-row">
@@ -77,7 +76,7 @@ function RepositoryCard({
 
             <style>{`
                 .repo-header-card {
-                    padding: 16px 22px;
+                    padding: 14px 18px;
                     border-radius: var(--border-radius);
                 }
                 .repo-header-main {
@@ -85,54 +84,54 @@ function RepositoryCard({
                     align-items: center;
                     justify-content: space-between;
                     flex-wrap: wrap;
-                    gap: 16px;
+                    gap: 14px;
                 }
                 .repo-header-identity {
                     display: flex;
                     align-items: center;
-                    gap: 14px;
+                    gap: 12px;
                 }
                 .repo-icon-wrap {
-                    width: 44px;
-                    height: 44px;
+                    width: 36px;
+                    height: 36px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: linear-gradient(135deg, rgba(139, 92, 246, 0.14) 0%, rgba(124, 58, 237, 0.22) 100%);
-                    border: 1px solid rgba(139, 92, 246, 0.28);
-                    border-radius: 12px;
+                    background: rgba(124, 58, 237, 0.15);
+                    border: 1px solid rgba(139, 92, 246, 0.35);
+                    border-radius: var(--radius-sm);
                     color: #c4b5fd;
                     flex-shrink: 0;
                 }
                 .repo-title-wrap {
                     display: flex;
                     flex-direction: column;
-                    gap: 4px;
+                    gap: 2px;
                 }
                 .repo-title-row {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
+                    gap: 10px;
                 }
                 .repo-title-name {
-                    font-size: 17px;
-                    font-weight: 700;
+                    font-size: 16px;
+                    font-weight: 800;
                     color: #ffffff;
                     letter-spacing: -0.3px;
                 }
                 .repo-status-badge {
-                    font-size: 11px;
-                    padding: 3px 9px;
+                    font-size: 10.5px;
+                    padding: 2px 7px;
                 }
                 .status-dot {
-                    width: 6px;
-                    height: 6px;
+                    width: 5px;
+                    height: 5px;
                     border-radius: 50%;
                     background: #34d399;
                     display: inline-block;
                 }
                 .repo-desc-sub {
-                    font-size: 12px;
+                    font-size: 11.5px;
                     color: var(--text-muted);
                 }
                 .repo-header-meta {
@@ -140,16 +139,16 @@ function RepositoryCard({
                     align-items: center;
                     gap: 12px;
                     flex-wrap: wrap;
-                    background: rgba(20, 17, 34, 0.6);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                    border-radius: 9999px;
-                    padding: 8px 16px;
+                    background: #090a0f;
+                    border: 1px solid var(--card-border);
+                    border-radius: var(--radius-sm);
+                    padding: 6px 14px;
                 }
                 .meta-item {
                     display: flex;
                     align-items: center;
                     gap: 6px;
-                    font-size: 12px;
+                    font-size: 11.5px;
                 }
                 .meta-icon {
                     color: var(--text-muted);
@@ -163,24 +162,24 @@ function RepositoryCard({
                     font-weight: 600;
                 }
                 .branch-tag {
-                    color: var(--primary);
+                    color: var(--primary-light);
+                    font-family: "JetBrains Mono", monospace;
                 }
                 .font-mono {
                     font-family: "JetBrains Mono", monospace;
-                    font-size: 11.5px;
+                    font-size: 11px;
                 }
                 .meta-divider {
                     width: 1px;
-                    height: 14px;
-                    background: rgba(255, 255, 255, 0.1);
+                    height: 12px;
+                    background: var(--card-border);
                 }
                 @media (max-width: 860px) {
                     .repo-header-meta {
                         width: 100%;
                         justify-content: flex-start;
                         gap: 10px;
-                        border-radius: 16px;
-                        padding: 10px 14px;
+                        padding: 8px 12px;
                     }
                     .meta-divider {
                         display: none;

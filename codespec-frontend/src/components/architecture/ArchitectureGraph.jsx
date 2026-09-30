@@ -76,7 +76,7 @@ function ArchitectureNode({ id, data, selected }) {
                 type="target"
                 position={Position.Left}
                 style={{
-                    background: "#282C26",
+                    background: "#09090b",
                     border: `2px solid ${config.color}`,
                     width: 7,
                     height: 7,
@@ -175,7 +175,7 @@ function ArchitectureNode({ id, data, selected }) {
                 type="source"
                 position={Position.Right}
                 style={{
-                    background: "#282C26",
+                    background: "#09090b",
                     border: `2px solid ${config.color}`,
                     width: 7,
                     height: 7,
@@ -303,7 +303,7 @@ function buildEdges(rawEdges, selectedNodeId) {
                     ? isOutbound
                         ? "var(--primary)"
                         : "var(--secondary)"
-                    : "#3E4338",
+                    : "#27272a",
                 strokeWidth: isConnected ? 2 : 1.2,
                 opacity: selectedNodeId ? (isConnected ? 1 : 0.25) : 0.85,
             },
@@ -315,20 +315,20 @@ function buildEdges(rawEdges, selectedNodeId) {
                     ? isOutbound
                         ? "var(--primary)"
                         : "var(--secondary)"
-                    : "#4A5044",
+                    : "#3f3f46",
             },
             labelStyle: {
-                fill: "#A8ACA0",
+                fill: "#8e8e98",
                 fontSize: 9.5,
                 fontWeight: 500,
                 fontFamily: "monospace",
             },
             labelBgStyle: {
-                fill: "#171916",
-                stroke: isConnected ? "var(--primary)" : "#363A32",
+                fill: "#09090b",
+                stroke: isConnected ? "var(--primary)" : "#27272a",
                 strokeWidth: 0.8,
-                rx: 3,
-                ry: 3,
+                rx: 2,
+                ry: 2,
             },
             labelBgPadding: [4, 2],
         };
@@ -568,23 +568,23 @@ function ArchitectureGraphInner({
                 minZoom={0.2}
                 maxZoom={2}
                 proOptions={{ hideAttribution: true }}
-                style={{ background: "#171A17" }}
+                style={{ background: "#000000" }}
             >
-                <Background color="#282C26" gap={22} size={1} />
+                <Background color="#1e1e24" gap={20} size={1} />
 
                 {showMinimap && (
                     <MiniMap
                         position="bottom-left"
                         nodeColor={(n) => {
                             const config = CATEGORY_CONFIG[n.data?.type];
-                            return config ? config.color : "#91A78A";
+                            return config ? config.color : "#8b5cf6";
                         }}
-                        nodeStrokeColor="#363A32"
-                        maskColor="rgba(18, 19, 18, 0.75)"
+                        nodeStrokeColor="#27272a"
+                        maskColor="rgba(0, 0, 0, 0.75)"
                         style={{
-                            background: "#171A17",
+                            background: "#09090b",
                             border: "1px solid var(--card-border)",
-                            borderRadius: "6px",
+                            borderRadius: "var(--radius-sm)",
                             marginBottom: "12px",
                             marginLeft: "12px",
                             width: 140,

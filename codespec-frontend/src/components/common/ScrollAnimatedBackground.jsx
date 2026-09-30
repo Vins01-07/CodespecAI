@@ -3,17 +3,15 @@ import { useEffect, useRef, useState } from "react";
 /**
  * ScrollAnimatedBackground
  *
- * Renders a high-performance, GPU-accelerated background matching the screenshot's
- * luminous 3D purple silk ribbon waves and ambient atmospheric glow.
- * Dynamically reacts to user scrolling across all pages:
- * - Parallax 3D purple silk ribbons that undulate and translate on scroll
- * - Ambient soft violet/indigo radiant mesh glows
- * - Subtle digital coordinate grid and stardust particles
- * - requestAnimationFrame scroll-velocity tracking
+ * Renders a high-performance, GPU-accelerated dark geometric ambient background
+ * matching the reference dark Neo-Brutalist developer aesthetic:
+ * - Subtle purple geometric wireframe polygons & isometric grid matrix
+ * - Restrained slow ambient atmospheric purple glow
+ * - Digital coordinate crosses & floating geometry
+ * - Gentle scroll parallax without visual distraction
  */
 export default function ScrollAnimatedBackground() {
-    const [scrollPos, setScrollPos] = useState({ y: 0, progress: 0, velocity: 0 });
-    const lastScrollY = useRef(0);
+    const [scrollY, setScrollY] = useState(0);
     const rafId = useRef(null);
 
     useEffect(() => {
@@ -27,20 +25,7 @@ export default function ScrollAnimatedBackground() {
                         document.documentElement.scrollTop ||
                         document.querySelector(".page-content")?.scrollTop ||
                         0;
-
-                    const maxScroll = Math.max(
-                        1,
-                        document.documentElement.scrollHeight - window.innerHeight
-                    );
-                    const progress = Math.min(1, Math.max(0, currentY / maxScroll));
-                    const velocity = Math.abs(currentY - lastScrollY.current);
-                    lastScrollY.current = currentY;
-
-                    setScrollPos({
-                        y: currentY,
-                        progress,
-                        velocity: Math.min(velocity, 50),
-                    });
+                    setScrollY(currentY);
                     ticking = false;
                 });
                 ticking = true;
@@ -64,229 +49,224 @@ export default function ScrollAnimatedBackground() {
         };
     }, []);
 
-    const { y, progress, velocity } = scrollPos;
-
-    // Parallax translation variables
-    const ribbon1Y = y * 0.28;
-    const ribbon2Y = y * -0.22;
-    const ribbon3Y = y * 0.14;
-    const ambientGlowY = y * 0.18;
-    const dynamicBlur = 48 + velocity * 0.35;
+    const parallax1 = scrollY * 0.12;
+    const parallax2 = scrollY * -0.08;
 
     return (
-        <div className="scroll-animated-bg" aria-hidden="true">
+        <div className="geometric-ambient-bg" aria-hidden="true">
             {/* Ambient Deep Atmospheric Glows */}
             <div
-                className="bg-purple-orb orb-top-left"
+                className="geo-glow geo-glow-top"
                 style={{
-                    transform: `translate3d(0, ${ambientGlowY * 0.8}px, 0) scale(${1 + progress * 0.12})`,
-                    filter: `blur(${dynamicBlur}px)`,
+                    transform: `translate3d(0, ${parallax1 * 0.5}px, 0)`,
                 }}
             />
-
             <div
-                className="bg-purple-orb orb-bottom-right"
+                className="geo-glow geo-glow-bottom"
                 style={{
-                    transform: `translate3d(0, ${ambientGlowY * -0.6}px, 0) scale(${1 - progress * 0.08})`,
-                    filter: `blur(${dynamicBlur + 16}px)`,
+                    transform: `translate3d(0, ${parallax2 * 0.5}px, 0)`,
                 }}
             />
 
-            {/* 3D Luminous Purple Silk Ribbon Waves (Signature visual from screenshot) */}
+            {/* Geometric Grid Texture */}
+            <div className="geo-grid-pattern" />
+
+            {/* Subtle Purple Geometric Wireframe Vector Canvas */}
             <svg
-                className="bg-silk-ribbon-svg"
+                className="geo-vector-svg"
                 viewBox="0 0 1440 900"
                 preserveAspectRatio="none"
             >
                 <defs>
-                    {/* Primary Violet-Purple Silk Gradient */}
-                    <linearGradient id="purpleSilkGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#705df2" stopOpacity="0.45" />
-                        <stop offset="35%" stopColor="#8b5cf6" stopOpacity="0.65" />
-                        <stop offset="65%" stopColor="#a855f7" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#4c1d95" stopOpacity="0" />
+                    <linearGradient id="purpleLineGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.35" />
+                        <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.2" />
+                        <stop offset="100%" stopColor="#4c1d95" stopOpacity="0.05" />
                     </linearGradient>
 
-                    {/* Secondary Deep Indigo-Magenta Ribbon Gradient */}
-                    <linearGradient id="purpleSilkGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#c084fc" stopOpacity="0.4" />
-                        <stop offset="45%" stopColor="#7c3aed" stopOpacity="0.55" />
-                        <stop offset="75%" stopColor="#4f46e5" stopOpacity="0.25" />
-                        <stop offset="100%" stopColor="#1e1b4b" stopOpacity="0" />
+                    <linearGradient id="purpleLineGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#a855f7" stopOpacity="0.3" />
+                        <stop offset="60%" stopColor="#6366f1" stopOpacity="0.15" />
+                        <stop offset="100%" stopColor="#312e81" stopOpacity="0.03" />
                     </linearGradient>
 
-                    {/* Specular Ribbon Edge Highlight */}
-                    <linearGradient id="ribbonEdgeSpecular" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#e9d5ff" stopOpacity="0.7" />
-                        <stop offset="50%" stopColor="#c084fc" stopOpacity="0.85" />
-                        <stop offset="100%" stopColor="#818cf8" stopOpacity="0.2" />
-                    </linearGradient>
-
-                    {/* Subtle Gaussian Blur for Smooth Silk Diffusion */}
-                    <filter id="silkDiffusion" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="18" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
+                    <pattern id="dotMatrix" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
+                        <circle cx="2" cy="2" r="1" fill="rgba(139, 92, 246, 0.14)" />
+                    </pattern>
                 </defs>
 
-                {/* Top-Left Dramatic Sweeping Silk Ribbon */}
+                {/* Dot matrix grid */}
+                <rect width="100%" height="100%" fill="url(#dotMatrix)" opacity="0.6" />
+
+                {/* Top-Right Floating Geometric Wireframe Prism */}
                 <g
+                    className="floating-geo geo-prism-1"
                     style={{
-                        transform: `translate3d(0, ${ribbon1Y}px, 0)`,
-                        transition: "transform 0.1s ease-out",
+                        transform: `translate3d(0, ${parallax1}px, 0)`,
                     }}
-                    filter="url(#silkDiffusion)"
                 >
-                    <path
-                        d={`M -80,-60 
-                            C 180,60 320,${220 + Math.sin(progress * 3.5) * 45} 240,${440 + Math.cos(progress * 2.5) * 55} 
-                            C 160,${620 - Math.sin(progress * 2) * 40} 40,680 -120,720 
-                            Z`}
-                        fill="url(#purpleSilkGrad1)"
+                    <polygon
+                        points="1180,120 1340,80 1400,220 1240,260"
+                        fill="rgba(124, 58, 237, 0.03)"
+                        stroke="url(#purpleLineGrad1)"
+                        strokeWidth="1.2"
                     />
-                    {/* Glowing Silk Crest Line */}
-                    <path
-                        d={`M -80,-60 
-                            C 180,60 320,${220 + Math.sin(progress * 3.5) * 45} 240,${440 + Math.cos(progress * 2.5) * 55} 
-                            C 160,${620 - Math.sin(progress * 2) * 40} 40,680 -120,720`}
-                        fill="none"
-                        stroke="url(#ribbonEdgeSpecular)"
-                        strokeWidth="3"
-                        strokeOpacity="0.75"
-                    />
+                    <line x1="1180" y1="120" x2="1400" y2="220" stroke="url(#purpleLineGrad1)" strokeWidth="1" strokeDasharray="3 3" />
+                    <line x1="1340" y1="80" x2="1240" y2="260" stroke="url(#purpleLineGrad1)" strokeWidth="1" strokeDasharray="3 3" />
+                    
+                    {/* Corner Crosses */}
+                    <circle cx="1180" cy="120" r="2.5" fill="#a78bfa" opacity="0.6" />
+                    <circle cx="1340" cy="80" r="2.5" fill="#a78bfa" opacity="0.6" />
+                    <circle cx="1400" cy="220" r="2.5" fill="#a78bfa" opacity="0.6" />
+                    <circle cx="1240" cy="260" r="2.5" fill="#a78bfa" opacity="0.6" />
                 </g>
 
-                {/* Bottom-Right Large Cascading Silk Ribbon Wave */}
+                {/* Bottom-Left Floating Geometric Polygonal Cluster */}
                 <g
+                    className="floating-geo geo-prism-2"
                     style={{
-                        transform: `translate3d(0, ${ribbon2Y}px, 0)`,
-                        transition: "transform 0.1s ease-out",
+                        transform: `translate3d(0, ${parallax2}px, 0)`,
                     }}
-                    filter="url(#silkDiffusion)"
                 >
-                    <path
-                        d={`M 1520,320 
-                            C 1340,${420 + Math.sin(progress * 3) * 50} 1180,${520 - Math.cos(progress * 2) * 40} 1220,${720 + Math.sin(progress * 3) * 60} 
-                            C 1260,${880 + Math.cos(progress * 2.5) * 40} 1420,960 1560,940 
-                            Z`}
-                        fill="url(#purpleSilkGrad2)"
+                    <polygon
+                        points="80,680 240,620 320,760 160,820"
+                        fill="rgba(139, 92, 246, 0.025)"
+                        stroke="url(#purpleLineGrad2)"
+                        strokeWidth="1.2"
                     />
-                    {/* Crest Curve Highlight */}
-                    <path
-                        d={`M 1520,320 
-                            C 1340,${420 + Math.sin(progress * 3) * 50} 1180,${520 - Math.cos(progress * 2) * 40} 1220,${720 + Math.sin(progress * 3) * 60} 
-                            C 1260,${880 + Math.cos(progress * 2.5) * 40} 1420,960 1560,940`}
-                        fill="none"
-                        stroke="url(#ribbonEdgeSpecular)"
-                        strokeWidth="2.5"
-                        strokeOpacity="0.8"
+                    <line x1="80" y1="680" x2="320" y2="760" stroke="url(#purpleLineGrad2)" strokeWidth="0.9" strokeDasharray="4 4" />
+                    <polygon
+                        points="240,620 380,580 440,700 320,760"
+                        fill="rgba(99, 102, 241, 0.02)"
+                        stroke="url(#purpleLineGrad2)"
+                        strokeWidth="1"
                     />
+                    <circle cx="240" cy="620" r="2" fill="#c084fc" opacity="0.5" />
+                    <circle cx="320" cy="760" r="2" fill="#c084fc" opacity="0.5" />
+                    <circle cx="160" cy="820" r="2" fill="#c084fc" opacity="0.5" />
                 </g>
 
-                {/* Floating Translucent Ambient Spline */}
-                <g
-                    style={{
-                        transform: `translate3d(0, ${ribbon3Y}px, 0)`,
-                        transition: "transform 0.1s ease-out",
-                    }}
-                    opacity="0.35"
-                >
-                    <path
-                        d={`M 200,920 Q 640,${720 + Math.sin(progress * 4) * 60} 1100,${860 - Math.cos(progress * 3) * 40}`}
-                        fill="none"
-                        stroke="url(#purpleSilkGrad1)"
-                        strokeWidth="24"
-                        strokeLinecap="round"
-                    />
-                </g>
+                {/* Subtle Coordinate Axis Lines */}
+                <line x1="0" y1="450" x2="1440" y2="450" stroke="rgba(139, 92, 246, 0.05)" strokeWidth="1" strokeDasharray="8 8" />
+                <line x1="720" y1="0" x2="720" y2="900" stroke="rgba(139, 92, 246, 0.05)" strokeWidth="1" strokeDasharray="8 8" />
             </svg>
 
-            {/* Subtle Constellation Floating Particle Field */}
-            <div
-                className="bg-stardust"
-                style={{
-                    transform: `translate3d(0, ${y * -0.06}px, 0)`,
-                }}
-            >
-                <span className="star s1" />
-                <span className="star s2" />
-                <span className="star s3" />
-                <span className="star s4" />
-                <span className="star s5" />
-                <span className="star s6" />
+            {/* Subtle Floating Node Markers */}
+            <div className="geo-floating-nodes">
+                <span className="geo-node n1" />
+                <span className="geo-node n2" />
+                <span className="geo-node n3" />
+                <span className="geo-node n4" />
             </div>
 
             <style>{`
-                .scroll-animated-bg {
+                .geometric-ambient-bg {
                     position: fixed;
                     inset: 0;
                     pointer-events: none;
                     z-index: 0;
                     overflow: hidden;
                     contain: strict;
+                    background: #07070a;
                 }
 
-                .bg-purple-orb {
+                .geo-glow {
                     position: absolute;
                     border-radius: 50%;
                     pointer-events: none;
-                    will-change: transform, filter;
-                    transition: filter 0.25s ease-out;
+                    will-change: transform;
+                    filter: blur(100px);
                 }
 
-                .orb-top-left {
-                    top: -10%;
-                    left: -10%;
-                    width: 720px;
-                    height: 720px;
-                    background: radial-gradient(circle, rgba(112, 93, 242, 0.22) 0%, rgba(139, 92, 246, 0.08) 45%, transparent 70%);
+                .geo-glow-top {
+                    top: -15%;
+                    left: 20%;
+                    width: 650px;
+                    height: 550px;
+                    background: radial-gradient(circle, rgba(124, 58, 237, 0.16) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 75%);
+                    animation: subtlePulse 12s ease-in-out infinite alternate;
                 }
 
-                .orb-bottom-right {
-                    bottom: -15%;
-                    right: -10%;
-                    width: 820px;
-                    height: 820px;
-                    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, rgba(99, 102, 241, 0.06) 50%, transparent 75%);
+                .geo-glow-bottom {
+                    bottom: -20%;
+                    right: 15%;
+                    width: 750px;
+                    height: 600px;
+                    background: radial-gradient(circle, rgba(109, 40, 217, 0.14) 0%, rgba(99, 102, 241, 0.04) 55%, transparent 75%);
+                    animation: subtlePulse 15s ease-in-out 3s infinite alternate;
                 }
 
-                .bg-silk-ribbon-svg {
+                .geo-grid-pattern {
+                    position: absolute;
+                    inset: 0;
+                    background-image: 
+                        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+                    background-size: 48px 48px;
+                    opacity: 0.7;
+                }
+
+                .geo-vector-svg {
                     position: absolute;
                     inset: 0;
                     width: 100%;
                     height: 100%;
                     pointer-events: none;
-                    overflow: visible;
                 }
 
-                .bg-stardust {
+                .floating-geo {
+                    will-change: transform;
+                    transition: transform 0.15s ease-out;
+                }
+
+                .geo-prism-1 {
+                    animation: geoDrift1 20s ease-in-out infinite alternate;
+                }
+
+                .geo-prism-2 {
+                    animation: geoDrift2 24s ease-in-out infinite alternate;
+                }
+
+                .geo-floating-nodes {
                     position: absolute;
                     inset: 0;
-                    will-change: transform;
                 }
 
-                .star {
+                .geo-node {
                     position: absolute;
                     width: 3px;
                     height: 3px;
-                    border-radius: 50%;
-                    background: #c084fc;
-                    box-shadow: 0 0 8px rgba(192, 132, 252, 0.8);
-                    opacity: 0.45;
-                    animation: floatStar 9s ease-in-out infinite alternate;
+                    background: #a855f7;
+                    border-radius: 1px;
+                    box-shadow: 0 0 6px rgba(168, 85, 247, 0.8);
+                    opacity: 0.35;
                 }
 
-                .s1 { top: 18%; left: 22%; animation-duration: 7s; width: 4px; height: 4px; opacity: 0.6; }
-                .s2 { top: 38%; left: 82%; animation-duration: 10s; }
-                .s3 { top: 68%; left: 14%; animation-duration: 8.5s; width: 3.5px; height: 3.5px; }
-                .s4 { top: 82%; left: 74%; animation-duration: 11s; }
-                .s5 { top: 48%; left: 42%; animation-duration: 7.5s; opacity: 0.35; }
-                .s6 { top: 28%; left: 66%; animation-duration: 9.5s; }
+                .n1 { top: 22%; left: 35%; animation: nodeFloat 8s ease-in-out infinite alternate; }
+                .n2 { top: 65%; left: 78%; animation: nodeFloat 11s ease-in-out 1s infinite alternate; }
+                .n3 { top: 82%; left: 25%; animation: nodeFloat 9.5s ease-in-out 2s infinite alternate; }
+                .n4 { top: 30%; left: 88%; animation: nodeFloat 10s ease-in-out 0.5s infinite alternate; }
 
-                @keyframes floatStar {
-                    0% { transform: translateY(0) scale(1); opacity: 0.35; }
-                    50% { transform: translateY(-14px) scale(1.3); opacity: 0.75; }
-                    100% { transform: translateY(8px) scale(0.9); opacity: 0.35; }
+                @keyframes geoDrift1 {
+                    0% { transform: translate(0, 0) rotate(0deg); }
+                    100% { transform: translate(-15px, 12px) rotate(1.5deg); }
+                }
+
+                @keyframes geoDrift2 {
+                    0% { transform: translate(0, 0) rotate(0deg); }
+                    100% { transform: translate(12px, -14px) rotate(-1.5deg); }
+                }
+
+                @keyframes nodeFloat {
+                    0% { transform: translateY(0); opacity: 0.25; }
+                    50% { transform: translateY(-8px); opacity: 0.65; }
+                    100% { transform: translateY(4px); opacity: 0.25; }
+                }
+
+                @keyframes subtlePulse {
+                    0% { transform: scale(1); opacity: 0.85; }
+                    50% { transform: scale(1.08); opacity: 1; }
+                    100% { transform: scale(0.95); opacity: 0.85; }
                 }
             `}</style>
         </div>

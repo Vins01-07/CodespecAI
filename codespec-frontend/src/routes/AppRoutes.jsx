@@ -10,7 +10,6 @@ import Dependencies from "../pages/Dependencies";
 import SystemQA from "../pages/SystemQA";
 import ChangeImpact from "../pages/ChangeImpact";
 import Documentation from "../pages/Documentation";
-import Communications from "../pages/Communications";
 
 function AppRoutes() {
     return (
@@ -25,7 +24,6 @@ function AppRoutes() {
                 <Route path="/system-qa" element={<SystemQA />} />
                 <Route path="/change-impact" element={<ChangeImpact />} />
                 <Route path="/documentation" element={<Documentation />} />
-                <Route path="/inbox" element={<Communications />} />
             </Route>
         </Routes>
     );

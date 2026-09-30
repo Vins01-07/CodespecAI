@@ -1,4 +1,4 @@
-import { ArrowRight, MoreHorizontal, Sparkles } from "lucide-react";
+import { ArrowRight, MoreHorizontal } from "lucide-react";
 import Card from "../common/Card";
 
 function SystemEfficiencyCard({
@@ -8,10 +8,8 @@ function SystemEfficiencyCard({
     context = "100% of nodes parsed cleanly",
 }) {
     // Semi-circular arc math
-    // Radius: 100, Center: 130, 115
-    const radius = 85;
+    const radius = 80;
     const circumference = Math.PI * radius;
-    // Percentage to stroke-dashoffset (semicircle: strokeDasharray = circumference)
     const progressOffset = circumference * (1 - efficiency / 100);
 
     return (
@@ -19,62 +17,61 @@ function SystemEfficiencyCard({
             <div className="efficiency-header">
                 <div className="efficiency-title-wrap">
                     <span className="efficiency-title">System Analysis</span>
-                    <span className="efficiency-tag">AST / Index</span>
+                    <span className="efficiency-tag font-mono">AST / INDEX</span>
                 </div>
 
                 <div className="efficiency-header-actions">
                     <button className="icon-tiny-btn" type="button" aria-label="More options">
-                        <MoreHorizontal size={14} />
+                        <MoreHorizontal size={13} />
                     </button>
                     <button className="icon-tiny-btn" type="button" aria-label="Open metrics">
-                        <ArrowRight size={13} />
+                        <ArrowRight size={12} />
                     </button>
                 </div>
             </div>
 
             <div className="gauge-container">
                 <div className="gauge-center-text">
-                    <span className="gauge-percentage">{efficiency.toFixed(2)}%</span>
-                    <span className="gauge-label">{label}</span>
+                    <span className="gauge-percentage font-mono">{efficiency.toFixed(1)}%</span>
+                    <span className="gauge-label font-mono">{label}</span>
                 </div>
 
-                <svg className="gauge-svg" viewBox="0 0 260 140">
+                <svg className="gauge-svg" viewBox="0 0 240 130">
                     <defs>
-                        {/* Glowing radial gradient for the area under the arch */}
                         <radialGradient id="gauge-glow" cx="50%" cy="100%" r="80%">
-                            <stop offset="0%" stopColor="rgba(139, 92, 246, 0.22)" />
-                            <stop offset="50%" stopColor="rgba(124, 58, 237, 0.08)" />
-                            <stop offset="100%" stopColor="rgba(139, 92, 246, 0)" />
+                            <stop offset="0%" stopColor="rgba(124, 58, 237, 0.25)" />
+                            <stop offset="60%" stopColor="rgba(139, 92, 246, 0.05)" />
+                            <stop offset="100%" stopColor="transparent" />
                         </radialGradient>
                         <linearGradient id="gauge-arc-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#c4b5fd" />
+                            <stop offset="0%" stopColor="#7c3aed" />
                             <stop offset="50%" stopColor="#8b5cf6" />
-                            <stop offset="100%" stopColor="#7c3aed" />
+                            <stop offset="100%" stopColor="#c4b5fd" />
                         </linearGradient>
                     </defs>
 
                     {/* Ambient glow fill under arc */}
                     <path
-                        d="M 35 125 A 95 95 0 0 1 225 125 Z"
+                        d="M 35 115 A 85 85 0 0 1 205 115 Z"
                         fill="url(#gauge-glow)"
                     />
 
                     {/* Track Arch */}
                     <path
-                        d="M 45 125 A 85 85 0 0 1 215 125"
+                        d="M 40 115 A 80 80 0 0 1 200 115"
                         fill="none"
                         stroke="rgba(255, 255, 255, 0.08)"
-                        strokeWidth="14"
-                        strokeLinecap="round"
+                        strokeWidth="12"
+                        strokeLinecap="square"
                     />
 
                     {/* Progress Arch */}
                     <path
-                        d="M 45 125 A 85 85 0 0 1 215 125"
+                        d="M 40 115 A 80 80 0 0 1 200 115"
                         fill="none"
                         stroke="url(#gauge-arc-gradient)"
-                        strokeWidth="14"
-                        strokeLinecap="round"
+                        strokeWidth="12"
+                        strokeLinecap="square"
                         strokeDasharray={circumference}
                         strokeDashoffset={progressOffset}
                         style={{
@@ -90,7 +87,7 @@ function SystemEfficiencyCard({
 
             <style>{`
                 .efficiency-card {
-                    padding: 18px 20px;
+                    padding: 14px 18px;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
@@ -108,54 +105,55 @@ function SystemEfficiencyCard({
                     flex-direction: column;
                 }
                 .efficiency-title {
-                    font-size: 14px;
-                    font-weight: 700;
+                    font-size: 13.5px;
+                    font-weight: 800;
                     color: #ffffff;
                 }
                 .efficiency-tag {
-                    font-size: 11px;
+                    font-size: 10px;
                     color: var(--text-muted);
-                    font-weight: 500;
+                    font-weight: 600;
+                    letter-spacing: 0.05em;
                 }
                 .efficiency-header-actions {
                     display: flex;
                     align-items: center;
-                    gap: 6px;
+                    gap: 5px;
                 }
                 .icon-tiny-btn {
-                    width: 28px;
-                    height: 28px;
+                    width: 26px;
+                    height: 26px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 9px;
-                    background: rgba(255, 255, 255, 0.04);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: var(--radius-sm);
+                    background: #090a0f;
+                    border: 1px solid var(--card-border);
                     color: var(--text-secondary);
                     cursor: pointer;
                     transition: all 0.15s ease;
                 }
                 .icon-tiny-btn:hover {
                     color: #ffffff;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-color: rgba(167, 139, 250, 0.3);
+                    background: #141620;
+                    border-color: rgba(255, 255, 255, 0.15);
                 }
                 .gauge-container {
                     position: relative;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    margin: 8px 0 0;
-                    height: 130px;
+                    margin: 4px 0 0;
+                    height: 120px;
                 }
                 .gauge-svg {
-                    width: 240px;
-                    height: 130px;
+                    width: 220px;
+                    height: 120px;
                     display: block;
                 }
                 .gauge-center-text {
                     position: absolute;
-                    bottom: 18px;
+                    bottom: 14px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -163,25 +161,24 @@ function SystemEfficiencyCard({
                     pointer-events: none;
                 }
                 .gauge-percentage {
-                    font-size: 26px;
+                    font-size: 24px;
                     font-weight: 800;
                     color: #ffffff;
                     letter-spacing: -0.6px;
                     line-height: 1.1;
-
                 }
                 .gauge-label {
-                    font-size: 11px;
+                    font-size: 10px;
                     color: var(--text-muted);
-                    font-weight: 600;
-                    letter-spacing: 0.04em;
+                    font-weight: 700;
+                    letter-spacing: 0.06em;
                     text-transform: uppercase;
-                    margin-top: 2px;
+                    margin-top: 1px;
                 }
                 .efficiency-footer {
                     text-align: center;
-                    padding-top: 4px;
-                    border-top: 1px solid rgba(255, 255, 255, 0.05);
+                    padding-top: 6px;
+                    border-top: 1px solid var(--card-border);
                 }
                 .efficiency-sublabel {
                     font-size: 11px;

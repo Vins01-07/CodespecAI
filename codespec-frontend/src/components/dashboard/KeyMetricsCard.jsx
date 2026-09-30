@@ -6,7 +6,7 @@ function KeyMetricsCard({
     value = "2,340",
     change = "+8% to the last index",
     icon: Icon,
-    accentColor = "violet", // violet | blue | teal | green | amber | rose | pink | cyan
+    accentColor = "violet",
 }) {
     const isPositive = change.startsWith("+");
 
@@ -16,25 +16,25 @@ function KeyMetricsCard({
                 <div className="card-identity">
                     {Icon && (
                         <div className={`icon-accent icon-accent--${accentColor}`}>
-                            <Icon size={15} strokeWidth={2.2} />
+                            <Icon size={14} strokeWidth={2.2} />
                         </div>
                     )}
-                    <span className="card-title-text">{title}</span>
+                    <span className="card-title-text font-mono">{title}</span>
                 </div>
 
                 <button className="card-more-btn" type="button" aria-label="More options">
-                    <MoreHorizontal size={14} />
+                    <MoreHorizontal size={13} />
                 </button>
             </div>
 
             <div className="card-center-row">
-                <span className="card-value-display">{value}</span>
+                <span className="card-value-display font-mono">{value}</span>
             </div>
 
             <div className="card-bottom-row">
-                <div className="trend-badge">
-                    <TrendingUp size={12} style={{ color: isPositive ? "#6ee7b7" : "#fda4af" }} />
-                    <span className="trend-text" style={{ color: isPositive ? "#6ee7b7" : "#fda4af" }}>
+                <div className="trend-badge font-mono">
+                    <TrendingUp size={11} style={{ color: isPositive ? "#34d399" : "#f87171" }} />
+                    <span className="trend-text" style={{ color: isPositive ? "#34d399" : "#f87171" }}>
                         {change}
                     </span>
                 </div>
@@ -42,12 +42,12 @@ function KeyMetricsCard({
 
             <style>{`
                 .key-metrics-card {
-                    padding: 18px 20px;
+                    padding: 14px 18px;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
                     border-radius: var(--border-radius);
-                    min-height: 155px;
+                    min-height: 140px;
                 }
                 .card-top-row {
                     display: flex;
@@ -57,50 +57,53 @@ function KeyMetricsCard({
                 .card-identity {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    gap: 8px;
                 }
                 .card-title-text {
-                    font-size: 12.5px;
-                    font-weight: 600;
+                    font-size: 11px;
+                    font-weight: 700;
                     color: var(--text-secondary);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
                 }
                 .card-more-btn {
-                    width: 26px;
-                    height: 26px;
+                    width: 24px;
+                    height: 24px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: 8px;
-                    background: rgba(255, 255, 255, 0.04);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: var(--radius-sm);
+                    background: #090a0f;
+                    border: 1px solid var(--card-border);
                     color: var(--text-muted);
                     cursor: pointer;
                     transition: all 0.15s ease;
                 }
                 .card-more-btn:hover {
                     color: #ffffff;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: #141620;
+                    border-color: rgba(255, 255, 255, 0.15);
                 }
                 .card-center-row {
-                    margin: 8px 0;
+                    margin: 6px 0;
                 }
                 .card-value-display {
-                    font-size: 32px;
+                    font-size: 28px;
                     font-weight: 800;
                     color: #ffffff;
-                    letter-spacing: -0.8px;
+                    letter-spacing: -0.6px;
                     line-height: 1.1;
                 }
                 .card-bottom-row {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
+                    gap: 6px;
                 }
                 .trend-badge {
                     display: inline-flex;
                     align-items: center;
-                    gap: 5px;
-                    font-size: 11.5px;
+                    gap: 4px;
+                    font-size: 11px;
                 }
                 .trend-text {
                     font-weight: 600;

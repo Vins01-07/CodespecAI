@@ -279,9 +279,9 @@ function ImpactGraphInner({ graphData, onSelectNode }) {
                 minZoom={0.2}
                 maxZoom={2}
                 proOptions={{ hideAttribution: true }}
-                style={{ background: "#171A17" }}
+                style={{ background: "#000000" }}
             >
-                <Background color="#282C26" gap={20} size={1} />
+                <Background color="#1e1e24" gap={20} size={1} />
             </ReactFlow>
 
             {/* Impact Legend (Bottom Left) */}
@@ -290,9 +290,9 @@ function ImpactGraphInner({ graphData, onSelectNode }) {
                     position: "absolute",
                     bottom: "12px",
                     left: "12px",
-                    background: "rgba(23, 26, 23, 0.9)",
+                    background: "#09090b",
                     border: "1px solid var(--card-border)",
-                    borderRadius: "6px",
+                    borderRadius: "var(--radius-sm)",
                     padding: "8px 12px",
                     display: "flex",
                     alignItems: "center",

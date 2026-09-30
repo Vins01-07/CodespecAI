@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { AlertTriangle, AlertCircle, ArrowRight, ShieldAlert, Sparkles } from "lucide-react";
+import { AlertTriangle, AlertCircle, ArrowRight, ShieldAlert } from "lucide-react";
 import Card from "../common/Card";
 import Badge from "../common/Badge";
 
@@ -39,15 +39,15 @@ function DocumentationAlerts({ alerts = defaultAlerts }) {
             <div className="doc-alerts-header">
                 <div className="doc-alerts-title-wrap">
                     <div className="icon-accent icon-accent--violet">
-                        <ShieldAlert size={16} strokeWidth={2} />
+                        <ShieldAlert size={15} strokeWidth={2.2} />
                     </div>
                     <div className="doc-header-text">
                         <span className="doc-alerts-title">Documentation Alerts</span>
                         <span className="doc-alerts-subtitle">Real-time sync warnings</span>
                     </div>
                 </div>
-                <Badge variant="warning" className="doc-count-badge">
-                    {alerts.length} pending
+                <Badge variant="warning" className="doc-count-badge font-mono">
+                    {alerts.length} PENDING
                 </Badge>
             </div>
 
@@ -55,8 +55,9 @@ function DocumentationAlerts({ alerts = defaultAlerts }) {
                 {alerts.map((alert) => {
                     const isDanger = alert.severity === "danger";
                     const Icon = isDanger ? AlertCircle : AlertTriangle;
-                    const accentColor = isDanger ? "#f87171" : "#a78bfa";
-                    const bgTint = isDanger ? "rgba(248, 113, 113, 0.12)" : "rgba(167, 139, 250, 0.12)";
+                    const accentColor = isDanger ? "#f87171" : "#fbbf24";
+                    const bgTint = isDanger ? "rgba(239, 68, 68, 0.12)" : "rgba(245, 158, 11, 0.12)";
+                    const borderTint = isDanger ? "rgba(239, 68, 68, 0.3)" : "rgba(245, 158, 11, 0.3)";
 
                     return (
                         <div
@@ -65,19 +66,19 @@ function DocumentationAlerts({ alerts = defaultAlerts }) {
                         >
                             <div
                                 className="alert-item-icon"
-                                style={{ background: bgTint, color: accentColor, borderColor: isDanger ? "rgba(248, 113, 113, 0.25)" : "rgba(167, 139, 250, 0.25)" }}
+                                style={{ background: bgTint, color: accentColor, borderColor: borderTint }}
                             >
-                                <Icon size={15} strokeWidth={2} />
+                                <Icon size={14} strokeWidth={2.2} />
                             </div>
 
                             <div className="alert-item-body">
                                 <div className="alert-item-header">
                                     <span className="alert-item-title">{alert.title}</span>
                                     <span
-                                        className="alert-severity-tag"
+                                        className="alert-severity-tag font-mono"
                                         style={{ color: accentColor }}
                                     >
-                                        {alert.severity}
+                                        {alert.severity.toUpperCase()}
                                     </span>
                                 </div>
 
@@ -98,10 +99,10 @@ function DocumentationAlerts({ alerts = defaultAlerts }) {
 
             <style>{`
                 .doc-alerts-card {
-                    padding: 18px 20px;
+                    padding: 14px 18px;
                     display: flex;
                     flex-direction: column;
-                    gap: 14px;
+                    gap: 12px;
                     border-radius: var(--border-radius);
                 }
                 .doc-alerts-header {
@@ -112,26 +113,15 @@ function DocumentationAlerts({ alerts = defaultAlerts }) {
                 .doc-alerts-title-wrap {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
-                }
-                .doc-icon-badge {
-                    width: 34px;
-                    height: 34px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 11px;
-                    background: rgba(167, 139, 250, 0.12);
-                    border: 1px solid rgba(167, 139, 250, 0.25);
-                    color: #a78bfa;
+                    gap: 8px;
                 }
                 .doc-header-text {
                     display: flex;
                     flex-direction: column;
                 }
                 .doc-alerts-title {
-                    font-size: 14px;
-                    font-weight: 700;
+                    font-size: 13.5px;
+                    font-weight: 800;
                     color: #ffffff;
                 }
                 .doc-alerts-subtitle {
@@ -139,48 +129,41 @@ function DocumentationAlerts({ alerts = defaultAlerts }) {
                     color: var(--text-muted);
                 }
                 .doc-count-badge {
-                    background: rgba(167, 139, 250, 0.12) !important;
-                    color: #c4b5fd !important;
-                    border: 1px solid rgba(167, 139, 250, 0.25) !important;
-                    font-size: 10.5px;
-                    padding: 3px 8px;
+                    font-size: 10px;
+                    padding: 2px 6px;
                 }
                 .alerts-list {
                     display: flex;
                     flex-direction: column;
-                    gap: 10px;
+                    gap: 6px;
                 }
                 .alert-item {
                     display: flex;
                     align-items: flex-start;
-                    gap: 12px;
-                    padding: 10px 12px;
-                    background: rgba(255, 255, 255, 0.03);
-                    border: 1px solid rgba(255, 255, 255, 0.06);
-                    border-radius: 14px;
-                    transition: background 0.15s ease, border-color 0.15s ease;
+                    gap: 10px;
+                    padding: 8px 10px;
+                    background: #090a0f;
+                    border: 1px solid var(--card-border);
+                    border-radius: var(--radius-sm);
+                    transition: border-color 0.15s ease;
                 }
                 .alert-item:hover {
-                    background: rgba(255, 255, 255, 0.06);
-                    border-color: rgba(167, 139, 250, 0.25);
+                    border-color: rgba(255, 255, 255, 0.15);
                 }
                 .alert-item-icon {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 10px;
-                    border: 1px solid transparent;
+                    width: 24px;
+                    height: 24px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    border-radius: var(--radius-sm);
+                    border: 1px solid;
                     flex-shrink: 0;
-                    margin-top: 2px;
+                    margin-top: 1px;
                 }
                 .alert-item-body {
                     flex: 1;
                     min-width: 0;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 3px;
                 }
                 .alert-item-header {
                     display: flex;
@@ -190,41 +173,39 @@ function DocumentationAlerts({ alerts = defaultAlerts }) {
                 }
                 .alert-item-title {
                     font-size: 12px;
-                    font-weight: 600;
+                    font-weight: 700;
                     color: #ffffff;
                 }
                 .alert-severity-tag {
-                    font-size: 10px;
+                    font-size: 9.5px;
                     font-weight: 700;
-                    text-transform: uppercase;
-                    letter-spacing: 0.04em;
+                    letter-spacing: 0.05em;
                 }
                 .alert-item-module {
-                    font-family: "JetBrains Mono", monospace;
-                    font-size: 10.5px;
-                    color: var(--primary);
+                    font-size: 11px;
+                    color: #a78bfa;
+                    margin: 2px 0 1px;
                 }
                 .alert-item-detail {
                     font-size: 11px;
-                    color: var(--text-muted);
+                    color: var(--text-secondary);
                     line-height: 1.35;
                 }
                 .doc-alerts-footer {
                     padding-top: 6px;
-                    border-top: 1px solid rgba(255, 255, 255, 0.05);
+                    border-top: 1px solid var(--card-border);
                 }
                 .view-doc-link {
-                    display: inline-flex;
+                    display: flex;
                     align-items: center;
-                    gap: 6px;
+                    justify-content: space-between;
                     font-size: 11.5px;
                     font-weight: 600;
-                    color: var(--primary);
-                    transition: color 0.15s ease, transform 0.15s ease;
+                    color: #c4b5fd;
+                    transition: color 0.15s ease;
                 }
                 .view-doc-link:hover {
                     color: #ffffff;
-                    transform: translateX(2px);
                 }
             `}</style>
         </Card>

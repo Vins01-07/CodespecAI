@@ -1,6 +1,6 @@
 import Card from "../common/Card";
 
-// Color accent map: maps an iconColor key to card variant + icon variant class names
+// Color accent map
 const COLOR_VARIANT_MAP = {
     "var(--primary)":         { card: "cs-card--violet",  icon: "icon-accent--violet"  },
     "var(--graph-service)":   { card: "cs-card--violet",  icon: "icon-accent--violet"  },
@@ -31,13 +31,13 @@ function MetricCard({
                 <span className="metric-label">{label}</span>
                 {Icon && (
                     <div className={`icon-accent ${variants.icon}`}>
-                        <Icon size={16} strokeWidth={2.2} />
+                        <Icon size={15} strokeWidth={2.2} />
                     </div>
                 )}
             </div>
 
             <div className="metric-body">
-                <div className="metric-value">{value}</div>
+                <div className="metric-value font-mono">{value}</div>
                 {(context || sublabel) && (
                     <div className="metric-context">
                         {context && <span className="context-text">{context}</span>}
@@ -47,8 +47,8 @@ function MetricCard({
                     </div>
                 )}
                 {trend && (
-                    <div className="metric-trend">
-                        <span style={{ color: trend.startsWith("+") ? "#6ee7b7" : "#fda4af", fontSize: "11px", fontWeight: 600 }}>
+                    <div className="metric-trend font-mono">
+                        <span style={{ color: trend.startsWith("+") ? "#34d399" : "#f87171", fontSize: "10.5px", fontWeight: 700 }}>
                             {trend}
                         </span>
                     </div>
@@ -57,42 +57,39 @@ function MetricCard({
 
             <style>{`
                 .metric-card {
-                    padding: 18px 20px;
+                    padding: 14px 16px;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
-                    min-height: 112px;
-                    border-radius: var(--radius-lg);
-                    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+                    min-height: 104px;
+                    border-radius: var(--border-radius);
                     cursor: default;
-                }
-                .metric-card:hover {
-                    transform: translateY(-3px);
                 }
                 .metric-header {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    margin-bottom: 10px;
+                    margin-bottom: 8px;
                 }
                 .metric-label {
-                    font-size: 11px;
+                    font-size: 10.5px;
                     font-weight: 700;
-                    letter-spacing: 0.07em;
+                    letter-spacing: 0.08em;
                     text-transform: uppercase;
                     color: var(--text-muted);
+                    font-family: "JetBrains Mono", monospace;
                 }
                 .metric-body {
                     display: flex;
                     flex-direction: column;
-                    gap: 4px;
+                    gap: 2px;
                 }
                 .metric-value {
-                    font-size: 28px;
+                    font-size: 24px;
                     font-weight: 800;
                     color: #ffffff;
-                    letter-spacing: -0.8px;
-                    line-height: 1;
+                    letter-spacing: -0.6px;
+                    line-height: 1.1;
                 }
                 .metric-context {
                     display: flex;
@@ -100,7 +97,7 @@ function MetricCard({
                     gap: 6px;
                     font-size: 11px;
                     color: var(--text-secondary);
-                    margin-top: 5px;
+                    margin-top: 4px;
                     flex-wrap: wrap;
                 }
                 .context-text {
@@ -108,16 +105,17 @@ function MetricCard({
                     font-weight: 500;
                 }
                 .sublabel-pill {
-                    padding: 1px 7px;
-                    background: rgba(255, 255, 255, 0.07);
-                    border: 1px solid rgba(255, 255, 255, 0.12);
-                    border-radius: 9999px;
+                    padding: 1px 5px;
+                    background: #141620;
+                    border: 1px solid var(--card-border);
+                    border-radius: var(--radius-sm);
                     color: var(--text-secondary);
-                    font-size: 10px;
+                    font-size: 9.5px;
                     font-weight: 600;
+                    font-family: "JetBrains Mono", monospace;
                 }
                 .metric-trend {
-                    margin-top: 3px;
+                    margin-top: 2px;
                 }
             `}</style>
         </Card>
