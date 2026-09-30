@@ -94,30 +94,32 @@ export function ChangeImpact() {
                     paddingBottom: "12px",
                 }}
             >
-                <div>
-                    <h1
-                        style={{
-                            fontSize: "18px",
-                            fontWeight: 600,
-                            color: "var(--text-primary)",
-                            margin: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                        }}
-                    >
-                        <Zap size={20} color="var(--primary)" />
-                        Change Impact Analysis
-                    </h1>
-                    <p
-                        style={{
-                            fontSize: "12.5px",
-                            color: "var(--text-secondary)",
-                            margin: "4px 0 0 0",
-                        }}
-                    >
-                        Predict blast radius, dependent services, breaking changes, and testing requirements before modifying code.
-                    </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="icon-accent icon-accent--rose" style={{ width: "42px", height: "42px", borderRadius: "14px" }}>
+                        <Zap size={20} strokeWidth={2} />
+                    </div>
+                    <div>
+                        <h1
+                            style={{
+                                fontSize: "18px",
+                                fontWeight: 700,
+                                color: "var(--text-primary)",
+                                margin: 0,
+                                letterSpacing: "-0.3px",
+                            }}
+                        >
+                            Change Impact Analysis
+                        </h1>
+                        <p
+                            style={{
+                                fontSize: "12.5px",
+                                color: "var(--text-secondary)",
+                                margin: "3px 0 0 0",
+                            }}
+                        >
+                            Predict blast radius, dependent services, breaking changes, and testing requirements before modifying code.
+                        </p>
+                    </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
@@ -260,14 +262,12 @@ export function ChangeImpact() {
             {/* Loading State */}
             {isLoading && (
                 <div
+                    className="cs-card cs-card--violet"
                     style={{
                         height: "400px",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        background: "var(--card-background)",
-                        borderRadius: "var(--border-radius)",
-                        border: "1px solid var(--card-border)",
                     }}
                 >
                     <Loading text="Computing dependency blast radius & risk scoring..." size={28} />
@@ -277,15 +277,13 @@ export function ChangeImpact() {
             {/* Empty State when no analysis has run */}
             {!isLoading && !result && !error && (
                 <div
+                    className="cs-card cs-card--indigo"
                     style={{
                         padding: "60px 20px",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
                         justifyContent: "center",
-                        background: "var(--card-background)",
-                        borderRadius: "var(--border-radius)",
-                        border: "1px solid var(--card-border)",
                     }}
                 >
                     <EmptyState

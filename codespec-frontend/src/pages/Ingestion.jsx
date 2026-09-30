@@ -211,7 +211,7 @@ function Ingestion() {
             <header className="ing-page-header">
                 <div className="header-info">
                     <div className="title-row">
-                        <div className="header-icon-wrap"><Upload size={20} /></div>
+                        <div className="icon-accent icon-accent--violet"><Upload size={20} /></div>
                         <h1 className="header-title">Ingestion & Processing</h1>
                     </div>
                     <p className="header-desc">
@@ -238,10 +238,10 @@ function Ingestion() {
             </header>
 
             {/* ─── Current Repository Card ────────────────────────────────── */}
-            <Card className="ing-repo-card">
+            <Card className="ing-repo-card cs-card--teal">
                 <div className="ing-repo-top">
                     <div className="ing-repo-identity">
-                        <div className="ing-repo-icon">
+                        <div className="icon-accent icon-accent--teal">
                             <FolderGit2 size={20} />
                         </div>
                         <div className="ing-repo-text">
@@ -297,7 +297,7 @@ function Ingestion() {
             </Card>
 
             {/* ─── Processing Pipeline ────────────────────────────────────── */}
-            <Card className="ing-pipeline-card">
+            <Card className="ing-pipeline-card cs-card--violet">
                 <div className="ing-pipeline-header">
                     <h2 className="ing-pipeline-title">Processing Pipeline</h2>
                     <span className="ing-pipeline-sub">
@@ -366,7 +366,7 @@ function Ingestion() {
             </Card>
 
             {/* ─── Status Detail / Processing Information ─────────────────── */}
-            <Card className="ing-detail-card">
+            <Card className="ing-detail-card cs-card--blue">
                 <div className="ing-detail-header">
                     <h2 className="ing-detail-title">Processing Information</h2>
                 </div>
@@ -428,9 +428,9 @@ function Ingestion() {
 
             {/* ─── Completed / Next Action ────────────────────────────────── */}
             {overallStatus === "completed" && (
-                <Card className="ing-completed-card">
+                <Card className="ing-completed-card cs-card--green">
                     <div className="ing-completed-inner">
-                        <div className="ing-completed-icon-wrap">
+                        <div className="icon-accent icon-accent--green" style={{ width: "48px", height: "48px", borderRadius: "16px" }}>
                             <CheckCircle2 size={28} />
                         </div>
                         <div className="ing-completed-text">
@@ -461,9 +461,9 @@ function Ingestion() {
 
             {/* ─── Pending — navigate to repo ────────────────────────────── */}
             {overallStatus === "pending" && (
-                <Card className="ing-pending-card">
+                <Card className="ing-pending-card cs-card--amber">
                     <div className="ing-pending-inner">
-                        <Clock size={22} className="ing-pending-icon" />
+                        <Clock size={22} className="ing-pending-icon" style={{ color: "#fcd34d" }} />
                         <div className="ing-pending-text">
                             <span className="ing-pending-title">Queued for processing</span>
                             <span className="ing-pending-sub">
@@ -685,10 +685,10 @@ const ingestionStyles = `
         transition: background 0.12s ease;
     }
     .ing-stage-active {
-        background: rgba(182, 154, 103, 0.06);
+        background: rgba(251, 191, 36, 0.08);
     }
     .ing-stage-failed {
-        background: rgba(184, 120, 112, 0.06);
+        background: rgba(248, 113, 113, 0.08);
     }
     .ing-stage-completed {
         opacity: 1;
@@ -706,22 +706,25 @@ const ingestionStyles = `
         border-radius: 50%;
         flex-shrink: 0;
         border: 1.5px solid var(--card-border);
-        background: var(--sidebar-background);
+        background: rgba(20, 16, 32, 0.7);
     }
     .ing-indicator-completed {
-        border-color: rgba(145, 167, 138, 0.5);
-        color: var(--success);
-        background: rgba(145, 167, 138, 0.1);
+        border-color: rgba(52, 211, 153, 0.6);
+        color: #34d399;
+        background: rgba(52, 211, 153, 0.15);
+        box-shadow: 0 0 12px rgba(52, 211, 153, 0.2);
     }
     .ing-indicator-active {
-        border-color: rgba(182, 154, 103, 0.5);
-        color: var(--warning);
-        background: rgba(182, 154, 103, 0.1);
+        border-color: rgba(251, 191, 36, 0.6);
+        color: #fbbf24;
+        background: rgba(251, 191, 36, 0.15);
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
     }
     .ing-indicator-failed {
-        border-color: rgba(184, 120, 112, 0.5);
-        color: var(--danger);
-        background: rgba(184, 120, 112, 0.1);
+        border-color: rgba(248, 113, 113, 0.6);
+        color: #f87171;
+        background: rgba(248, 113, 113, 0.15);
+        box-shadow: 0 0 12px rgba(248, 113, 113, 0.2);
     }
     .ing-indicator-pending {
         border-color: var(--card-border);

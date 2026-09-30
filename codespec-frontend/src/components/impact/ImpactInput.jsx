@@ -48,12 +48,14 @@ export function ImpactInput({
     const isSubmitDisabled = isLoading || !target.trim();
 
     return (
-        <Card className="impact-input-card">
+        <Card className="impact-input-card cs-card cs-card--rose">
             <form onSubmit={handleSubmit} className="impact-form">
                 {/* Header title */}
                 <div className="impact-header-row">
-                    <div className="impact-title-group">
-                        <Zap size={15} color="var(--primary)" />
+                    <div className="impact-title-group" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="icon-accent icon-accent--rose" style={{ width: "28px", height: "28px", borderRadius: "8px" }}>
+                            <Zap size={14} strokeWidth={2.2} />
+                        </div>
                         <span className="impact-title-text">
                             Target Specification
                         </span>

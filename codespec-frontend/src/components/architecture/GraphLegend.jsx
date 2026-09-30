@@ -4,31 +4,31 @@ import { Layers, ChevronDown, ChevronUp, Globe, Server, Database, HardDrive, Net
 export const CATEGORY_CONFIG = {
     frontend: {
         label: "Frontend",
-        color: "#9BA8B0",
+        color: "#818cf8",
         description: "Web client & user interface",
         icon: Globe,
     },
     service: {
         label: "Service",
-        color: "#91A78A",
+        color: "#a78bfa",
         description: "APIs, microservices & workers",
         icon: Server,
     },
     database: {
         label: "Database",
-        color: "#A49A82",
+        color: "#c084fc",
         description: "Relational & graph data stores",
         icon: Database,
     },
     cache: {
         label: "Cache",
-        color: "#B87870",
+        color: "#f472b6",
         description: "In-memory caches & queues",
         icon: HardDrive,
     },
     external: {
         label: "External",
-        color: "#8F9A8C",
+        color: "#38bdf8",
         description: "Third-party APIs & cloud storage",
         icon: Network,
     },
@@ -41,16 +41,17 @@ function GraphLegend({ activeFilter = "all", onFilterChange, nodeCounts = {} }) 
         <div
             className="graph-legend-container"
             style={{
-                background: "rgba(23, 25, 22, 0.92)",
-                backdropFilter: "blur(8px)",
+                background: "rgba(20, 16, 32, 0.88)",
+                backdropFilter: "blur(20px)",
+                WebkitBackdropFilter: "blur(20px)",
                 border: "1px solid var(--card-border)",
                 borderRadius: "var(--border-radius)",
-                padding: "8px 12px",
+                padding: "10px 16px",
                 display: "flex",
                 flexDirection: "column",
                 gap: "8px",
                 maxWidth: "600px",
-                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.3)",
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.5)",
                 fontSize: "12px",
                 userSelect: "none",
             }}

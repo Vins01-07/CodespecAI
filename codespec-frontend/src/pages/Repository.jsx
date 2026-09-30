@@ -32,8 +32,8 @@ function Repository() {
             <header className="repo-page-header">
                 <div className="header-info">
                     <div className="title-row">
-                        <div className="header-icon-wrap">
-                            <FolderGit2 size={20} />
+                        <div className="icon-accent icon-accent--violet" style={{ width: "42px", height: "42px" }}>
+                            <FolderGit2 size={20} strokeWidth={2.2} />
                         </div>
                         <h1 className="header-title">Repository Management</h1>
                     </div>
@@ -55,9 +55,9 @@ function Repository() {
 
             {/* Stats Summary Bar */}
             <section className="repo-stats-bar" aria-label="Repository Summary Stats">
-                <div className="stat-pill-card cs-card">
-                    <div className="stat-pill-icon">
-                        <Layers size={16} />
+                <div className="stat-pill-card cs-card cs-card--violet">
+                    <div className="icon-accent icon-accent--violet">
+                        <Layers size={18} strokeWidth={2.2} />
                     </div>
                     <div className="stat-pill-content">
                         <span className="stat-pill-label">Total Repositories</span>
@@ -65,9 +65,9 @@ function Repository() {
                     </div>
                 </div>
 
-                <div className="stat-pill-card cs-card">
-                    <div className="stat-pill-icon active-icon">
-                        <FolderGit2 size={16} />
+                <div className="stat-pill-card cs-card cs-card--blue">
+                    <div className="icon-accent icon-accent--blue">
+                        <FolderGit2 size={18} strokeWidth={2.2} />
                     </div>
                     <div className="stat-pill-content">
                         <span className="stat-pill-label">Active Workspace</span>
@@ -77,9 +77,9 @@ function Repository() {
                     </div>
                 </div>
 
-                <div className="stat-pill-card cs-card">
-                    <div className="stat-pill-icon ready-icon">
-                        <CheckCircle2 size={16} />
+                <div className="stat-pill-card cs-card cs-card--green">
+                    <div className="icon-accent icon-accent--green">
+                        <CheckCircle2 size={18} strokeWidth={2.2} />
                     </div>
                     <div className="stat-pill-content">
                         <span className="stat-pill-label">Ready / Analyzed</span>
@@ -87,9 +87,9 @@ function Repository() {
                     </div>
                 </div>
 
-                <div className="stat-pill-card cs-card">
-                    <div className="stat-pill-icon processing-icon">
-                        <Loader2 size={16} />
+                <div className="stat-pill-card cs-card cs-card--amber">
+                    <div className="icon-accent icon-accent--amber">
+                        <Loader2 size={18} strokeWidth={2.2} className="animate-spin" />
                     </div>
                     <div className="stat-pill-content">
                         <span className="stat-pill-label">Processing / Queued</span>

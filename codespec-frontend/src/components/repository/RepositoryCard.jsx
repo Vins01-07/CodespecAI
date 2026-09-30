@@ -192,21 +192,23 @@ function RepositoryCard({
 
             <style>{`
                 .repo-card {
-                    padding: 16px;
+                    padding: 18px 20px;
                     display: flex;
                     flex-direction: column;
-                    gap: 12px;
-                    background: var(--card-background);
+                    gap: 14px;
+                    background: var(--card-background-gradient);
                     border: 1px solid var(--card-border);
                     border-radius: var(--border-radius);
-                    transition: border-color 0.15s ease, background 0.15s ease;
+                    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
                 }
                 .repo-card:hover {
-                    border-color: #484e44;
+                    border-color: rgba(167, 139, 250, 0.35);
+                    box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 20px -4px rgba(139, 92, 246, 0.15);
                 }
                 .repo-card-active {
-                    border-color: var(--active-border);
-                    background: #1f231d;
+                    border-color: rgba(167, 139, 250, 0.5);
+                    background: linear-gradient(145deg, rgba(34, 28, 54, 0.8) 0%, rgba(18, 15, 30, 0.9) 100%);
+                    box-shadow: 0 14px 32px -6px rgba(0, 0, 0, 0.7), 0 0 24px -4px rgba(139, 92, 246, 0.25);
                 }
                 .repo-card-header {
                     display: flex;
@@ -221,14 +223,14 @@ function RepositoryCard({
                     min-width: 0;
                 }
                 .repo-provider-icon {
-                    width: 34px;
-                    height: 34px;
+                    width: 36px;
+                    height: 36px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: var(--active-background);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--border-radius);
+                    background: rgba(167, 139, 250, 0.15);
+                    border: 1px solid rgba(167, 139, 250, 0.3);
+                    border-radius: 12px;
                     color: var(--primary);
                     flex-shrink: 0;
                 }

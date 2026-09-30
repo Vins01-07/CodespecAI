@@ -35,9 +35,9 @@ function ArchitectureNode({ id, data, selected }) {
         : "var(--card-border)";
 
     const backgroundColor = selected
-        ? "rgba(37, 41, 33, 0.95)"
+        ? "rgba(48, 38, 76, 0.95)"
         : isHighlighted
-        ? "rgba(32, 35, 29, 0.9)"
+        ? "rgba(35, 28, 56, 0.9)"
         : "var(--card-background)";
 
     const opacity = isDimmed ? 0.3 : 1;
@@ -56,13 +56,13 @@ function ArchitectureNode({ id, data, selected }) {
         <div
             className={`arch-node-card ${selected ? "selected" : ""}`}
             style={{
-                width: "190px",
-                borderRadius: "6px",
+                width: "195px",
+                borderRadius: "14px",
                 background: backgroundColor,
                 border: `1px solid ${borderColor}`,
                 boxShadow: selected
-                    ? `0 0 0 1px ${config.color}, 0 6px 20px rgba(0, 0, 0, 0.5)`
-                    : "0 4px 12px rgba(0, 0, 0, 0.25)",
+                    ? `0 0 0 2px ${config.color}, 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 20px rgba(139, 92, 246, 0.3)`
+                    : "0 6px 16px rgba(0, 0, 0, 0.35)",
                 display: "flex",
                 flexDirection: "column",
                 overflow: "hidden",

@@ -1,36 +1,49 @@
 :root {
-    /* Obsidian Sage Palette */
-    --app-background: #121312;
-    --sidebar-background: #171916;
-    --topbar-background: #151714;
+    /* Dark Titanium & Violet Purple Palette (Matches Purple Silk Background) */
+    --app-background: #0c0d12;
+    --sidebar-background: rgba(15, 16, 21, 0.95);
+    --topbar-background: rgba(13, 14, 19, 0.88);
 
-    --card-background: #1D201B;
-    --card-background-hover: #252921;
-    --card-border: #363A32;
+    --card-background: rgba(20, 22, 29, 0.85);
+    --card-background-gradient: linear-gradient(155deg, rgba(26, 28, 38, 0.85) 0%, rgba(14, 15, 21, 0.96) 100%);
+    --card-background-hover: rgba(30, 33, 44, 0.92);
+    --card-border: rgba(255, 255, 255, 0.07);
+    --card-border-gold: rgba(139, 92, 246, 0.22);
+    --card-border-glow: rgba(139, 92, 246, 0.12);
 
-    --graph-background: #171A17;
-    --graph-grid: #282C26;
+    --graph-background: #0d0e14;
+    --graph-grid: rgba(139, 92, 246, 0.04);
 
-    --primary: #A8B39A;
-    --primary-hover: #B8C2AA;
-    --secondary: #9C927B;
+    /* Violet & Purple Accent Tones */
+    --primary: #8b5cf6;
+    --primary-light: #a78bfa;
+    --primary-solid: #7c3aed;
+    --primary-hover: #c4b5fd;
+    --primary-gradient: linear-gradient(135deg, #c4b5fd 0%, #7c3aed 100%);
+    --secondary: #a78bfa;
 
-    --text-primary: #E7E8DF;
-    --text-secondary: #A8ACA0;
-    --text-muted: #70756C;
+    --gold-accent: #8b5cf6;
+    --gold-bright: #c4b5fd;
+    --gold-muted: #6d28d9;
+    --gold-soft-bg: rgba(139, 92, 246, 0.10);
 
-    --success: #91A78A;
-    --warning: #B69A67;
-    --danger: #B87870;
+    --text-primary: #f8f9fa;
+    --text-secondary: #9da4b0;
+    --text-muted: #646b79;
 
-    --active-background: #2B3028;
-    --active-border: #727D68;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
 
-    --graph-frontend: #9BA8B0;
-    --graph-service: #91A78A;
-    --graph-database: #A49A82;
-    --graph-cache: #B87870;
-    --graph-external: #8F9A8C;
+    --active-background: #7c3aed;
+    --active-color: #ffffff;
+    --active-border: rgba(139, 92, 246, 0.5);
+
+    --graph-frontend: #8b5cf6;
+    --graph-service: #a78bfa;
+    --graph-database: #38bdf8;
+    --graph-cache: #f472b6;
+    --graph-external: #34d399;
 
     /* Semantic / Compatibility Aliases */
     --bg-primary: var(--app-background);
@@ -39,24 +52,37 @@
     --bg-card: var(--card-background);
     --bg-card-hover: var(--card-background-hover);
     --border: var(--card-border);
-    --border-soft: #252822;
+    --border-soft: rgba(255, 255, 255, 0.05);
 
-    --accent-green: var(--primary);
-    --accent-yellow: var(--secondary);
-    --accent-blue: var(--graph-frontend);
+    --accent-green: var(--success);
+    --accent-yellow: var(--warning);
+    --accent-blue: #60a5fa;
     --accent-red: var(--danger);
+    --accent-purple: #a78bfa;
+    --accent-gold: #8b5cf6;
 
     /* Layout & Dimensions */
-    --sidebar-width: 205px;
-    --topbar-height: 56px;
-    --content-padding: 22px;
-    --card-gap: 14px;
-    --border-radius: 7px;
-    --radius-sm: 4px;
-    --radius-md: 7px;
-    --radius-lg: 7px;
+    --sidebar-width: 230px;
+    --sidebar-dock-width: 74px;
+    --topbar-height: 64px;
+    --content-padding: 24px;
+    --card-gap: 16px;
+    --border-radius: 16px;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-full: 9999px;
 
-    /* Effects */
-    --card-shadow: 0 6px 18px rgba(0, 0, 0, 0.26);
+    /* Effects — Refined depth shadows with soft violet ambient highlight */
+    --card-shadow: 0 2px 4px rgba(0, 0, 0, 0.35), 0 10px 30px -4px rgba(0, 0, 0, 0.45);
+    --card-glow: 0 0 24px rgba(139, 92, 246, 0.08);
     --glow: none;
+
+    /* Premium animation tokens */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --duration-fast: 0.15s;
+    --duration-normal: 0.25s;
+    --duration-slow: 0.4s;
 }

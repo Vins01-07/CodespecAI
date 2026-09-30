@@ -20,6 +20,7 @@ import {
     CheckCircle2,
     Cpu,
     Radio,
+    Activity,
 } from "lucide-react";
 import useArchitectureStore from "../store/architectureStore";
 import useRepositoryStore from "../store/repositoryStore";
@@ -247,30 +248,32 @@ function Dependencies() {
                     flexShrink: 0,
                 }}
             >
-                <div>
-                    <h1
-                        style={{
-                            fontSize: "18px",
-                            fontWeight: 600,
-                            color: "var(--text-primary)",
-                            margin: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                        }}
-                    >
-                        <Share2 size={20} color="var(--primary)" />
-                        Codebase Dependencies
-                    </h1>
-                    <p
-                        style={{
-                            fontSize: "12.5px",
-                            color: "var(--text-secondary)",
-                            margin: "4px 0 0 0",
-                        }}
-                    >
-                        Inspect dependency relationships, inter-service call hierarchies, communication protocols, and architectural coupling.
-                    </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="icon-accent icon-accent--violet" style={{ width: "42px", height: "42px" }}>
+                        <Share2 size={20} strokeWidth={2.2} />
+                    </div>
+                    <div>
+                        <h1
+                            style={{
+                                fontSize: "20px",
+                                fontWeight: 700,
+                                color: "var(--text-primary)",
+                                margin: 0,
+                                letterSpacing: "-0.4px",
+                            }}
+                        >
+                            Codebase Dependencies
+                        </h1>
+                        <p
+                            style={{
+                                fontSize: "12.5px",
+                                color: "var(--text-secondary)",
+                                margin: "4px 0 0 0",
+                            }}
+                        >
+                            Inspect dependency relationships, inter-service call hierarchies, communication protocols, and architectural coupling.
+                        </p>
+                    </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
@@ -357,49 +360,55 @@ function Dependencies() {
             </div>
 
             {/* Quick Dependency Metrics & Selected Scope Strip */}
+            {/* Quick Dependency Metrics & Selected Scope Strip */}
             <div
+                className="cs-card cs-card--violet"
                 style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
                     flexWrap: "wrap",
                     gap: "12px",
-                    background: "var(--card-background)",
-                    padding: "8px 14px",
-                    borderRadius: "var(--border-radius)",
-                    border: "1px solid var(--card-border)",
+                    padding: "12px 18px",
                     fontSize: "12px",
                     flexShrink: 0,
                 }}
             >
                 {/* Global Metrics */}
-                <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <Layers size={13} color="var(--primary)" />
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="icon-accent icon-accent--violet" style={{ width: "26px", height: "26px", borderRadius: "8px" }}>
+                            <Layers size={13} strokeWidth={2.2} />
+                        </div>
+                        <span style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "13px" }}>
                             {dependencyStats.totalNodes}
                         </span>
-                        <span style={{ color: "var(--text-muted)" }}>Components</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>Components</span>
                     </div>
 
-                    <span style={{ color: "var(--card-border)" }}>•</span>
+                    <span style={{ color: "rgba(255,255,255,0.15)" }}>•</span>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <Share2 size={13} color="var(--secondary)" />
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="icon-accent icon-accent--cyan" style={{ width: "26px", height: "26px", borderRadius: "8px" }}>
+                            <Share2 size={13} strokeWidth={2.2} />
+                        </div>
+                        <span style={{ color: "var(--text-primary)", fontWeight: 700, fontSize: "13px" }}>
                             {dependencyStats.totalEdges}
                         </span>
-                        <span style={{ color: "var(--text-muted)" }}>Relationships</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>Relationships</span>
                     </div>
 
-                    <span style={{ color: "var(--card-border)" }}>•</span>
+                    <span style={{ color: "rgba(255,255,255,0.15)" }}>•</span>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                        <span style={{ color: "var(--text-muted)" }}>Active Edge Scope:</span>
-                        <span style={{ color: "var(--primary)", fontWeight: 600 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div className="icon-accent icon-accent--green" style={{ width: "26px", height: "26px", borderRadius: "8px" }}>
+                            <Activity size={13} strokeWidth={2.2} />
+                        </div>
+                        <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>Active Scope:</span>
+                        <span style={{ color: "#6ee7b7", fontWeight: 700, fontSize: "13px" }}>
                             {focusedGraphData.edges.length} edges
                         </span>
-                        <span style={{ color: "var(--text-muted)" }}>({focusedGraphData.nodes.length} nodes)</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: "11px" }}>({focusedGraphData.nodes.length} nodes)</span>
                     </div>
                 </div>
 
@@ -597,8 +606,8 @@ function Dependencies() {
                                 gap: "4px",
                                 padding: "4px 8px",
                                 border: "none",
-                                borderRadius: "4px",
-                                background: directionFilter === "outbound" ? "rgba(168, 179, 154, 0.2)" : "transparent",
+                                borderRadius: "9999px",
+                                background: directionFilter === "outbound" ? "rgba(167, 139, 250, 0.2)" : "transparent",
                                 color: directionFilter === "outbound" ? "var(--primary)" : "var(--text-secondary)",
                                 fontWeight: directionFilter === "outbound" ? 600 : 400,
                                 cursor: activeNode ? "pointer" : "not-allowed",

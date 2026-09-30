@@ -71,11 +71,11 @@ function SourceReference({
                         alignItems: "center",
                         gap: "4px",
                         fontSize: "11px",
-                        color: "var(--text-muted)",
-                        background: "rgba(168, 179, 154, 0.06)",
-                        padding: "2px 6px",
-                        borderRadius: "3px",
-                        border: "1px solid var(--card-border)",
+                        color: "var(--primary)",
+                        background: "rgba(167, 139, 250, 0.1)",
+                        padding: "2px 8px",
+                        borderRadius: "9999px",
+                        border: "1px solid rgba(167, 139, 250, 0.25)",
                     }}
                 >
                     <Layers size={11} />

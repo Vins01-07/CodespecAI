@@ -79,30 +79,32 @@ function KnowledgeSearch() {
                     paddingBottom: "14px",
                 }}
             >
-                <div>
-                    <h1
-                        style={{
-                            fontSize: "18px",
-                            fontWeight: 600,
-                            color: "var(--text-primary)",
-                            margin: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                        }}
-                    >
-                        <Search size={18} color="var(--primary)" />
-                        Knowledge Search
-                    </h1>
-                    <p
-                        style={{
-                            fontSize: "13px",
-                            color: "var(--text-secondary)",
-                            margin: "4px 0 0 0",
-                        }}
-                    >
-                        Query indexed AST symbols, functions, classes, and code context across your analyzed repositories.
-                    </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="icon-accent icon-accent--cyan" style={{ width: "42px", height: "42px", borderRadius: "14px" }}>
+                        <Search size={18} strokeWidth={2} />
+                    </div>
+                    <div>
+                        <h1
+                            style={{
+                                fontSize: "18px",
+                                fontWeight: 700,
+                                color: "var(--text-primary)",
+                                margin: 0,
+                                letterSpacing: "-0.3px",
+                            }}
+                        >
+                            Knowledge Search
+                        </h1>
+                        <p
+                            style={{
+                                fontSize: "13px",
+                                color: "var(--text-secondary)",
+                                margin: "3px 0 0 0",
+                            }}
+                        >
+                            Query indexed AST symbols, functions, classes, and code context across your analyzed repositories.
+                        </p>
+                    </div>
                 </div>
 
                 {currentRepo && (
@@ -144,17 +146,16 @@ function KnowledgeSearch() {
 
             {/* Content Display Area */}
             {isLoading && (
-                <Card style={{ padding: "40px" }}>
+                <Card className="cs-card--violet" style={{ padding: "40px" }}>
                     <Loading text="Searching codebase knowledge index..." />
                 </Card>
             )}
 
             {error && !isLoading && (
                 <Card
+                    className="cs-card--rose"
                     style={{
                         padding: "18px 20px",
-                        border: "1px solid var(--danger)",
-                        background: "rgba(184, 120, 112, 0.08)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
@@ -212,9 +213,11 @@ function KnowledgeSearch() {
 
             {!isLoading && !error && !hasSearched && (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
-                    <Card style={{ padding: "18px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                            <Terminal size={16} color="var(--primary)" />
+                    <Card className="cs-card--cyan" style={{ padding: "18px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                            <div className="icon-accent icon-accent--cyan">
+                                <Terminal size={16} />
+                            </div>
                             <h3 style={{ fontSize: "13px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
                                 Symbol & Function Search
                             </h3>
@@ -245,9 +248,11 @@ function KnowledgeSearch() {
                         </div>
                     </Card>
 
-                    <Card style={{ padding: "18px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                            <BookOpen size={16} color="var(--secondary)" />
+                    <Card className="cs-card--blue" style={{ padding: "18px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                            <div className="icon-accent icon-accent--blue">
+                                <BookOpen size={16} />
+                            </div>
                             <h3 style={{ fontSize: "13px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
                                 Architectural Domains
                             </h3>
@@ -278,9 +283,11 @@ function KnowledgeSearch() {
                         </div>
                     </Card>
 
-                    <Card style={{ padding: "18px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                            <Compass size={16} color="var(--success)" />
+                    <Card className="cs-card--green" style={{ padding: "18px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
+                            <div className="icon-accent icon-accent--green">
+                                <Compass size={16} />
+                            </div>
                             <h3 style={{ fontSize: "13px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
                                 Natural Queries
                             </h3>

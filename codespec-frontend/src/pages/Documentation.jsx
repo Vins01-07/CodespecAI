@@ -152,10 +152,10 @@ function Documentation() {
     return (
         <div className="documentation-page">
             {/* ── Top Header Bar ────────────────────────────────────────────── */}
-            <div className="doc-page-header cs-card">
+            <div className="doc-page-header cs-card cs-card--blue">
                 <div className="doc-header-main">
                     <div className="doc-title-row">
-                        <div className="doc-icon-header">
+                        <div className="icon-accent icon-accent--blue" style={{ width: "42px", height: "42px", borderRadius: "14px" }}>
                             <BookOpen size={18} />
                         </div>
                         <div>
@@ -543,10 +543,11 @@ function Documentation() {
                     gap: 10px;
                 }
                 .doc-icon-header {
-                    width: 32px;
-                    height: 32px;
-                    border-radius: var(--border-radius);
-                    background: rgba(168, 179, 154, 0.12);
+                    width: 34px;
+                    height: 34px;
+                    border-radius: 12px;
+                    background: rgba(167, 139, 250, 0.15);
+                    border: 1px solid rgba(167, 139, 250, 0.3);
                     color: var(--primary);
                     display: flex;
                     align-items: center;
@@ -680,9 +681,9 @@ function Documentation() {
                     border-color: rgba(182, 154, 103, 0.3);
                 }
                 .tab-count.primary {
-                    background: rgba(168, 179, 154, 0.15);
+                    background: rgba(167, 139, 250, 0.15);
                     color: var(--primary);
-                    border-color: rgba(168, 179, 154, 0.3);
+                    border-color: rgba(167, 139, 250, 0.35);
                 }
                 .doc-explorer-layout {
                     display: grid;
@@ -804,10 +805,10 @@ function Documentation() {
                 .viewer-completeness {
                     font-size: 10.5px;
                     color: var(--primary);
-                    background: rgba(168, 179, 154, 0.1);
-                    border: 1px solid rgba(168, 179, 154, 0.25);
-                    padding: 1px 6px;
-                    border-radius: var(--radius-sm);
+                    background: rgba(167, 139, 250, 0.15);
+                    border: 1px solid rgba(167, 139, 250, 0.3);
+                    padding: 2px 8px;
+                    border-radius: 9999px;
                 }
                 .viewer-title {
                     margin: 0;

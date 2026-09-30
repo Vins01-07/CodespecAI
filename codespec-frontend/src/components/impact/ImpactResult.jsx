@@ -60,35 +60,31 @@ export function ImpactResult({ result }) {
             >
                 {/* Risk Level Card */}
                 <Card
+                    className="cs-card cs-card--rose"
                     style={{
                         display: "flex",
                         alignItems: "center",
                         gap: "14px",
-                        padding: "14px 16px",
-                        borderLeft: `4px solid ${riskConfig.color}`,
+                        padding: "16px 18px",
                     }}
                 >
                     <div
+                        className="icon-accent icon-accent--rose"
                         style={{
-                            width: "42px",
-                            height: "42px",
-                            borderRadius: "10px",
-                            background: "rgba(23, 26, 23, 0.8)",
-                            border: `1px solid ${riskConfig.color}`,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            width: "44px",
+                            height: "44px",
+                            borderRadius: "12px",
                             flexShrink: 0,
                         }}
                     >
-                        <RiskIcon size={22} color={riskConfig.color} />
+                        <RiskIcon size={22} strokeWidth={2.2} />
                     </div>
                     <div>
-                        <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
                             Assessed Risk
                         </span>
                         <div style={{ display: "flex", alignItems: "baseline", gap: "8px", marginTop: "2px" }}>
-                            <span style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-primary)" }}>
+                            <span style={{ fontSize: "20px", fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.4px" }}>
                                 {risk_level}
                             </span>
                             <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 500 }}>
@@ -99,31 +95,46 @@ export function ImpactResult({ result }) {
                 </Card>
 
                 {/* Direct Dependents */}
-                <Card style={{ padding: "14px 16px" }}>
-                    <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
-                        Direct Dependents
-                    </span>
-                    <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginTop: "2px" }}>
+                <Card className="cs-card cs-card--violet" style={{ padding: "16px 18px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+                            Direct Dependents
+                        </span>
+                        <div className="icon-accent icon-accent--violet" style={{ width: "24px", height: "24px", borderRadius: "6px" }}>
+                            <Layers size={12} strokeWidth={2.2} />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", marginTop: "6px", letterSpacing: "-0.5px" }}>
                         {blast_radius.direct_dependents ?? affected_items.filter((i) => i.impact_type === "direct").length}
                     </div>
                 </Card>
 
                 {/* Indirect Dependents */}
-                <Card style={{ padding: "14px 16px" }}>
-                    <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
-                        Indirect Dependents
-                    </span>
-                    <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", marginTop: "2px" }}>
+                <Card className="cs-card cs-card--blue" style={{ padding: "16px 18px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+                            Indirect Dependents
+                        </span>
+                        <div className="icon-accent icon-accent--blue" style={{ width: "24px", height: "24px", borderRadius: "6px" }}>
+                            <Activity size={12} strokeWidth={2.2} />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--text-primary)", marginTop: "6px", letterSpacing: "-0.5px" }}>
                         {blast_radius.indirect_dependents ?? affected_items.filter((i) => i.impact_type === "indirect").length}
                     </div>
                 </Card>
 
                 {/* Affected Test Suites */}
-                <Card style={{ padding: "14px 16px" }}>
-                    <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
-                        Affected Tests
-                    </span>
-                    <div style={{ fontSize: "20px", fontWeight: 700, color: "var(--secondary)", marginTop: "2px" }}>
+                <Card className="cs-card cs-card--teal" style={{ padding: "16px 18px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+                            Affected Tests
+                        </span>
+                        <div className="icon-accent icon-accent--teal" style={{ width: "24px", height: "24px", borderRadius: "6px" }}>
+                            <CheckSquare size={12} strokeWidth={2.2} />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: "24px", fontWeight: 800, color: "#2dd4bf", marginTop: "6px", letterSpacing: "-0.5px" }}>
                         {blast_radius.affected_tests ?? "—"}
                     </div>
                 </Card>
@@ -131,10 +142,12 @@ export function ImpactResult({ result }) {
 
             {/* Summary Narrative */}
             {summary && (
-                <Card style={{ padding: "14px 16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "6px" }}>
-                        <Activity size={14} color="var(--primary)" />
-                        <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.4px" }}>
+                <Card className="cs-card cs-card--indigo" style={{ padding: "16px 18px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                        <div className="icon-accent icon-accent--indigo" style={{ width: "26px", height: "26px", borderRadius: "7px" }}>
+                            <Activity size={13} strokeWidth={2.2} />
+                        </div>
+                        <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)", textTransform: "uppercase", letterSpacing: "0.5px" }}>
                             Executive Summary
                         </span>
                     </div>
@@ -239,10 +252,10 @@ export function ImpactResult({ result }) {
                                                 fontSize: "10px",
                                                 fontWeight: 700,
                                                 padding: "2px 6px",
-                                                borderRadius: "4px",
-                                                background: item.severity === "HIGH" ? "rgba(184, 120, 112, 0.15)" : "rgba(168, 179, 154, 0.1)",
+                                                borderRadius: "9999px",
+                                                background: item.severity === "HIGH" ? "rgba(248, 113, 113, 0.15)" : "rgba(167, 139, 250, 0.15)",
                                                 color: item.severity === "HIGH" ? "var(--danger)" : "var(--primary)",
-                                                border: `1px solid ${item.severity === "HIGH" ? "rgba(184, 120, 112, 0.3)" : "rgba(168, 179, 154, 0.2)"}`,
+                                                border: `1px solid ${item.severity === "HIGH" ? "rgba(248, 113, 113, 0.35)" : "rgba(167, 139, 250, 0.35)"}`,
                                                 flexShrink: 0,
                                             }}
                                         >

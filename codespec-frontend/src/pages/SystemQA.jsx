@@ -52,12 +52,12 @@ function CodeSnippet({ snippet, language }) {
         <div
             style={{
                 position: "relative",
-                background: "#121312",
+                background: "rgba(13, 11, 23, 0.9)",
                 border: "1px solid var(--card-border)",
-                borderRadius: "5px",
+                borderRadius: "10px",
                 overflow: "hidden",
                 fontSize: "11.5px",
-                fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+                fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
                 marginTop: "6px",
             }}
         >
@@ -66,10 +66,10 @@ function CodeSnippet({ snippet, language }) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    padding: "4px 10px",
-                    background: "rgba(23, 25, 22, 0.8)",
+                    padding: "6px 12px",
+                    background: "rgba(24, 20, 38, 0.8)",
                     borderBottom: "1px solid var(--card-border)",
-                    fontSize: "10px",
+                    fontSize: "10.5px",
                     color: "var(--text-muted)",
                 }}
             >
@@ -522,30 +522,32 @@ function SystemQA() {
                     flexShrink: 0,
                 }}
             >
-                <div>
-                    <h1
-                        style={{
-                            fontSize: "18px",
-                            fontWeight: 600,
-                            color: "var(--text-primary)",
-                            margin: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                        }}
-                    >
-                        <MessageSquare size={20} color="var(--primary)" />
-                        System Q&A
-                    </h1>
-                    <p
-                        style={{
-                            fontSize: "12.5px",
-                            color: "var(--text-secondary)",
-                            margin: "4px 0 0 0",
-                        }}
-                    >
-                        Ask questions about your codebase architecture, services, dependencies, and implementation details.
-                    </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="icon-accent icon-accent--violet" style={{ width: "42px", height: "42px", borderRadius: "14px" }}>
+                        <MessageSquare size={20} strokeWidth={2} />
+                    </div>
+                    <div>
+                        <h1
+                            style={{
+                                fontSize: "18px",
+                                fontWeight: 700,
+                                color: "var(--text-primary)",
+                                margin: 0,
+                                letterSpacing: "-0.3px",
+                            }}
+                        >
+                            System Q&A
+                        </h1>
+                        <p
+                            style={{
+                                fontSize: "12.5px",
+                                color: "var(--text-secondary)",
+                                margin: "3px 0 0 0",
+                            }}
+                        >
+                            Ask questions about your codebase architecture, services, dependencies, and implementation details.
+                        </p>
+                    </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
@@ -648,19 +650,8 @@ function SystemQA() {
                             padding: "40px 20px",
                         }}
                     >
-                        <div
-                            style={{
-                                width: "56px",
-                                height: "56px",
-                                borderRadius: "16px",
-                                background: "rgba(168, 179, 154, 0.1)",
-                                border: "1px solid rgba(168, 179, 154, 0.2)",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                            }}
-                        >
-                            <Bot size={28} color="var(--primary)" />
+                        <div className="icon-accent icon-accent--violet" style={{ width: "56px", height: "56px", borderRadius: "18px" }}>
+                            <Bot size={28} />
                         </div>
 
                         <div style={{ textAlign: "center" }}>
@@ -699,39 +690,30 @@ function SystemQA() {
                         >
                             {STARTER_QUESTIONS.map((q, idx) => {
                                 const Icon = q.icon;
+                                const accents = ["violet", "blue", "teal", "rose", "amber", "cyan"];
+                                const accent = accents[idx % accents.length];
                                 return (
                                     <button
                                         key={idx}
                                         type="button"
                                         onClick={() => handleSubmit(q.text)}
+                                        className={`cs-card cs-card--${accent}`}
                                         style={{
                                             display: "flex",
-                                            alignItems: "flex-start",
-                                            gap: "10px",
-                                            padding: "12px 14px",
-                                            background: "var(--card-background)",
-                                            border: "1px solid var(--card-border)",
-                                            borderRadius: "var(--border-radius)",
+                                            alignItems: "center",
+                                            gap: "12px",
+                                            padding: "12px 16px",
                                             color: "var(--text-secondary)",
                                             fontSize: "12.5px",
                                             cursor: "pointer",
                                             textAlign: "left",
                                             lineHeight: 1.4,
-                                            transition: "all 0.15s ease",
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.borderColor = "var(--primary)";
-                                            e.currentTarget.style.color = "var(--text-primary)";
-                                            e.currentTarget.style.background = "var(--card-background-hover)";
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.borderColor = "var(--card-border)";
-                                            e.currentTarget.style.color = "var(--text-secondary)";
-                                            e.currentTarget.style.background = "var(--card-background)";
                                         }}
                                     >
-                                        <Icon size={15} color="var(--primary)" style={{ flexShrink: 0, marginTop: "1px" }} />
-                                        <span>{q.text}</span>
+                                        <div className={`icon-accent icon-accent--${accent}`} style={{ width: "30px", height: "30px", borderRadius: "9px", flexShrink: 0 }}>
+                                            <Icon size={14} strokeWidth={2.2} />
+                                        </div>
+                                        <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{q.text}</span>
                                     </button>
                                 );
                             })}
@@ -825,18 +807,15 @@ function SystemQA() {
                     }}
                 >
                     <div
+                        className="cs-card cs-card--violet"
                         style={{
                             flex: 1,
                             position: "relative",
                             display: "flex",
                             alignItems: "flex-end",
-                            background: "var(--card-background)",
-                            border: "1px solid var(--card-border)",
-                            borderRadius: "var(--border-radius)",
-                            transition: "border-color 0.15s ease",
+                            borderRadius: "18px",
+                            transition: "all 0.2s ease",
                         }}
-                        onFocus={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
-                        onBlur={(e) => (e.currentTarget.style.borderColor = "var(--card-border)")}
                     >
                         <textarea
                             ref={inputRef}

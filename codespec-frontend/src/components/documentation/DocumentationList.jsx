@@ -44,10 +44,10 @@ function DocumentationList({
                     .doc-empty-icon-wrap {
                         width: 42px;
                         height: 42px;
-                        border-radius: 50%;
-                        background: rgba(168, 179, 154, 0.08);
-                        border: 1px solid var(--card-border);
-                        color: var(--text-muted);
+                        border-radius: 12px;
+                        background: rgba(167, 139, 250, 0.12);
+                        border: 1px solid rgba(167, 139, 250, 0.25);
+                        color: var(--primary);
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -226,10 +226,10 @@ function DocumentationList({
                     flex: 1;
                 }
                 .doc-icon-wrap {
-                    width: 24px;
-                    height: 24px;
-                    border-radius: var(--radius-sm);
-                    background: rgba(168, 179, 154, 0.12);
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 8px;
+                    background: rgba(167, 139, 250, 0.15);
                     color: var(--primary);
                     display: flex;
                     align-items: center;
@@ -265,9 +265,9 @@ function DocumentationList({
                 .doc-module-badge {
                     font-size: 10px;
                     color: var(--primary);
-                    background: rgba(168, 179, 154, 0.08);
-                    padding: 1px 5px;
-                    border-radius: 3px;
+                    background: rgba(167, 139, 250, 0.12);
+                    padding: 2px 6px;
+                    border-radius: 9999px;
                 }
                 .doc-item-status-wrap {
                     display: flex;

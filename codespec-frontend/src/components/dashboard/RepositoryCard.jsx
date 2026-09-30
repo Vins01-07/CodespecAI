@@ -4,6 +4,7 @@ import {
     GitCommit,
     Clock,
     Code2,
+    Layers,
 } from "lucide-react";
 import Card from "../common/Card";
 import Badge from "../common/Badge";
@@ -19,11 +20,11 @@ function RepositoryCard({
     },
 }) {
     return (
-        <Card className="repo-header-card">
+        <Card className="repo-header-card cs-card--gold">
             <div className="repo-header-main">
                 <div className="repo-header-identity">
                     <div className="repo-icon-wrap">
-                        <FolderGit2 size={20} />
+                        <FolderGit2 size={20} strokeWidth={2} />
                     </div>
                     <div className="repo-title-wrap">
                         <div className="repo-title-row">
@@ -43,7 +44,7 @@ function RepositoryCard({
 
                 <div className="repo-header-meta">
                     <div className="meta-item">
-                        <GitBranch size={14} className="meta-icon" />
+                        <GitBranch size={13} className="meta-icon" />
                         <span className="meta-label">Branch:</span>
                         <span className="meta-value branch-tag">{repository?.branch || "main"}</span>
                     </div>
@@ -51,7 +52,7 @@ function RepositoryCard({
                     <div className="meta-divider" />
 
                     <div className="meta-item">
-                        <GitCommit size={14} className="meta-icon" />
+                        <GitCommit size={13} className="meta-icon" />
                         <span className="meta-label">Commit:</span>
                         <span className="meta-value font-mono">{repository?.commit || "8f4a21d"}</span>
                     </div>
@@ -59,7 +60,7 @@ function RepositoryCard({
                     <div className="meta-divider" />
 
                     <div className="meta-item">
-                        <Code2 size={14} className="meta-icon" />
+                        <Code2 size={13} className="meta-icon" />
                         <span className="meta-label">Stack:</span>
                         <span className="meta-value">{repository?.language || "TypeScript / Python"}</span>
                     </div>
@@ -67,7 +68,7 @@ function RepositoryCard({
                     <div className="meta-divider" />
 
                     <div className="meta-item">
-                        <Clock size={14} className="meta-icon" />
+                        <Clock size={13} className="meta-icon" />
                         <span className="meta-label">Indexed:</span>
                         <span className="meta-value">{repository?.lastIndexed || "2 mins ago"}</span>
                     </div>
@@ -76,61 +77,62 @@ function RepositoryCard({
 
             <style>{`
                 .repo-header-card {
-                    padding: 14px 18px;
+                    padding: 16px 22px;
+                    border-radius: var(--border-radius);
                 }
                 .repo-header-main {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     flex-wrap: wrap;
-                    gap: 14px;
+                    gap: 16px;
                 }
                 .repo-header-identity {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
+                    gap: 14px;
                 }
                 .repo-icon-wrap {
-                    width: 36px;
-                    height: 36px;
+                    width: 44px;
+                    height: 44px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: var(--active-background);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--border-radius);
-                    color: var(--primary);
+                    background: linear-gradient(135deg, rgba(139, 92, 246, 0.14) 0%, rgba(124, 58, 237, 0.22) 100%);
+                    border: 1px solid rgba(139, 92, 246, 0.28);
+                    border-radius: 12px;
+                    color: #c4b5fd;
                     flex-shrink: 0;
                 }
                 .repo-title-wrap {
                     display: flex;
                     flex-direction: column;
-                    gap: 3px;
+                    gap: 4px;
                 }
                 .repo-title-row {
                     display: flex;
                     align-items: center;
-                    gap: 10px;
+                    gap: 12px;
                 }
                 .repo-title-name {
-                    font-size: 15px;
-                    font-weight: 600;
-                    color: var(--text-primary);
-                    letter-spacing: -0.2px;
+                    font-size: 17px;
+                    font-weight: 700;
+                    color: #ffffff;
+                    letter-spacing: -0.3px;
                 }
                 .repo-status-badge {
                     font-size: 11px;
-                    padding: 2px 7px;
+                    padding: 3px 9px;
                 }
                 .status-dot {
                     width: 6px;
                     height: 6px;
                     border-radius: 50%;
-                    background: var(--success);
+                    background: #34d399;
                     display: inline-block;
                 }
                 .repo-desc-sub {
-                    font-size: 11px;
+                    font-size: 12px;
                     color: var(--text-muted);
                 }
                 .repo-header-meta {
@@ -138,10 +140,10 @@ function RepositoryCard({
                     align-items: center;
                     gap: 12px;
                     flex-wrap: wrap;
-                    background: #171916;
-                    border: 1px solid var(--card-border);
-                    border-radius: 6px;
-                    padding: 6px 12px;
+                    background: rgba(20, 17, 34, 0.6);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 9999px;
+                    padding: 8px 16px;
                 }
                 .meta-item {
                     display: flex;
@@ -154,28 +156,31 @@ function RepositoryCard({
                 }
                 .meta-label {
                     color: var(--text-muted);
+                    font-weight: 500;
                 }
                 .meta-value {
-                    color: var(--text-primary);
-                    font-weight: 500;
+                    color: #ffffff;
+                    font-weight: 600;
                 }
                 .branch-tag {
                     color: var(--primary);
                 }
                 .font-mono {
-                    font-family: monospace;
-                    font-size: 11px;
+                    font-family: "JetBrains Mono", monospace;
+                    font-size: 11.5px;
                 }
                 .meta-divider {
                     width: 1px;
                     height: 14px;
-                    background: var(--card-border);
+                    background: rgba(255, 255, 255, 0.1);
                 }
                 @media (max-width: 860px) {
                     .repo-header-meta {
                         width: 100%;
                         justify-content: flex-start;
                         gap: 10px;
+                        border-radius: 16px;
+                        padding: 10px 14px;
                     }
                     .meta-divider {
                         display: none;

@@ -11,6 +11,7 @@ import {
     HardDrive,
     Shield,
     Boxes,
+    Filter,
 } from "lucide-react";
 import Card from "../common/Card";
 import Badge from "../common/Badge";
@@ -114,11 +115,11 @@ const defaultEdges = [
 ];
 
 const categoryConfig = {
-    frontend: { color: "#9BA8B0", label: "Frontend", border: "#9BA8B0" },
-    service: { color: "#91A78A", label: "Service", border: "#91A78A" },
-    database: { color: "#A49A82", label: "Database", border: "#A49A82" },
-    cache: { color: "#B87870", label: "Cache", border: "#B87870" },
-    external: { color: "#8F9A8C", label: "External", border: "#8F9A8C" },
+    frontend: { color: "#818cf8", label: "Frontend", border: "#818cf8" },
+    service: { color: "#a78bfa", label: "Service", border: "#a78bfa" },
+    database: { color: "#c084fc", label: "Database", border: "#c084fc" },
+    cache: { color: "#f472b6", label: "Cache", border: "#f472b6" },
+    external: { color: "#38bdf8", label: "External", border: "#38bdf8" },
 };
 
 function ArchitecturePreview({
@@ -133,15 +134,20 @@ function ArchitecturePreview({
         totalServicesCount || nodes.filter((n) => n.type === "service").length;
 
     const NODE_WIDTH = 148;
-    const NODE_HEIGHT = 48;
+    const NODE_HEIGHT = 50;
 
     return (
-        <Card className="arch-preview-card">
+        <Card className="arch-preview-card cs-card--violet">
             <div className="arch-header">
                 <div className="arch-header-left">
                     <div className="arch-title-group">
-                        <span className="arch-title">System Architecture Preview</span>
-                        <Badge variant="default" className="arch-badge">
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                            <div className="icon-accent icon-accent--violet">
+                                <Network size={16} strokeWidth={2} />
+                            </div>
+                            <span className="arch-title">Architecture Preview</span>
+                        </div>
+                        <Badge variant="primary" className="arch-badge">
                             {displayNodeCount} Nodes • {displayServiceCount} Services
                         </Badge>
                     </div>
@@ -151,6 +157,11 @@ function ArchitecturePreview({
                 </div>
 
                 <div className="arch-header-right">
+                    <button className="filter-pill-btn" type="button">
+                        <Filter size={13} />
+                        <span>Filter</span>
+                    </button>
+
                     <Link to="/architecture" className="open-arch-btn">
                         <span>Open Architecture</span>
                         <ArrowUpRight size={14} />
@@ -167,12 +178,16 @@ function ArchitecturePreview({
                     <defs>
                         <pattern
                             id="preview-grid"
-                            width="20"
-                            height="20"
+                            width="24"
+                            height="24"
                             patternUnits="userSpaceOnUse"
                         >
-                            <circle cx="10" cy="10" r="1" fill="#282C26" />
+                            <circle cx="12" cy="12" r="1" fill="rgba(148, 163, 184, 0.08)" />
                         </pattern>
+                        <linearGradient id="edge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="#818cf8" stopOpacity="0.8" />
+                        </linearGradient>
                         <marker
                             id="arrowhead"
                             markerWidth="6"
@@ -181,12 +196,12 @@ function ArchitecturePreview({
                             refY="3"
                             orient="auto"
                         >
-                            <polygon points="0 0, 6 3, 0 6" fill="#363A32" />
+                            <polygon points="0 0, 6 3, 0 6" fill="rgba(148, 163, 184, 0.5)" />
                         </marker>
                     </defs>
 
-                    {/* Grid Background */}
-                    <rect width="100%" height="100%" fill="#171A17" />
+                    {/* Dark ethereal canvas background */}
+                    <rect width="100%" height="100%" fill="#0c0e14" />
                     <rect width="100%" height="100%" fill="url(#preview-grid)" />
 
                     {/* Connectors / Edges */}
@@ -211,10 +226,14 @@ function ArchitecturePreview({
                                 <path
                                     d={pathData}
                                     fill="none"
-                                    stroke={isHighlighted ? "var(--primary)" : "#363A32"}
-                                    strokeWidth={isHighlighted ? 2 : 1.2}
-                                    strokeDasharray={edge.label?.includes("Trigger") ? "3,3" : "none"}
+                                    stroke={isHighlighted ? "url(#edge-gradient)" : "rgba(255, 255, 255, 0.14)"}
+                                    strokeWidth={isHighlighted ? 2.5 : 1.4}
+                                    strokeDasharray={edge.label?.includes("Trigger") ? "4,4" : "none"}
                                     markerEnd="url(#arrowhead)"
+                                    style={{
+                                        transition: "stroke 0.2s ease, stroke-width 0.2s ease, opacity 0.2s ease",
+                                        opacity: isHighlighted ? 1 : 0.7,
+                                    }}
                                 />
                             </g>
                         );
@@ -231,33 +250,49 @@ function ArchitecturePreview({
                                 transform={`translate(${node.x}, ${node.y})`}
                                 onMouseEnter={() => setHoveredNode(node.id)}
                                 onMouseLeave={() => setHoveredNode(null)}
-                                style={{ cursor: "pointer" }}
+                                style={{ cursor: "pointer", transition: "transform 0.15s ease" }}
                             >
+                                {/* Glow backdrop for hovered node */}
+                                {isHovered && (
+                                    <rect
+                                        x="-4"
+                                        y="-4"
+                                        width={NODE_WIDTH + 8}
+                                        height={NODE_HEIGHT + 8}
+                                        rx="14"
+                                        fill="none"
+                                        stroke={config.color}
+                                        strokeWidth="1.5"
+                                        opacity="0.5"
+                                        style={{ filter: "blur(4px)" }}
+                                    />
+                                )}
+
                                 {/* Node Card Background */}
                                 <rect
                                     width={NODE_WIDTH}
                                     height={NODE_HEIGHT}
-                                    rx="6"
-                                    fill={isHovered ? "#252921" : "#1D201B"}
-                                    stroke={isHovered ? config.color : "#363A32"}
+                                    rx="10"
+                                    fill={isHovered ? "rgba(38, 31, 62, 0.95)" : "rgba(22, 18, 36, 0.88)"}
+                                    stroke={isHovered ? config.color : "rgba(255, 255, 255, 0.1)"}
                                     strokeWidth={isHovered ? 1.5 : 1}
                                 />
 
                                 {/* Left Category Accent Bar */}
                                 <rect
-                                    width="3"
+                                    width="4"
                                     height={NODE_HEIGHT}
-                                    rx="1"
+                                    rx="2"
                                     fill={config.color}
                                 />
 
                                 {/* Node Title */}
                                 <text
-                                    x="10"
-                                    y="19"
-                                    fill="#E7E8DF"
-                                    fontSize="11"
-                                    fontWeight="600"
+                                    x="12"
+                                    y="20"
+                                    fill="#ffffff"
+                                    fontSize="11.5"
+                                    fontWeight="700"
                                     fontFamily="inherit"
                                 >
                                     {node.name}
@@ -265,9 +300,9 @@ function ArchitecturePreview({
 
                                 {/* Tech / Subtitle */}
                                 <text
-                                    x="10"
-                                    y="34"
-                                    fill="#70756C"
+                                    x="12"
+                                    y="36"
+                                    fill="rgba(148, 163, 184, 0.5)"
                                     fontSize="9.5"
                                     fontFamily="inherit"
                                 >
@@ -276,21 +311,21 @@ function ArchitecturePreview({
 
                                 {/* Category Tag Pill */}
                                 <rect
-                                    x={NODE_WIDTH - 48}
-                                    y="7"
-                                    width="42"
-                                    height="12"
-                                    rx="3"
-                                    fill="#171916"
+                                    x={NODE_WIDTH - 50}
+                                    y="8"
+                                    width="44"
+                                    height="14"
+                                    rx="7"
+                                    fill="rgba(15, 12, 25, 0.8)"
                                     stroke={config.color}
-                                    strokeWidth="0.6"
+                                    strokeWidth="0.8"
                                 />
                                 <text
-                                    x={NODE_WIDTH - 27}
-                                    y="16"
+                                    x={NODE_WIDTH - 28}
+                                    y="18"
                                     fill={config.color}
-                                    fontSize="7"
-                                    fontWeight="600"
+                                    fontSize="7.5"
+                                    fontWeight="700"
                                     textAnchor="middle"
                                     fontFamily="inherit"
                                 >
@@ -323,55 +358,63 @@ function ArchitecturePreview({
 
             <style>{`
                 .arch-preview-card {
-                    padding: 16px 18px;
+                    padding: 18px 22px;
                     display: flex;
                     flex-direction: column;
-                    gap: 12px;
+                    gap: 14px;
                     height: 100%;
+                    border-radius: var(--border-radius);
                 }
                 .arch-header {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     flex-wrap: wrap;
+                    gap: 12px;
+                }
+                .arch-header-right {
+                    display: flex;
+                    align-items: center;
                     gap: 10px;
                 }
                 .arch-title-group {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
+                    gap: 10px;
+                    flex-wrap: wrap;
                 }
                 .arch-title {
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: var(--text-primary);
+                    font-size: 15px;
+                    font-weight: 700;
+                    color: #ffffff;
+                    letter-spacing: -0.2px;
                 }
                 .arch-badge {
-                    font-size: 10px;
-                    padding: 1px 6px;
+                    font-size: 10.5px;
+                    padding: 2px 8px;
                 }
                 .arch-subtitle {
                     display: block;
-                    font-size: 11px;
+                    font-size: 11.5px;
                     color: var(--text-muted);
-                    margin-top: 2px;
+                    margin-top: 3px;
                 }
                 .open-arch-btn {
                     display: inline-flex;
                     align-items: center;
-                    gap: 5px;
+                    gap: 6px;
                     font-size: 12px;
-                    font-weight: 500;
+                    font-weight: 600;
                     color: var(--primary);
-                    padding: 5px 10px;
-                    border-radius: var(--border-radius);
-                    border: 1px solid var(--card-border);
-                    background: #171916;
-                    transition: all 0.15s ease;
+                    padding: 6px 14px;
+                    border-radius: 9999px;
+                    border: 1px solid rgba(148, 163, 184, 0.2);
+                    background: rgba(148, 163, 184, 0.08);
+                    transition: all 0.2s ease;
                 }
                 .open-arch-btn:hover {
-                    background: var(--card-background-hover);
-                    border-color: var(--primary);
+                    background: rgba(148, 163, 184, 0.14);
+                    border-color: rgba(148, 163, 184, 0.3);
                     color: var(--text-primary);
                 }
                 .arch-canvas-container {
@@ -379,10 +422,11 @@ function ArchitecturePreview({
                     width: 100%;
                     min-height: 290px;
                     flex: 1;
-                    border: 1px solid var(--card-border);
-                    border-radius: 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 18px;
                     overflow: hidden;
-                    background: #171A17;
+                    background: #0c0e14;
+                    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
                 }
                 .arch-svg-canvas {
                     width: 100%;
@@ -394,36 +438,38 @@ function ArchitecturePreview({
                     align-items: center;
                     justify-content: space-between;
                     flex-wrap: wrap;
-                    gap: 8px;
-                    padding-top: 4px;
-                    border-top: 1px solid var(--card-border);
-                    font-size: 11px;
+                    gap: 10px;
+                    padding-top: 8px;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
+                    font-size: 11.5px;
                 }
                 .legend-label-wrap {
                     display: flex;
                     align-items: center;
                     gap: 6px;
                     color: var(--text-muted);
+                    font-weight: 600;
                 }
                 .legend-items {
                     display: flex;
                     align-items: center;
-                    gap: 14px;
+                    gap: 16px;
                     flex-wrap: wrap;
                 }
                 .legend-item {
                     display: flex;
                     align-items: center;
-                    gap: 5px;
+                    gap: 6px;
                 }
                 .legend-color-dot {
-                    width: 7px;
-                    height: 7px;
-                    border-radius: 2px;
+                    width: 8px;
+                    height: 8px;
+                    border-radius: 3px;
                 }
                 .legend-item-text {
                     color: var(--text-secondary);
-                    font-size: 11px;
+                    font-size: 11.5px;
+                    font-weight: 500;
                 }
             `}</style>
         </Card>

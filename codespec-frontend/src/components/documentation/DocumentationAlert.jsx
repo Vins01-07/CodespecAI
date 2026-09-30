@@ -24,8 +24,8 @@ function DocumentationAlert({ alert, onFix, isCompact = false }) {
         info: {
             icon: Info,
             accent: "var(--primary)",
-            bg: "rgba(168, 179, 154, 0.1)",
-            border: "rgba(168, 179, 154, 0.3)",
+            bg: "rgba(167, 139, 250, 0.12)",
+            border: "rgba(167, 139, 250, 0.3)",
             badgeVariant: "default",
             label: "Info",
         },
@@ -222,9 +222,9 @@ function DocumentationAlert({ alert, onFix, isCompact = false }) {
                     align-items: center;
                     gap: 4px;
                     color: var(--primary);
-                    background: rgba(168, 179, 154, 0.08);
-                    padding: 1px 5px;
-                    border-radius: 3px;
+                    background: rgba(167, 139, 250, 0.12);
+                    padding: 2px 7px;
+                    border-radius: 9999px;
                 }
                 .doc-alert-time {
                     display: inline-flex;
@@ -285,7 +285,7 @@ function DocumentationAlert({ alert, onFix, isCompact = false }) {
                 .doc-alert-resolve-btn:hover {
                     color: var(--primary);
                     border-color: var(--primary);
-                    background: rgba(168, 179, 154, 0.08);
+                    background: rgba(167, 139, 250, 0.12);
                 }
             `}</style>
         </div>

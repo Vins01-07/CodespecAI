@@ -134,10 +134,10 @@ function UpdateSuggestion({ suggestion, onApply }) {
                     flex: 1;
                 }
                 .sug-icon-badge {
-                    width: 26px;
-                    height: 26px;
-                    border-radius: var(--radius-sm);
-                    background: rgba(168, 179, 154, 0.12);
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 9px;
+                    background: rgba(167, 139, 250, 0.15);
                     display: flex;
                     align-items: center;
                     justify-content: center;

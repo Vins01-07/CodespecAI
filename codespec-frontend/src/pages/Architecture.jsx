@@ -8,6 +8,8 @@ import {
     Database,
     Share2,
     GitBranch,
+    Cpu,
+    Globe,
 } from "lucide-react";
 import useArchitectureStore from "../store/architectureStore";
 import useRepositoryStore from "../store/repositoryStore";
@@ -57,6 +59,13 @@ function Architecture() {
     const serviceCount = graphData?.nodes?.filter((n) => n.type === "service").length || 0;
     const storageCount = graphData?.nodes?.filter((n) => n.type === "database" || n.type === "cache").length || 0;
 
+    const statCards = [
+        { label: "Nodes", value: totalNodes, Icon: Layers, accent: "violet" },
+        { label: "Services", value: serviceCount, Icon: Server, accent: "blue" },
+        { label: "Storage & Cache", value: storageCount, Icon: Database, accent: "teal" },
+        { label: "Dependency Edges", value: totalEdges, Icon: Share2, accent: "pink" },
+    ];
+
     return (
         <div
             style={{
@@ -78,34 +87,36 @@ function Architecture() {
                     flexWrap: "wrap",
                     gap: "14px",
                     borderBottom: "1px solid var(--card-border)",
-                    paddingBottom: "12px",
+                    paddingBottom: "14px",
                     flexShrink: 0,
                 }}
             >
-                <div>
-                    <h1
-                        style={{
-                            fontSize: "18px",
-                            fontWeight: 600,
-                            color: "var(--text-primary)",
-                            margin: 0,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                        }}
-                    >
-                        <Network size={20} color="var(--primary)" />
-                        System Architecture
-                    </h1>
-                    <p
-                        style={{
-                            fontSize: "12.5px",
-                            color: "var(--text-secondary)",
-                            margin: "4px 0 0 0",
-                        }}
-                    >
-                        Interactive topology graph, component relationships, data flow, and runtime dependencies.
-                    </p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    <div className="icon-accent icon-accent--violet">
+                        <Network size={18} strokeWidth={2} />
+                    </div>
+                    <div>
+                        <h1
+                            style={{
+                                fontSize: "18px",
+                                fontWeight: 700,
+                                color: "var(--text-primary)",
+                                margin: 0,
+                                letterSpacing: "-0.3px",
+                            }}
+                        >
+                            System Architecture
+                        </h1>
+                        <p
+                            style={{
+                                fontSize: "12.5px",
+                                color: "var(--text-secondary)",
+                                margin: "3px 0 0 0",
+                            }}
+                        >
+                            Interactive topology graph, component relationships, data flow, and runtime dependencies.
+                        </p>
+                    </div>
                 </div>
 
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
@@ -175,8 +186,8 @@ function Architecture() {
                         title="Reload graph data"
                         disabled={isLoading}
                         style={{
-                            height: "30px",
-                            padding: "0 10px",
+                            height: "34px",
+                            padding: "0 14px",
                             fontSize: "12px",
                             opacity: isLoading ? 0.7 : 1,
                         }}
@@ -191,49 +202,40 @@ function Architecture() {
                 </div>
             </div>
 
-            {/* Quick Metrics Bar */}
+            {/* Premium Quick Metrics Bar */}
             {graphData && (
                 <div
                     style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "16px",
-                        flexWrap: "wrap",
-                        fontSize: "12px",
-                        color: "var(--text-muted)",
-                        padding: "0 2px",
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
+                        gap: "12px",
                         flexShrink: 0,
                     }}
                 >
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <Layers size={13} color="var(--primary)" />
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{totalNodes}</span>
-                        <span>Nodes</span>
-                    </div>
-
-                    <span style={{ color: "var(--card-border)" }}>•</span>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <Server size={13} color="#91A78A" />
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{serviceCount}</span>
-                        <span>Services</span>
-                    </div>
-
-                    <span style={{ color: "var(--card-border)" }}>•</span>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <Database size={13} color="#A49A82" />
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{storageCount}</span>
-                        <span>Storage & Caches</span>
-                    </div>
-
-                    <span style={{ color: "var(--card-border)" }}>•</span>
-
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                        <Share2 size={13} color="var(--secondary)" />
-                        <span style={{ color: "var(--text-primary)", fontWeight: 600 }}>{totalEdges}</span>
-                        <span>Dependency Edges</span>
-                    </div>
+                    {statCards.map(({ label, value, Icon, accent }) => (
+                        <div
+                            key={label}
+                            className={`cs-card cs-card--${accent}`}
+                            style={{
+                                padding: "14px 16px",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                            }}
+                        >
+                            <div className={`icon-accent icon-accent--${accent}`}>
+                                <Icon size={16} strokeWidth={2} />
+                            </div>
+                            <div>
+                                <div style={{ fontSize: "22px", fontWeight: 800, color: "#fff", letterSpacing: "-0.5px", lineHeight: 1 }}>
+                                    {value}
+                                </div>
+                                <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "3px", fontWeight: 500 }}>
+                                    {label}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
