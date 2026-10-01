@@ -48,12 +48,28 @@ services:
       timeout: 3s
       retries: 5
 
+  # ─── Qdrant semantic vector store ────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:v1.13.2
+    container_name: codespec-qdrant
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:6333/healthz >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   # ─── FastAPI Backend ─────────────────────────────────────────────────────
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        INSTALL_EMBEDDING_DEPS: "true"
     container_name: codespec-backend
+    mem_limit: 8g
+    cpus: 2.0
     ports:
       - "8000:8000"
     env_file:
@@ -63,6 +79,8 @@ services:
       NEO4J_URI: bolt://neo4j:7687
       REDIS_URL: redis://redis:6379/0
       REPO_WORKSPACE_DIR: /app/workspace/repos
+      QDRANT_URL: http://qdrant:6333
+      EMBEDDING_CACHE_DIR: /models
     volumes:
       - ./backend/app:/app/app          # hot-reload: mount source
       - repo_workspace:/app/workspace/repos
@@ -70,6 +88,8 @@ services:
       neo4j:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      qdrant:
         condition: service_healthy
     restart: unless-stopped
 
@@ -98,6 +118,45 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      qdrant:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ─── BGE-M3 indexing worker ──────────────────────────────────────────────
+  embedding-worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        INSTALL_EMBEDDING_DEPS: "true"
+    container_name: codespec-embedding-worker
+    mem_limit: 8g
+    cpus: 2.0
+    command: >
+      celery -A app.workers.celery_app worker
+      --loglevel=info
+      --concurrency=1
+      --prefetch-multiplier=1
+      --queues=embeddings
+    env_file:
+      - ./backend/.env
+    environment:
+      NEO4J_URI: bolt://neo4j:7687
+      REDIS_URL: redis://redis:6379/0
+      REPO_WORKSPACE_DIR: /app/workspace/repos
+      QDRANT_URL: http://qdrant:6333
+      EMBEDDING_CACHE_DIR: /models
+    volumes:
+      - ./backend/app:/app/app
+      - repo_workspace:/app/workspace/repos
+      - embedding_model_cache:/models
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
     restart: unless-stopped
 
 # ---------------------------------------------------------------------------
@@ -108,3 +167,5 @@ volumes:
   neo4j_logs:
   redis_data:
   repo_workspace:
+  qdrant_data:
+  embedding_model_cache:

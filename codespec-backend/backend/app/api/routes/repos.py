@@ -18,14 +18,60 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from app.api.deps import get_graph_builder
 from app.config import settings
 from app.core.graph.builder import GraphBuilder
+from app.core.indexing.workspace import resolve_repository_workspace
 from app.models.repository import (
     IngestTaskResponse,
+    RepoIndexRequest,
     RepoIngestRequest,
     TaskStatusResponse,
 )
-from app.workers.tasks import ingest_git_repo, ingest_zip_repo
+from app.workers.tasks import index_repository_task, ingest_git_repo, ingest_zip_repo
 
 router = APIRouter(prefix="/repos", tags=["repositories"])
+
+
+@router.post(
+    "/index",
+    response_model=IngestTaskResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Schedule semantic indexing for an ingested repository",
+)
+async def index_repository(
+    body: RepoIndexRequest,
+    builder: GraphBuilder = Depends(get_graph_builder),
+) -> IngestTaskResponse:
+    try:
+        known_repository = any(
+            repository.get("url") == body.repo_url
+            for repository in builder.list_repositories()
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Repository catalog is temporarily unavailable",
+        ) from exc
+    if not known_repository:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Repository is not present in the graph",
+        )
+
+    repository_root = resolve_repository_workspace(
+        body.repo_url, Path(settings.REPO_WORKSPACE_DIR)
+    )
+    if repository_root is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Repository workspace was not found",
+        )
+    try:
+        task = index_repository_task.delay(str(repository_root), body.repo_url)
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Indexing task queue is unavailable",
+        ) from exc
+    return IngestTaskResponse(task_id=task.id, status="PENDING")
 
 
 @router.post(

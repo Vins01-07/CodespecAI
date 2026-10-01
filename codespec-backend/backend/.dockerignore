@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+.git/
+.venv/
+venv/
+workspace/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+tests/
+test_samples/
+clean_test_output.txt

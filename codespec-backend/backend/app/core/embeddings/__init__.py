@@ -1,0 +1,1 @@
+"""Local embedding providers used by semantic indexing and retrieval."""

@@ -11,6 +11,11 @@ class RepoIngestRequest(BaseModel):
     branch: Optional[str] = Field(None, description="Branch to check out (default: main)")
 
 
+class RepoIndexRequest(BaseModel):
+    """Request to re-index a repository already present in the workspace."""
+    repo_url: str = Field(..., min_length=1, max_length=2048)
+
+
 class IngestTaskResponse(BaseModel):
     """Immediate response when an ingestion task is dispatched."""
     task_id: str

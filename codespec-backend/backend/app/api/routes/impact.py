@@ -1,43 +1,41 @@
-"""
-Impact prediction routes — Module 2 placeholder.
+"""Graph-based impact analysis API."""
 
-Returns 501 Not Implemented until the LLM impact predictor is built.
-"""
-from fastapi import APIRouter
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.api.deps import get_impact_service
+from app.core.impact.service import (
+    EntityNotFoundError,
+    ImpactService,
+    ImpactStorageError,
+)
+from app.models.impact import ImpactAnalysisRequest, ImpactAnalysisResponse
 
 router = APIRouter(prefix="/impact", tags=["impact"])
 
 
-@router.get(
-    "/{repo_url:path}/function/{function_name}",
-    summary="[Module 2] Predict downstream impact of modifying a function",
+@router.post(
+    "/analyze",
+    response_model=ImpactAnalysisResponse,
+    summary="Analyze dependencies and potentially affected entities",
 )
-async def predict_impact(repo_url: str, function_name: str) -> JSONResponse:
-    return JSONResponse(
-        status_code=501,
-        content={
-            "status": "not_implemented",
-            "module": "Module 2 — Cognitive LLM & Impact Predictor",
-            "eta": "Months 4–6",
-            "description": (
-                "This endpoint will traverse the Neo4j call graph to identify "
-                "all downstream functions/classes affected by changes to "
-                f"'{function_name}' and return a risk-scored impact report."
-            ),
-        },
-    )
-
-
-@router.get(
-    "/{repo_url:path}/diff",
-    summary="[Module 2] Analyse a git diff for impact",
-)
-async def analyse_diff(repo_url: str) -> JSONResponse:
-    return JSONResponse(
-        status_code=501,
-        content={
-            "status": "not_implemented",
-            "module": "Module 2 — Cognitive LLM & Impact Predictor",
-        },
-    )
+async def analyze_impact(
+    body: ImpactAnalysisRequest,
+    service: ImpactService = Depends(get_impact_service),
+) -> ImpactAnalysisResponse:
+    try:
+        return service.analyze(
+            repo_url=body.repo_url,
+            entity_kind=body.entity_kind,
+            entity_id=body.entity_id,
+            max_depth=body.max_depth,
+            limit=body.limit,
+        )
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Entity not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except ImpactStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Impact graph is temporarily unavailable",
+        ) from exc

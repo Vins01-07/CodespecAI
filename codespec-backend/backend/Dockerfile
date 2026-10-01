@@ -13,10 +13,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
+ARG INSTALL_EMBEDDING_DEPS=false
+
 # Install Python dependencies first (cache layer)
 COPY requirements.txt .
+COPY requirements-embeddings.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r requirements.txt \
+    && if [ "$INSTALL_EMBEDDING_DEPS" = "true" ]; then pip install --no-cache-dir -r requirements-embeddings.txt; fi
 
 # Copy application source
 COPY app/ ./app/
