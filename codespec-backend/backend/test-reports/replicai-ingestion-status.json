@@ -1,0 +1,21 @@
+{
+    "task_id":  "82e8af3a-e29e-42ad-a0cc-ffd538b23148",
+    "status":  "SUCCESS",
+    "result":  {
+                   "repo_url":  "https://github.com/RajDalvi08/replicai",
+                   "repo_name":  "replicai",
+                   "branch":  "main",
+                   "files_scanned":  103,
+                   "files_parsed":  103,
+                   "semantic_index_task_id":  "d590cc20-c27d-44c5-8c7b-c884d60279f4",
+                   "files":  103,
+                   "functions":  461,
+                   "classes":  103,
+                   "imports_linked":  226,
+                   "calls_linked":  465,
+                   "instantiates_linked":  160,
+                   "uses_linked":  284,
+                   "extends_linked":  12
+               },
+    "error":  null
+}

@@ -16,13 +16,13 @@ import logging
 import hashlib
 from pathlib import Path
 
-from celery import shared_task
 import httpx
 from redis import Redis
 from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import TimeoutError as RedisTimeoutError
 
 from app.config import settings
+from app.workers.celery_app import celery_app
 from app.core.graph.builder import GraphBuilder
 from app.core.ingestion.git_fetcher import GitFetcher
 from app.core.ingestion.scanner import RepoScanner
@@ -106,7 +106,7 @@ def _run_pipeline(
 # Tasks
 # ---------------------------------------------------------------------------
 
-@shared_task(
+@celery_app.task(
     bind=True,
     name="codespec.ingest_git_repo",
     max_retries=3,
@@ -139,7 +139,7 @@ def ingest_git_repo(self, repo_url: str, branch: str = "main") -> dict:
         raise self.retry(exc=exc) from exc
 
 
-@shared_task(
+@celery_app.task(
     bind=True,
     name="codespec.ingest_zip_repo",
     max_retries=2,
@@ -178,7 +178,7 @@ def ingest_zip_repo(self, zip_path: str, repo_name: str) -> dict:
         raise self.retry(exc=exc) from exc
 
 
-@shared_task(
+@celery_app.task(
     bind=True,
     name="codespec.index_repository",
     max_retries=3,
