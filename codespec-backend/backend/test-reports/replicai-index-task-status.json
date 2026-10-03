@@ -1,0 +1,6 @@
+{
+    "task_id":  "d590cc20-c27d-44c5-8c7b-c884d60279f4",
+    "status":  "FAILURE",
+    "result":  null,
+    "error":  "BGE-M3 model could not be loaded"
+}
