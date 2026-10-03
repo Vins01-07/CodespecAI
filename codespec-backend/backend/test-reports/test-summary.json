@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-03",
+  "overall": {
+    "host_pytest": "PASS: 50 passed, 2 warnings",
+    "docker_pytest": "PASS: 50 passed, 2 warnings"
+  },
+  "areas": [
+    {
+      "area": "Ingestion",
+      "result": "PASS: 6 passed",
+      "log": "ingestion.txt"
+    },
+    {
+      "area": "Tree-sitter",
+      "result": "PASS: 21 passed",
+      "log": "tree-sitter.txt"
+    },
+    {
+      "area": "Embedding, Qdrant, chunking",
+      "result": "PASS: 14 passed, 1 warning",
+      "log": "embedding-qdrant-chunking.txt"
+    },
+    {
+      "area": "Relationship extraction, Neo4j impact",
+      "result": "PASS: 3 passed; live GraphBuilder CALLS edge verified",
+      "log": "relationship-neo4j-impact.txt"
+    },
+    {
+      "area": "FastAPI, Celery",
+      "result": "PASS: 7 passed; live API and both Celery queues verified",
+      "log": "fastapi-celery.txt"
+    },
+    {
+      "area": "GraphRAG",
+      "result": "PASS: 3 passed; model inference not run",
+      "log": "graphrag.txt"
+    }
+  ],
+  "live_checks": {
+    "api_health": "PASS: status=ok, vector_store=ready",
+    "api_docs": "PASS: HTTP 200",
+    "redis": "PASS: PONG",
+    "neo4j": "PASS: RETURN 1 and one real CALLS relationship",
+    "qdrant": "PASS: healthz plus repository-filtered vector upsert/search",
+    "celery": "PASS: celery and embeddings workers both pong",
+    "compose": "PASS: infrastructure healthy and config parses"
+  },
+  "limitations": [
+    "BGE-M3 inference was not run; model dependencies and weights were not provisioned.",
+    "No indexing task was submitted to the embeddings worker.",
+    "The project-local backend .env is absent; API and worker test containers used explicit development environment values."
+  ],
+  "artifact": "backend-verification-report.pdf"
+}
