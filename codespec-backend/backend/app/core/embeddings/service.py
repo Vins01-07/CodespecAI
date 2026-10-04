@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from app.config import settings
+from app.core.embeddings.provision import resolve_model_snapshot
 
 logger = logging.getLogger(__name__)
 
@@ -86,22 +87,34 @@ class BGEM3EmbeddingProvider:
         if self._model is not None:
             return self._model
         try:
-            Path(self.cache_dir).mkdir(parents=True, exist_ok=True)
-            os.environ.setdefault("HF_HOME", self.cache_dir)
-            os.environ.setdefault("TRANSFORMERS_CACHE", self.cache_dir)
-            if self.local_files_only:
-                os.environ["HF_HUB_OFFLINE"] = "1"
-                os.environ["TRANSFORMERS_OFFLINE"] = "1"
+            cache_dir = str(Path(self.cache_dir).expanduser().resolve())
+            Path(cache_dir).mkdir(parents=True, exist_ok=True)
+            os.environ["HF_HOME"] = cache_dir
+            os.environ["HF_HUB_CACHE"] = cache_dir
+            os.environ["TRANSFORMERS_CACHE"] = cache_dir
+            offline = "1" if self.local_files_only else "0"
+            os.environ["HF_HUB_OFFLINE"] = offline
+            os.environ["TRANSFORMERS_OFFLINE"] = offline
+            model_source = str(
+                resolve_model_snapshot(
+                    self.model_path,
+                    cache_dir,
+                    local_files_only=self.local_files_only,
+                )
+            )
             if self._model_factory is None:
                 from FlagEmbedding import BGEM3FlagModel
 
                 factory = BGEM3FlagModel
             else:
                 factory = self._model_factory
-            model_options = {"use_fp16": self.device.lower().startswith("cuda")}
+            model_options = {
+                "use_fp16": self.device.lower().startswith("cuda"),
+                "cache_dir": cache_dir,
+            }
             if self.device.lower() != "auto":
                 model_options["devices"] = [self.device]
-            self._model = factory(self.model_path, **model_options)
+            self._model = factory(model_source, **model_options)
         except Exception as exc:
             logger.warning("BGE-M3 model unavailable (%s)", type(exc).__name__)
             raise EmbeddingError("BGE-M3 model could not be loaded") from exc
