@@ -1,0 +1,6 @@
+Docker Engine 29.8.0 reachable.
+Compose infrastructure: Neo4j healthy, Redis healthy, Qdrant healthy.
+Containerized FastAPI: /health status=ok, vector_store=ready; /docs HTTP 200.
+Celery: celery queue and embeddings queue workers responded pong.
+The full Compose application stack was not launched as one project because backend/.env is absent; API and workers were started with explicit development settings.
+BGE-M3 model inference was not run because model dependencies and weights were not provisioned.

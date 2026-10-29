@@ -375,6 +375,25 @@ CodespecAI/
 
 ---
 
+## Local BGE-M3 provisioning
+
+The current backend uses `BAAI/bge-m3` for local dense embeddings. Install the backend and embedding dependencies, then run the provisioning command from `codespec-backend/backend`:
+
+```sh
+pip install -r requirements-embeddings.txt
+python -m app.core.embeddings.provision
+```
+
+The command downloads the configured `EMBEDDING_MODEL_PATH` into `EMBEDDING_CACHE_DIR` using the Hugging Face cache layout consumed by `BGEM3FlagModel`. With the defaults, the cache is `codespec-backend/backend/workspace/model-cache`. Provisioning is the only step that needs Hugging Face network access; runtime inference remains `EMBEDDING_LOCAL_FILES_ONLY=True` and loads from that cache. Keep the same model ID and cache directory in the runtime environment.
+
+For the Compose embedding worker, run the same command through the worker service from `codespec-backend` so the model is written to its persistent `/models` volume:
+
+```sh
+docker compose run --rm --no-deps embedding-worker python -m app.core.embeddings.provision
+```
+
+---
+
 ## 12. Testing
 
 The backend includes a comprehensive automated test suite covering all layers of the system.

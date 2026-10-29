@@ -1,0 +1,1 @@
+"""Repository-to-vector indexing orchestration."""
