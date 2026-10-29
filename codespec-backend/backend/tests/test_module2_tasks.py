@@ -12,12 +12,18 @@ from app.workers.celery_app import celery_app
 
 
 def test_graph_ingestion_enqueues_separate_index_task(monkeypatch, tmp_path: Path):
-    monkeypatch.setattr(tasks._scanner, "scan", lambda root: [])
-    monkeypatch.setattr(tasks._registry, "parse_files", lambda paths, base_dir: [])
+    dummy_file = tmp_path / "app.py"
+    dummy_file.write_text("print('test')")
+    monkeypatch.setattr(tasks._scanner, "scan", lambda root: [dummy_file])
+    monkeypatch.setattr(
+        tasks._registry,
+        "parse_files",
+        lambda paths, base_dir: [SimpleNamespace(path="app.py", language="python", functions=[], classes=[], imports=[])],
+    )
     monkeypatch.setattr(
         tasks._builder,
         "ingest_full_repo",
-        lambda *args: {"files": 0, "functions": 0, "classes": 0},
+        lambda *args: {"files": 1, "functions": 0, "classes": 0},
     )
     enqueued = []
     monkeypatch.setattr(
@@ -30,6 +36,21 @@ def test_graph_ingestion_enqueues_separate_index_task(monkeypatch, tmp_path: Pat
 
     assert result["semantic_index_task_id"] == "index-id"
     assert enqueued == [(str(tmp_path), "repo-url")]
+
+
+def test_graph_ingestion_rejects_empty_repository(monkeypatch, tmp_path: Path):
+    monkeypatch.setattr(tasks._scanner, "scan", lambda root: [])
+    with pytest.raises(ValueError, match="No supported source files found"):
+        tasks._run_pipeline(tmp_path, "repo-url", "repo-name", branch="main")
+
+
+def test_graph_ingestion_rejects_unparseable_repository(monkeypatch, tmp_path: Path):
+    dummy_file = tmp_path / "corrupt.py"
+    dummy_file.write_text("...")
+    monkeypatch.setattr(tasks._scanner, "scan", lambda root: [dummy_file])
+    monkeypatch.setattr(tasks._registry, "parse_files", lambda paths, base_dir: [])
+    with pytest.raises(ValueError, match="Failed to parse any source files"):
+        tasks._run_pipeline(tmp_path, "repo-url", "repo-name", branch="main")
 
 
 def test_celery_routes_indexing_to_dedicated_queue():

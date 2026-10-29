@@ -75,9 +75,21 @@ def _run_pipeline(
     file_paths = _scanner.scan(repo_dir)
     logger.info("Found %d source files", len(file_paths))
 
+    if not file_paths:
+        raise ValueError(
+            f"No supported source files found in repository '{repo_name}' (branch '{branch}'). "
+            "Ingestion cannot proceed on an empty or non-code repository."
+        )
+
     logger.info("Parsing source files …")
     summaries = _registry.parse_files(file_paths, base_dir=repo_dir)
     logger.info("Parsed %d / %d files successfully", len(summaries), len(file_paths))
+
+    if not summaries:
+        raise ValueError(
+            f"Failed to parse any source files in repository '{repo_name}' (branch '{branch}'). "
+            "Ingestion cannot proceed."
+        )
 
     logger.info("Building Neo4j graph …")
     stats = _builder.ingest_full_repo(repo_url, repo_name, branch, summaries)
@@ -127,13 +139,16 @@ def ingest_git_repo(self, repo_url: str, branch: str = "main") -> dict:
         # GitFetcher.__init__ accepts `workspace` as a Path
         fetcher = GitFetcher(workspace=Path(settings.REPO_WORKSPACE_DIR))
         repo_dir: Path = fetcher.fetch(repo_url, branch=branch)
-        repo_name = repo_url.rstrip("/").split("/")[-1].removesuffix(".git")
+        repo_name = repo_url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
         return _run_pipeline(
             repo_dir=repo_dir,
             repo_url=repo_url,
             repo_name=repo_name,
             branch=branch,
         )
+    except ValueError as exc:
+        logger.error("ingest_git_repo rejected: %s", exc)
+        raise exc
     except Exception as exc:
         logger.error("ingest_git_repo failed: %s", exc, exc_info=True)
         raise self.retry(exc=exc) from exc
@@ -173,6 +188,9 @@ def ingest_zip_repo(self, zip_path: str, repo_name: str) -> dict:
             repo_name=repo_name,
             branch="local",
         )
+    except ValueError as exc:
+        logger.error("ingest_zip_repo rejected: %s", exc)
+        raise exc
     except Exception as exc:
         logger.error("ingest_zip_repo failed: %s", exc, exc_info=True)
         raise self.retry(exc=exc) from exc

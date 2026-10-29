@@ -1,4 +1,4 @@
-"""Qdrant adapter with mandatory repository filtering and safe initialization."""
+"""Qdrant adapter with mandatory repository filtering, dynamic batching, and schema validation."""
 
 from __future__ import annotations
 
@@ -6,8 +6,11 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
+from pydantic import ValidationError
+
 from app.config import settings
 from app.core.chunking.models import CodeChunk
+from app.core.vectors.schemas import ChunkPayloadSchema
 
 
 class VectorStoreError(RuntimeError):
@@ -32,9 +35,11 @@ class QdrantVectorStore:
         url: str = settings.QDRANT_URL,
         api_key: str | None = settings.QDRANT_API_KEY,
         timeout: float = settings.QDRANT_TIMEOUT_SECONDS,
+        upsert_batch_size: int = settings.QDRANT_UPSERT_BATCH_SIZE,
     ) -> None:
         self.collection_name = collection_name
         self.vector_size = vector_size
+        self.upsert_batch_size = upsert_batch_size
         self._client = client
         self._client_options = {"url": url, "api_key": api_key, "timeout": timeout}
 
@@ -92,37 +97,52 @@ class QdrantVectorStore:
         except Exception as exc:
             raise VectorStoreError("Qdrant collection initialization failed") from exc
 
-    def upsert(self, chunks: list[CodeChunk], vectors: list[list[float]]) -> None:
+    def upsert(
+        self,
+        chunks: list[CodeChunk],
+        vectors: list[list[float]],
+        batch_size: int | None = None,
+    ) -> None:
         if len(chunks) != len(vectors):
             raise ValueError("Each chunk must have exactly one embedding")
         models = self._models()
+        batch_limit = batch_size or self.upsert_batch_size
         points = []
+
         for chunk, vector in zip(chunks, vectors, strict=True):
             self._validate_vector(vector)
+            raw_payload = {
+                "repository_id": chunk.repository_id,
+                "file_path": chunk.file_path,
+                "entity_id": chunk.entity_id,
+                "entity_name": chunk.entity_name,
+                "entity_type": chunk.entity_type,
+                "language": chunk.language,
+                "start_line": chunk.start_line,
+                "end_line": chunk.end_line,
+                "chunk_index": chunk.chunk_index,
+                "content_hash": chunk.content_hash,
+                "file_revision": chunk.file_revision,
+                "text": chunk.text,
+            }
+            try:
+                validated_payload = ChunkPayloadSchema.model_validate(raw_payload).model_dump()
+            except ValidationError as exc:
+                raise VectorStoreError(f"Chunk payload validation failed: {exc}") from exc
+
             points.append(
                 models.PointStruct(
                     id=chunk.chunk_id,
                     vector={"dense": vector},
-                    payload={
-                        "repository_id": chunk.repository_id,
-                        "file_path": chunk.file_path,
-                        "entity_id": chunk.entity_id,
-                        "entity_name": chunk.entity_name,
-                        "entity_type": chunk.entity_type,
-                        "language": chunk.language,
-                        "start_line": chunk.start_line,
-                        "end_line": chunk.end_line,
-                        "chunk_index": chunk.chunk_index,
-                        "content_hash": chunk.content_hash,
-                        "file_revision": chunk.file_revision,
-                        "text": chunk.text,
-                    },
+                    payload=validated_payload,
                 )
             )
+
         try:
-            if points:
+            for i in range(0, len(points), batch_limit):
+                batch = points[i : i + batch_limit]
                 self.client.upsert(
-                    collection_name=self.collection_name, points=points, wait=True
+                    collection_name=self.collection_name, points=batch, wait=True
                 )
         except Exception as exc:
             raise VectorStoreError("Qdrant upsert failed") from exc
@@ -130,6 +150,8 @@ class QdrantVectorStore:
     def delete_stale_file_revision(
         self, repository_key: str, file_path: str, current_revision: str
     ) -> None:
+        if not repository_key or not str(repository_key).strip():
+            raise ValueError("Repository filter is required for vector delete")
         models = self._models()
         selector = models.FilterSelector(
             filter=models.Filter(
@@ -151,15 +173,21 @@ class QdrantVectorStore:
         self._delete(selector)
 
     def delete_file(self, repository_key: str, file_path: str) -> None:
+        if not repository_key or not str(repository_key).strip():
+            raise ValueError("Repository filter is required for vector delete")
         self._delete_filter(
             repository_key,
             models_filter={"file_path": file_path},
         )
 
     def delete_repository(self, repository_key: str) -> None:
+        if not repository_key or not str(repository_key).strip():
+            raise ValueError("Repository filter is required for vector delete")
         self._delete_filter(repository_key)
 
     def _delete_filter(self, repository_key: str, models_filter: dict[str, str] | None = None) -> None:
+        if not repository_key or not str(repository_key).strip():
+            raise ValueError("Repository filter is required for vector delete")
         models = self._models()
         conditions = [
             models.FieldCondition(
@@ -186,7 +214,7 @@ class QdrantVectorStore:
         score_threshold: float = 0.0,
     ) -> list[VectorHit]:
         self._validate_vector(vector)
-        if not repository_key:
+        if not repository_key or not str(repository_key).strip():
             raise ValueError("Repository filter is required for vector search")
         models = self._models()
         query_filter = models.Filter(
@@ -216,7 +244,7 @@ class QdrantVectorStore:
     def get_chunks_for_entities(
         self, repository_key: str, entity_ids: list[str], limit: int = 500
     ) -> list[VectorHit]:
-        if not repository_key or not entity_ids:
+        if not repository_key or not str(repository_key).strip() or not entity_ids:
             return []
         models = self._models()
         scroll_filter = models.Filter(
@@ -252,6 +280,8 @@ class QdrantVectorStore:
         return hits[:limit]
 
     def list_repository_files(self, repository_key: str) -> set[str]:
+        if not repository_key or not str(repository_key).strip():
+            raise ValueError("Repository filter is required for vector scan")
         models = self._models()
         file_paths: set[str] = set()
         offset = None

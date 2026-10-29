@@ -60,6 +60,37 @@ services:
       timeout: 5s
       retries: 10
 
+ 
+  # ─── Hugging Face Text Embeddings Inference (TEI) ────────────────────────
+  tei:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.9
+    container_name: codespec-tei
+    command:
+      - "--model-id"
+      - "BAAI/bge-m3"
+      - "--port"
+      - "80"
+      - "--max-batch-tokens"
+      - "4096"
+      - "--tokenization-workers"
+      - "2"
+      - "--max-concurrent-requests"
+      - "64"
+    environment:
+      PORT: 80
+      HUGGINGFACE_HUB_CACHE: /data
+    volumes:
+      - embedding_model_cache:/data
+    ports:
+      - "8081:80"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    restart: unless-stopped
+
   # ─── FastAPI Backend ─────────────────────────────────────────────────────
   backend:
     build:
@@ -81,9 +112,11 @@ services:
       REPO_WORKSPACE_DIR: /app/workspace/repos
       QDRANT_URL: http://qdrant:6333
       EMBEDDING_CACHE_DIR: /models
+      TEI_ENDPOINT: http://tei:80
     volumes:
       - ./backend/app:/app/app          # hot-reload: mount source
       - repo_workspace:/app/workspace/repos
+      - embedding_model_cache:/models
     depends_on:
       neo4j:
         condition: service_healthy
@@ -146,6 +179,7 @@ services:
       REPO_WORKSPACE_DIR: /app/workspace/repos
       QDRANT_URL: http://qdrant:6333
       EMBEDDING_CACHE_DIR: /models
+      TEI_ENDPOINT: http://tei:80
     volumes:
       - ./backend/app:/app/app
       - repo_workspace:/app/workspace/repos
@@ -169,3 +203,5 @@ volumes:
   repo_workspace:
   qdrant_data:
   embedding_model_cache:
+
+

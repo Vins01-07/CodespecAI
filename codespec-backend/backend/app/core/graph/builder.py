@@ -413,7 +413,7 @@ class GraphBuilder:
             """
             MERGE (r:Repository {url: $url})
             ON CREATE SET r.name = $name, r.branch = $branch, r.created_at = timestamp()
-            ON MATCH  SET r.branch = $branch, r.updated_at = timestamp()
+            ON MATCH  SET r.name = $name, r.branch = $branch, r.updated_at = timestamp()
             """,
             url=repo_url,
             name=repo_name,

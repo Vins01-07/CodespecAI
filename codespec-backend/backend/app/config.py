@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     EMBEDDING_CACHE_DIR: str = "./workspace/model-cache"
     EMBEDDING_BATCH_SIZE: int = Field(default=8, ge=1, le=128)
     EMBEDDING_MAX_LENGTH: int = Field(default=1024, ge=16, le=8192)
+    TEI_ENDPOINT: str | None = None
+    TEI_TIMEOUT_SECONDS: float = Field(default=5.0, gt=0)
+    EMBEDDING_PROVIDER: str = "dual"  # "dual", "tei", "local"
+
+    QDRANT_UPSERT_BATCH_SIZE: int = Field(default=64, ge=1, le=512)
 
     INDEX_MAX_CHUNK_CHARS: int = Field(default=1800, ge=100, le=20000)
     INDEX_CHUNK_OVERLAP_LINES: int = Field(default=2, ge=0, le=100)
@@ -43,6 +48,10 @@ class Settings(BaseSettings):
     IMPACT_MAX_RESULTS: int = Field(default=200, ge=1, le=1000)
     INDEX_LOCK_TIMEOUT_SECONDS: int = Field(default=3600, ge=60)
     INDEX_LOCK_WAIT_SECONDS: int = Field(default=30, ge=1, le=300)
+
+    NEO4J_QUERY_TIMEOUT_SECONDS: float = Field(default=15.0, gt=0)
+    REDIS_CACHE_ENABLED: bool = True
+    REDIS_CACHE_TTL_SECONDS: int = Field(default=3600, ge=1)
 
     @field_validator("EMBEDDING_DEVICE")
     @classmethod

@@ -1,4 +1,4 @@
-"""Hybrid retrieval and source-grounded context assembly."""
+"""Hybrid retrieval with Reciprocal Rank Fusion (RRF) and Redis context caching."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from app.core.embeddings.service import EmbeddingError, EmbeddingProvider
 from app.core.repository_identity import repository_id
+from app.core.retrieval.cache import RedisContextCache
 from app.core.retrieval.graph import GraphRetrievalError, Neo4jGraphRetriever
 from app.core.vectors.store import QdrantVectorStore, VectorHit, VectorStoreError
 from app.models.retrieval import (
@@ -31,11 +32,19 @@ class HybridRetrievalService:
         vector_store: QdrantVectorStore,
         graph_retriever: Neo4jGraphRetriever,
         score_threshold: float = 0.0,
+        cache: RedisContextCache | None = None,
+        rrf_k: int = 60,
+        semantic_weight: float = 1.0,
+        graph_weight: float = 1.0,
     ) -> None:
         self.embedding_provider = embedding_provider
         self.vector_store = vector_store
         self.graph_retriever = graph_retriever
         self.score_threshold = score_threshold
+        self.cache = cache
+        self.rrf_k = rrf_k
+        self.semantic_weight = semantic_weight
+        self.graph_weight = graph_weight
 
     def search(
         self,
@@ -51,6 +60,23 @@ class HybridRetrievalService:
         graph_depth = min(max(graph_depth, 0), 4)
         max_context_chars = min(max(max_context_chars, 100), 200000)
         repo_id = repository_id(repo_url)
+
+        # 1. Check Redis Context Cache for warm sub-250ms response
+        cache_key: str | None = None
+        if self.cache and self.cache.enabled:
+            cache_key = self.cache.generate_key(
+                repo_id=repo_id,
+                query=query,
+                top_k=top_k,
+                graph_depth=graph_depth,
+                max_context_chars=max_context_chars,
+            )
+            cached_result = self.cache.get(cache_key)
+            if cached_result is not None:
+                logger.debug("Cache hit for context query on repo %s", repo_id)
+                return cached_result
+
+        # 2. Execute Hybrid Retrieval Pipeline
         try:
             query_vector = self.embedding_provider.embed_texts([query])[0]
             semantic_hits = self.vector_store.search(
@@ -134,13 +160,20 @@ class HybridRetrievalService:
                 )
             )
             truncated = truncated or content_truncated
-        return HybridRetrievalResponse(
+
+        response = HybridRetrievalResponse(
             repository_id=repo_id,
             query_id=uuid4().hex,
             items=context_items,
             graph_evidence=graph_evidence,
             truncated=truncated,
         )
+
+        # 3. Store in warm Redis cache
+        if self.cache and self.cache.enabled and cache_key:
+            self.cache.set(cache_key, response)
+
+        return response
 
     @staticmethod
     def _candidate(candidates: dict[str, dict], hit: VectorHit) -> dict:
@@ -149,11 +182,13 @@ class HybridRetrievalService:
             {"point_id": hit.point_id, "payload": hit.payload, "graph_paths": []},
         )
 
-    @staticmethod
-    def _rrf_score(candidate: dict, constant: int = 60) -> float:
+    def _rrf_score(self, candidate: dict, constant: int | None = None) -> float:
+        k = constant if constant is not None else getattr(self, "rrf_k", 60)
+        sem_weight = getattr(self, "semantic_weight", 1.0)
+        gr_weight = getattr(self, "graph_weight", 1.0)
         score = 0.0
         if candidate.get("semantic_rank") is not None:
-            score += 1.0 / (constant + candidate["semantic_rank"])
+            score += sem_weight / (k + candidate["semantic_rank"])
         if candidate.get("graph_rank") is not None:
-            score += 1.0 / (constant + candidate["graph_rank"])
+            score += gr_weight / (k + candidate["graph_rank"])
         return score
