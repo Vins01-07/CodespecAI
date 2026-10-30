@@ -1,3 +1,4 @@
+
 """
 Celery tasks for asynchronous repository ingestion.
 
@@ -5,15 +6,15 @@ Two entry-point tasks:
   ingest_git_repo  — clone/pull a git repository then parse + graph-build
   ingest_zip_repo  — unpack an uploaded zip then parse + graph-build
 
-Both tasks share the same _run_pipeline() helper which:
+Both tasks share the _run_pipeline() helper which:
   1. Scans files via RepoScanner
   2. Parses each file via ParserRegistry
   3. Builds/updates the Neo4j graph via GraphBuilder
+  4. Enqueues semantic indexing into Qdrant using TEI embeddings
 """
 from __future__ import annotations
 
 import logging
-import hashlib
 from pathlib import Path
 
 import httpx
@@ -23,23 +24,35 @@ from redis.exceptions import TimeoutError as RedisTimeoutError
 
 from app.config import settings
 from app.workers.celery_app import celery_app
+
 from app.core.graph.builder import GraphBuilder
 from app.core.ingestion.git_fetcher import GitFetcher
 from app.core.ingestion.scanner import RepoScanner
 from app.core.ingestion.zip_handler import ZipHandler
 from app.core.parser.registry import ParserRegistry
+
 from app.core.chunking.service import CodeChunker
-from app.core.embeddings.service import BGEM3EmbeddingProvider
+
+from app.core.embeddings.service import (
+    BGEM3EmbeddingProvider,
+    DualModeEmbeddingProvider,
+    TEIEmbeddingProvider,
+)
+
 from app.core.indexing.service import RepositoryIndexingService
 from app.core.indexing.lock import RedisRepositoryLock, RepositoryLockBusy
+
 from app.core.vectors.indexer import SemanticIndexer
 from app.core.vectors.store import QdrantVectorStore
 from app.core.vectors.store import VectorStoreError
+
 
 logger = logging.getLogger(__name__)
 
 
 def _is_retryable_index_error(error: Exception) -> bool:
+    """Identify transient errors that are safe to retry."""
+
     transient_errors = (
         httpx.TransportError,
         RedisConnectionError,
@@ -48,11 +61,14 @@ def _is_retryable_index_error(error: Exception) -> bool:
         ConnectionError,
         RepositoryLockBusy,
     )
+
     if isinstance(error, transient_errors):
         return True
+
     return isinstance(error, VectorStoreError) and isinstance(
         error.__cause__, transient_errors
     )
+
 
 # Module-level singletons (created once per worker process)
 _scanner = RepoScanner()
@@ -60,8 +76,44 @@ _registry = ParserRegistry()
 _builder = GraphBuilder()
 
 
+def _build_embedding_provider() -> DualModeEmbeddingProvider:
+    """
+    Construct the configured embedding provider.
+
+    TEI is used when TEI_ENDPOINT is configured.
+    Local BGE-M3 is retained as a fallback for dual mode.
+    In TEI mode, failures are reported instead of falling back
+    to the local model.
+    """
+
+    mode = settings.EMBEDDING_PROVIDER.lower()
+    tei_provider = (
+        TEIEmbeddingProvider(endpoint=settings.TEI_ENDPOINT)
+        if settings.TEI_ENDPOINT
+        else None
+    )
+
+    if mode == "tei":
+        if tei_provider is None:
+            raise RuntimeError(
+                "EMBEDDING_PROVIDER is set to 'tei', "
+                "but TEI_ENDPOINT is not configured."
+            )
+        local_provider = None
+    elif mode == "local":
+        local_provider = BGEM3EmbeddingProvider()
+    else:  # dual mode
+        local_provider = BGEM3EmbeddingProvider()
+
+    return DualModeEmbeddingProvider(
+        tei_provider=tei_provider,
+        local_provider=local_provider,
+        mode=mode,
+    )
+
+
 # ---------------------------------------------------------------------------
-# Shared pipeline
+# Shared ingestion pipeline
 # ---------------------------------------------------------------------------
 
 def _run_pipeline(
@@ -70,38 +122,69 @@ def _run_pipeline(
     repo_name: str,
     branch: str = "main",
 ) -> dict:
-    """Scan → parse → graph-build for a directory that is already on disk."""
-    logger.info("Scanning %s …", repo_dir)
+    """Scan → parse → graph-build for a directory already on disk."""
+
+    logger.info("Scanning repository: %s", repo_dir)
+
     file_paths = _scanner.scan(repo_dir)
+
     logger.info("Found %d source files", len(file_paths))
 
     if not file_paths:
         raise ValueError(
-            f"No supported source files found in repository '{repo_name}' (branch '{branch}'). "
-            "Ingestion cannot proceed on an empty or non-code repository."
+            f"No supported source files found in repository '{repo_name}' "
+            f"(branch '{branch}'). Ingestion cannot proceed."
         )
 
-    logger.info("Parsing source files …")
-    summaries = _registry.parse_files(file_paths, base_dir=repo_dir)
-    logger.info("Parsed %d / %d files successfully", len(summaries), len(file_paths))
+    logger.info("Parsing source files...")
+
+    summaries = _registry.parse_files(
+        file_paths,
+        base_dir=repo_dir,
+    )
+
+    logger.info(
+        "Parsed %d / %d files successfully",
+        len(summaries),
+        len(file_paths),
+    )
 
     if not summaries:
         raise ValueError(
-            f"Failed to parse any source files in repository '{repo_name}' (branch '{branch}'). "
-            "Ingestion cannot proceed."
+            f"Failed to parse any source files in repository '{repo_name}' "
+            f"(branch '{branch}'). Ingestion cannot proceed."
         )
 
-    logger.info("Building Neo4j graph …")
-    stats = _builder.ingest_full_repo(repo_url, repo_name, branch, summaries)
+    logger.info("Building Neo4j graph...")
+
+    stats = _builder.ingest_full_repo(
+        repo_url,
+        repo_name,
+        branch,
+        summaries,
+    )
+
     logger.info("Graph build complete: %s", stats)
 
     semantic_index_task_id = None
+
     try:
         semantic_index_task_id = index_repository_task.delay(
-            str(repo_dir), repo_url
+            str(repo_dir),
+            repo_url,
         ).id
+
+        logger.info(
+            "Semantic indexing task queued: %s",
+            semantic_index_task_id,
+        )
+
     except Exception as exc:
-        logger.warning("Could not enqueue semantic indexing (%s)", type(exc).__name__)
+        logger.warning(
+            "Could not enqueue semantic indexing (%s)",
+            type(exc).__name__,
+            exc_info=True,
+        )
 
     return {
         "repo_url": repo_url,
@@ -115,7 +198,7 @@ def _run_pipeline(
 
 
 # ---------------------------------------------------------------------------
-# Tasks
+# Git repository ingestion
 # ---------------------------------------------------------------------------
 
 @celery_app.task(
@@ -126,33 +209,51 @@ def _run_pipeline(
 )
 def ingest_git_repo(self, repo_url: str, branch: str = "main") -> dict:
     """
-    Clone (or pull) a git repository and run the full ingestion pipeline.
-
-    Args:
-        repo_url: Public or authenticated HTTPS/SSH clone URL.
-        branch:   Git branch to check out (default: 'main').
-
-    Returns:
-        Ingestion stats dict.
+    Clone or update a Git repository and execute the ingestion pipeline.
     """
+
     try:
-        # GitFetcher.__init__ accepts `workspace` as a Path
-        fetcher = GitFetcher(workspace=Path(settings.REPO_WORKSPACE_DIR))
-        repo_dir: Path = fetcher.fetch(repo_url, branch=branch)
-        repo_name = repo_url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".git")
+        fetcher = GitFetcher(
+            workspace=Path(settings.REPO_WORKSPACE_DIR)
+        )
+
+        repo_dir: Path = fetcher.fetch(
+            repo_url,
+            branch=branch,
+        )
+
+        repo_name = (
+            repo_url.rstrip("/")
+            .rsplit("/", 1)[-1]
+            .removesuffix(".git")
+        )
+
         return _run_pipeline(
             repo_dir=repo_dir,
             repo_url=repo_url,
             repo_name=repo_name,
             branch=branch,
         )
+
     except ValueError as exc:
-        logger.error("ingest_git_repo rejected: %s", exc)
-        raise exc
+        logger.error(
+            "ingest_git_repo rejected: %s",
+            exc,
+        )
+        raise
+
     except Exception as exc:
-        logger.error("ingest_git_repo failed: %s", exc, exc_info=True)
+        logger.error(
+            "ingest_git_repo failed: %s",
+            exc,
+            exc_info=True,
+        )
         raise self.retry(exc=exc) from exc
 
+
+# ---------------------------------------------------------------------------
+# ZIP repository ingestion
+# ---------------------------------------------------------------------------
 
 @celery_app.task(
     bind=True,
@@ -162,24 +263,23 @@ def ingest_git_repo(self, repo_url: str, branch: str = "main") -> dict:
 )
 def ingest_zip_repo(self, zip_path: str, repo_name: str) -> dict:
     """
-    Unpack a previously uploaded ZIP archive and run the full ingestion pipeline.
-
-    Args:
-        zip_path:  Absolute path to the ZIP file saved by the API route.
-        repo_name: Human-readable name for this repository.
-
-    Returns:
-        Ingestion stats dict.
+    Extract an uploaded ZIP archive and execute the ingestion pipeline.
     """
+
     try:
         zip_file = Path(zip_path)
         zip_bytes = zip_file.read_bytes()
 
-        # ZipHandler.extract() takes (bytes, filename) and returns (dest_path, repo_url)
-        handler = ZipHandler(workspace=Path(settings.REPO_WORKSPACE_DIR))
-        repo_dir, repo_url = handler.extract(zip_bytes, filename=repo_name)
+        handler = ZipHandler(
+            workspace=Path(settings.REPO_WORKSPACE_DIR)
+        )
 
-        # Clean up the temporary ZIP file
+        repo_dir, repo_url = handler.extract(
+            zip_bytes,
+            filename=repo_name,
+        )
+
+        # Remove the temporary ZIP after successful extraction.
         zip_file.unlink(missing_ok=True)
 
         return _run_pipeline(
@@ -188,13 +288,26 @@ def ingest_zip_repo(self, zip_path: str, repo_name: str) -> dict:
             repo_name=repo_name,
             branch="local",
         )
+
     except ValueError as exc:
-        logger.error("ingest_zip_repo rejected: %s", exc)
-        raise exc
+        logger.error(
+            "ingest_zip_repo rejected: %s",
+            exc,
+        )
+        raise
+
     except Exception as exc:
-        logger.error("ingest_zip_repo failed: %s", exc, exc_info=True)
+        logger.error(
+            "ingest_zip_repo failed: %s",
+            exc,
+            exc_info=True,
+        )
         raise self.retry(exc=exc) from exc
 
+
+# ---------------------------------------------------------------------------
+# Semantic repository indexing
+# ---------------------------------------------------------------------------
 
 @celery_app.task(
     bind=True,
@@ -202,22 +315,61 @@ def ingest_zip_repo(self, zip_path: str, repo_name: str) -> dict:
     max_retries=3,
     default_retry_delay=30,
 )
-def index_repository_task(self, repo_dir: str, repo_url: str) -> dict:
-    """Build or reconcile one repository's Qdrant index asynchronously."""
+def index_repository_task(
+    self,
+    repo_dir: str,
+    repo_url: str,
+) -> dict:
+    """
+    Build or reconcile the repository's semantic Qdrant index.
+
+    Uses the configured embedding provider:
+      - tei: TEI server only
+      - dual: TEI first, local BGE-M3 fallback
+      - local: local BGE-M3 only
+    """
+
     try:
+        logger.info(
+            "Starting semantic indexing for repository: %s",
+            repo_url,
+        )
+
+        logger.info(
+            "Embedding provider mode: %s",
+            settings.EMBEDDING_PROVIDER,
+        )
+
+        logger.info(
+            "TEI endpoint: %s",
+            settings.TEI_ENDPOINT,
+        )
+
+        # 1. Initialize Qdrant
         vector_store = QdrantVectorStore()
         vector_store.ensure_collection()
+
+        # 2. Initialize code chunker
         chunker = CodeChunker(
             max_chunk_chars=settings.INDEX_MAX_CHUNK_CHARS,
             overlap_lines=settings.INDEX_CHUNK_OVERLAP_LINES,
             min_chunk_chars=settings.INDEX_MIN_CHUNK_CHARS,
             max_file_bytes=settings.INDEX_MAX_FILE_BYTES,
         )
-        embedding_provider = BGEM3EmbeddingProvider()
+
+        # 3. Initialize configured embedding provider
+        embedding_provider = _build_embedding_provider()
+
+        # 4. Initialize Redis client and semantic indexer
         redis_client = Redis.from_url(settings.REDIS_URL)
+
         indexer = SemanticIndexer(
-            embedding_provider, vector_store, batch_size=settings.INDEX_BATCH_SIZE
+            embedding_provider,
+            vector_store,
+            batch_size=settings.INDEX_BATCH_SIZE,
         )
+
+        # 5. Initialize repository indexing service
         service = RepositoryIndexingService(
             scanner=RepoScanner(),
             parser_registry=ParserRegistry(),
@@ -231,9 +383,29 @@ def index_repository_task(self, repo_dir: str, repo_url: str) -> dict:
                 blocking_timeout=settings.INDEX_LOCK_WAIT_SECONDS,
             ),
         )
-        return service.index_repository(Path(repo_dir), repo_url)
+
+        # 6. Execute semantic indexing
+        result = service.index_repository(
+            Path(repo_dir),
+            repo_url,
+        )
+
+        logger.info(
+            "Semantic indexing completed successfully for %s",
+            repo_url,
+        )
+
+        return result
+
     except Exception as exc:
-        logger.error("Semantic indexing failed (%s)", type(exc).__name__)
+        logger.error(
+            "Semantic indexing failed (%s): %s",
+            type(exc).__name__,
+            exc,
+            exc_info=True,
+        )
+
         if _is_retryable_index_error(exc):
             raise self.retry(exc=exc) from exc
+
         raise

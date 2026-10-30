@@ -215,7 +215,13 @@ class DualModeEmbeddingProvider:
     ) -> None:
         self.mode = mode.lower()
         self.tei_provider = tei_provider
-        self.local_provider = local_provider or LocalEmbeddingProvider()
+        self._local_provider = local_provider
+
+    @property
+    def local_provider(self) -> LocalEmbeddingProvider:
+        if self._local_provider is None:
+            self._local_provider = LocalEmbeddingProvider()
+        return self._local_provider
 
     def embed_texts(self, texts: Sequence[str]) -> list[list[float]]:
         if not texts:

@@ -113,6 +113,7 @@ services:
       QDRANT_URL: http://qdrant:6333
       EMBEDDING_CACHE_DIR: /models
       TEI_ENDPOINT: http://tei:80
+      EMBEDDING_PROVIDER: tei
     volumes:
       - ./backend/app:/app/app          # hot-reload: mount source
       - repo_workspace:/app/workspace/repos
@@ -180,6 +181,8 @@ services:
       QDRANT_URL: http://qdrant:6333
       EMBEDDING_CACHE_DIR: /models
       TEI_ENDPOINT: http://tei:80
+      EMBEDDING_PROVIDER: tei
+      TEI_TIMEOUT_SECONDS: "60.0"
     volumes:
       - ./backend/app:/app/app
       - repo_workspace:/app/workspace/repos
