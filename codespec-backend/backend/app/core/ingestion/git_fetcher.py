@@ -41,7 +41,8 @@ class GitFetcher:
                     origin.set_url(repo_url)
             else:
                 repo.create_remote("origin", repo_url)
-
+   
+   #fetch the targeted branch
         try:
             if target_branch:
                 logger.info(

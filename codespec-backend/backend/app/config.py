@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     EMBEDDING_BATCH_SIZE: int = Field(default=8, ge=1, le=128)
     EMBEDDING_MAX_LENGTH: int = Field(default=1024, ge=16, le=8192)
     TEI_ENDPOINT: str | None = None
-    TEI_TIMEOUT_SECONDS: float = Field(default=5.0, gt=0)
+    TEI_TIMEOUT_SECONDS: float = Field(default=60.0, gt=0)
     EMBEDDING_PROVIDER: str = "dual"  # "dual", "tei", "local"
 
     QDRANT_UPSERT_BATCH_SIZE: int = Field(default=64, ge=1, le=512)

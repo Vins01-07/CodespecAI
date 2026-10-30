@@ -55,10 +55,17 @@ class RepositoryIndexingService:
         files_indexed = 0
         chunks_indexed = 0
 
+        logger.info(
+            "Discovered %d indexable files for repository '%s'",
+            len(paths),
+            repository_key,
+        )
+
         for path in paths:
             relative_path = path.relative_to(root).as_posix()
             try:
                 if path.stat().st_size > self.max_file_bytes:
+                    logger.warning("Skipping '%s': file size exceeds max_file_bytes (%d)", relative_path, self.max_file_bytes)
                     failed_files += 1
                     continue
                 if path.suffix.lower() == ".md":
@@ -66,6 +73,7 @@ class RepositoryIndexingService:
                 else:
                     summary = self.parser_registry.parse_file(path, base_dir=root)
                     if summary is None:
+                        logger.warning("Skipping '%s': parser returned no summary", relative_path)
                         failed_files += 1
                         continue
                     chunks = self.chunker.chunk_source_file(repo_url, root, summary)
@@ -79,12 +87,25 @@ class RepositoryIndexingService:
                 indexed_paths.add(relative_path)
                 files_indexed += 1
                 chunks_indexed += chunk_count
+                logger.debug("Indexed '%s': %d chunks generated", relative_path, chunk_count)
             except ChunkingError as exc:
-                logger.warning("Repository file skipped during indexing (%s)", type(exc).__name__)
+                logger.warning("Repository file skipped during indexing (%s): %s", relative_path, exc)
+                failed_files += 1
+            except Exception as exc:
+                logger.error("Failed to index file '%s' (%s): %s", relative_path, type(exc).__name__, exc, exc_info=True)
                 failed_files += 1
 
         if failed_files == 0:
             self.vector_store.delete_missing_files(repository_key, indexed_paths)
+
+        logger.info(
+            "Repository indexing finished for '%s': %d/%d files indexed, %d chunks indexed, %d failed",
+            repository_key,
+            files_indexed,
+            len(paths),
+            chunks_indexed,
+            failed_files,
+        )
 
         return {
             "repository_id": repository_key,
