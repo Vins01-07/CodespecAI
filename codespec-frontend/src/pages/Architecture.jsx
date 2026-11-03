@@ -96,24 +96,10 @@ function Architecture() {
                         <Network size={18} strokeWidth={2} />
                     </div>
                     <div>
-                        <h1
-                            style={{
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                color: "var(--text-primary)",
-                                margin: 0,
-                                letterSpacing: "-0.3px",
-                            }}
-                        >
+                        <h1 className="premium-page-title">
                             System Architecture
                         </h1>
-                        <p
-                            style={{
-                                fontSize: "12.5px",
-                                color: "var(--text-secondary)",
-                                margin: "3px 0 0 0",
-                            }}
-                        >
+                        <p className="premium-page-subtitle">
                             Interactive topology graph, component relationships, data flow, and runtime dependencies.
                         </p>
                     </div>

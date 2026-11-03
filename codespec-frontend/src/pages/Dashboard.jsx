@@ -12,7 +12,7 @@ import useRepositoryStore from "../store/repositoryStore";
 function HeaderArchitectureIllustration() {
     return (
         <div className="header-illustration" aria-hidden="true">
-            <svg width="230" height="110" viewBox="0 0 240 120" fill="none">
+            <svg width="470" height="224" viewBox="0 0 240 120" fill="none">
                 <defs>
                     <radialGradient id="platformGlow" cx="50%" cy="50%" r="50%">
                         <stop offset="0%" stopColor="#FF3548" stopOpacity="0.65" />
@@ -233,6 +233,7 @@ function Dashboard() {
                     margin-bottom: 14px;
                     flex-wrap: wrap;
                     gap: 12px;
+                    min-height: 150px;
                 }
                 .dashboard-header-left {
                     display: flex;
@@ -241,26 +242,57 @@ function Dashboard() {
                 }
                 .dash-white {
                     color: #F5F5F7;
-                    font-size: 26px;
+                    font-size: inherit;
                     font-weight: 800;
-                    letter-spacing: -0.5px;
                 }
                 .dash-crimson {
                     color: #FF3548;
-                    font-size: 26px;
+                    font-size: inherit;
                     font-weight: 800;
-                    letter-spacing: -0.5px;
                     text-shadow: 0 0 16px rgba(255, 53, 72, 0.4);
                 }
                 .dashboard-header-right {
                     display: flex;
                     align-items: center;
                     gap: 14px;
+                    position: relative;
+                    width: 470px;
+                    height: 150px;
                 }
                 .header-illustration {
                     display: block;
                     margin-right: -6px;
                     pointer-events: none;
+                    position: absolute;
+                    right: 94px;
+                    top: 18px;
+                    z-index: 1;
+                }
+                .header-illustration svg {
+                    width: 470px;
+                    height: 224px;
+                    overflow: visible;
+                    filter: drop-shadow(0 18px 24px rgba(227, 38, 54, 0.12));
+                }
+                .filter-pill-btn {
+                    position: absolute;
+                    right: 0;
+                    top: 52px;
+                    z-index: 3;
+                }
+                .dashboard-container > .repo-header-card {
+                    position: relative;
+                    z-index: 5;
+                }
+                @media (max-width: 1200px) {
+                    .dashboard-header-right {
+                        width: 390px;
+                    }
+                    .header-illustration {
+                        right: 78px;
+                        transform: scale(0.86);
+                        transform-origin: top right;
+                    }
                 }
                 @media (max-width: 820px) {
                     .header-illustration {

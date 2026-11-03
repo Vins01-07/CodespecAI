@@ -253,24 +253,10 @@ function Dependencies() {
                         <Share2 size={20} strokeWidth={2.2} />
                     </div>
                     <div>
-                        <h1
-                            style={{
-                                fontSize: "20px",
-                                fontWeight: 700,
-                                color: "var(--text-primary)",
-                                margin: 0,
-                                letterSpacing: "-0.4px",
-                            }}
-                        >
+                        <h1 className="premium-page-title">
                             Codebase Dependencies
                         </h1>
-                        <p
-                            style={{
-                                fontSize: "12.5px",
-                                color: "var(--text-secondary)",
-                                margin: "4px 0 0 0",
-                            }}
-                        >
+                        <p className="premium-page-subtitle">
                             Inspect dependency relationships, inter-service call hierarchies, communication protocols, and architectural coupling.
                         </p>
                     </div>
