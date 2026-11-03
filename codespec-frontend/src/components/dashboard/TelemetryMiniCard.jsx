@@ -76,7 +76,7 @@ export default function TelemetryMiniCard() {
                 .mini-big-stat {
                     font-size: 26px;
                     font-weight: 800;
-                    color: #c4b5fd;
+                    color: #FF3548;
                     line-height: 1.1;
                 }
 
@@ -129,8 +129,8 @@ export default function TelemetryMiniCard() {
                 }
 
                 .mini-pill-btn.active {
-                    background: #8b5cf6;
-                    border-color: #a78bfa;
+                    background: #E32636;
+                    border-color: #d99ba5;
                     color: #ffffff;
                     font-weight: 700;
                 }

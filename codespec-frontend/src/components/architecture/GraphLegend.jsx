@@ -4,31 +4,31 @@ import { Layers, ChevronDown, ChevronUp, Globe, Server, Database, HardDrive, Net
 export const CATEGORY_CONFIG = {
     frontend: {
         label: "Frontend",
-        color: "#818cf8",
+        color: "#FF5A6E",
         description: "Web client & user interface",
         icon: Globe,
     },
     service: {
         label: "Service",
-        color: "#a78bfa",
+        color: "#FF3548",
         description: "APIs, microservices & workers",
         icon: Server,
     },
     database: {
         label: "Database",
-        color: "#c084fc",
+        color: "#10B981",
         description: "Relational & graph data stores",
         icon: Database,
     },
     cache: {
         label: "Cache",
-        color: "#f472b6",
+        color: "#F59E0B",
         description: "In-memory caches & queues",
         icon: HardDrive,
     },
     external: {
         label: "External",
-        color: "#38bdf8",
+        color: "#d7c59a",
         description: "Third-party APIs & cloud storage",
         icon: Network,
     },
@@ -41,7 +41,7 @@ function GraphLegend({ activeFilter = "all", onFilterChange, nodeCounts = {} }) 
         <div
             className="graph-legend-container"
             style={{
-                background: "rgba(20, 16, 32, 0.88)",
+                background: "#101115",
                 backdropFilter: "blur(20px)",
                 WebkitBackdropFilter: "blur(20px)",
                 border: "1px solid var(--card-border)",

@@ -34,14 +34,14 @@ export default function TrendAreaChartCard() {
                 <svg className="trend-svg" viewBox="0 0 360 140" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="trendGoldGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.38" />
-                            <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.14" />
-                            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.0" />
+                            <stop offset="0%" stopColor="#FF3548" stopOpacity="0.38" />
+                            <stop offset="50%" stopColor="#E32636" stopOpacity="0.14" />
+                            <stop offset="100%" stopColor="#9a4c61" stopOpacity="0.0" />
                         </linearGradient>
                         <linearGradient id="trendLineStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#c4b5fd" />
-                            <stop offset="60%" stopColor="#a78bfa" />
-                            <stop offset="100%" stopColor="#8b5cf6" />
+                            <stop offset="0%" stopColor="#FF3548" />
+                            <stop offset="60%" stopColor="#d99ba5" />
+                            <stop offset="100%" stopColor="#E32636" />
                         </linearGradient>
                     </defs>
 
@@ -75,8 +75,8 @@ export default function TrendAreaChartCard() {
                     />
 
                     {/* Active Highlight Points */}
-                    <circle cx="295" cy="42" r="4.5" fill="#c4b5fd" stroke="#0c0d12" strokeWidth="2" />
-                    <circle cx="295" cy="42" r="8" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.6" />
+                    <circle cx="295" cy="42" r="4.5" fill="#FF3548" stroke="#0c0d12" strokeWidth="2" />
+                    <circle cx="295" cy="42" r="8" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.6" />
                 </svg>
 
                 {/* Live Floating Metric Badge */}
@@ -161,7 +161,7 @@ export default function TrendAreaChartCard() {
                 }
 
                 .trend-pill-btn.active {
-                    background: #8b5cf6;
+                    background: #E32636;
                     color: #ffffff;
                     font-weight: 700;
                 }
@@ -197,7 +197,7 @@ export default function TrendAreaChartCard() {
                 .badge-value {
                     font-size: 13px;
                     font-weight: 800;
-                    color: #c4b5fd;
+                    color: #FF3548;
                     line-height: 1;
                 }
 
@@ -236,7 +236,7 @@ export default function TrendAreaChartCard() {
                 }
 
                 .gold-text {
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .trend-stat-divider {

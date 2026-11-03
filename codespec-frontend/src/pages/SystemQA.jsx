@@ -1,42 +1,80 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
-    MessageSquare,
+    ArrowUp,
     Send,
     FolderGit2,
-    GitBranch,
-    Bot,
-    User,
     Loader2,
-    AlertCircle,
     FileCode,
     Copy,
     Check,
     Layers,
     ChevronDown,
     ChevronUp,
-    Sparkles,
     Trash2,
-    RotateCcw,
-    Code,
-    Terminal,
-    BookOpen,
-    Lightbulb,
-    HelpCircle,
+    Sparkles,
+    Network,
+    FileText,
+    Paperclip,
+    Plus,
+    CornerDownLeft,
 } from "lucide-react";
 import useRepositoryStore from "../store/repositoryStore";
 import chatApi from "../services/chatApi";
-import Card from "../components/common/Card";
 import Badge from "../components/common/Badge";
+import IridescentOrb from "../components/chat/IridescentOrb";
 
-// ─── Suggested starter questions ────────────────────────────────────────
-const STARTER_QUESTIONS = [
-    { icon: Code, text: "How does the authentication flow work?" },
-    { icon: Layers, text: "What services does the API Gateway route to?" },
-    { icon: Terminal, text: "How does the ingestion pipeline process repositories?" },
-    { icon: BookOpen, text: "What databases are used and how are they connected?" },
+// Red Hexagonal Brand Mark Icon for CodeSpec AI in chat stream
+function BrandHexIcon({ size = 16 }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"
+                fill="#FF3548"
+            />
+            <path
+                d="M12 6L17.2 9V15L12 18L6.8 15V9L12 6Z"
+                fill="#15161B"
+            />
+            <circle cx="12" cy="12" r="2" fill="#FF3548" />
+        </svg>
+    );
+}
+
+// Three Quick Action Cards matching the reference screenshot exactly
+const HERO_ACTION_CARDS = [
+    {
+        id: "surprise",
+        icon: Sparkles,
+        title: "Surprise me!",
+        description: "Surprise me with a creative architectural insight or graph tour.",
+        prompt: "Give me an architectural breakdown of this codebase, highlighting key services, main dependencies, and unexpected patterns.",
+        accentColor: "#168CA3",
+    },
+    {
+        id: "trace",
+        icon: Network,
+        title: "Trace data flow",
+        description: "Trace requests from frontend client to gateway and database.",
+        prompt: "Trace the request flow from the React frontend client through the API Gateway, services, and down to the database and cache.",
+        accentColor: "#254D9C",
+    },
+    {
+        id: "summarise",
+        icon: FileText,
+        title: "Summarise",
+        description: "Summarise a module or audit dependencies in seconds.",
+        prompt: "Provide an executive summary of this repository: its architecture, primary dependencies, health score, and potential risks.",
+        accentColor: "#075A68",
+    },
 ];
 
-// ─── Code Snippet Component ─────────────────────────────────────────────
+// Code Snippet Component
 function CodeSnippet({ snippet, language }) {
     const [copied, setCopied] = useState(false);
 
@@ -49,68 +87,26 @@ function CodeSnippet({ snippet, language }) {
     };
 
     return (
-        <div
-            style={{
-                position: "relative",
-                background: "rgba(13, 11, 23, 0.9)",
-                border: "1px solid var(--card-border)",
-                borderRadius: "10px",
-                overflow: "hidden",
-                fontSize: "11.5px",
-                fontFamily: "'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                marginTop: "6px",
-            }}
-        >
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "6px 12px",
-                    background: "rgba(24, 20, 38, 0.8)",
-                    borderBottom: "1px solid var(--card-border)",
-                    fontSize: "10.5px",
-                    color: "var(--text-muted)",
-                }}
-            >
-                <span>{language || "code"}</span>
+        <div className="chat-code-block">
+            <div className="chat-code-header">
+                <span className="font-mono">{language || "code"}</span>
                 <button
                     type="button"
                     onClick={handleCopy}
-                    style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "3px",
-                        background: "transparent",
-                        border: "none",
-                        color: copied ? "var(--success)" : "var(--text-muted)",
-                        cursor: "pointer",
-                        fontSize: "10px",
-                        padding: "2px 4px",
-                    }}
+                    className="chat-copy-btn font-mono"
                 >
-                    {copied ? <Check size={10} /> : <Copy size={10} />}
-                    {copied ? "Copied" : "Copy"}
+                    {copied ? <Check size={11} /> : <Copy size={11} />}
+                    <span>{copied ? "Copied" : "Copy"}</span>
                 </button>
             </div>
-            <pre
-                style={{
-                    margin: 0,
-                    padding: "10px 12px",
-                    overflowX: "auto",
-                    color: "var(--text-secondary)",
-                    lineHeight: 1.5,
-                    whiteSpace: "pre-wrap",
-                    wordBreak: "break-word",
-                }}
-            >
+            <pre className="chat-code-pre">
                 {snippet}
             </pre>
         </div>
     );
 }
 
-// ─── Source Reference Card ───────────────────────────────────────────────
+// Source Reference Card
 function SourceCard({ source, index }) {
     const [expanded, setExpanded] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -132,63 +128,21 @@ function SourceCard({ source, index }) {
     };
 
     return (
-        <div
-            style={{
-                border: "1px solid var(--card-border)",
-                borderRadius: "var(--border-radius)",
-                background: "var(--sidebar-background)",
-                overflow: "hidden",
-                transition: "border-color 0.12s ease",
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--primary)")}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--card-border)")}
-        >
+        <div className="source-ref-card">
             <div
                 onClick={() => setExpanded((prev) => !prev)}
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "8px",
-                    padding: "8px 10px",
-                    cursor: "pointer",
-                }}
+                className="source-ref-header"
             >
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", minWidth: 0 }}>
-                    <span
-                        style={{
-                            width: "18px",
-                            height: "18px",
-                            borderRadius: "4px",
-                            background: "var(--active-background)",
-                            border: "1px solid var(--card-border)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: "10px",
-                            fontWeight: 700,
-                            color: "var(--primary)",
-                            flexShrink: 0,
-                        }}
-                    >
+                    <span className="source-index-num font-mono">
                         {index + 1}
                     </span>
-                    <FileCode size={13} color="var(--primary)" style={{ flexShrink: 0 }} />
-                    <span
-                        style={{
-                            fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
-                            fontSize: "11.5px",
-                            fontWeight: 500,
-                            color: "var(--text-primary)",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                        }}
-                    >
+                    <FileCode size={13} style={{ color: "var(--bright-red)", flexShrink: 0 }} />
+                    <span className="source-file-path font-mono">
                         {source.file}
                     </span>
                     {lineText && (
-                        <span style={{ color: "var(--secondary)", fontSize: "11px", fontWeight: 600, fontFamily: "monospace", flexShrink: 0 }}>
+                        <span className="source-line-num font-mono">
                             {lineText}
                         </span>
                     )}
@@ -196,56 +150,29 @@ function SourceCard({ source, index }) {
 
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
                     {source.module && (
-                        <span
-                            style={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                gap: "3px",
-                                fontSize: "10px",
-                                color: "var(--text-muted)",
-                                background: "rgba(168, 179, 154, 0.06)",
-                                padding: "1px 5px",
-                                borderRadius: "3px",
-                                border: "1px solid var(--card-border)",
-                            }}
-                        >
+                        <span className="source-module-badge font-mono">
                             <Layers size={10} />
                             {source.module}
                         </span>
-                    )}
-
-                    {source.symbol && (
-                        <Badge variant="primary" style={{ fontSize: "10px", padding: "0px 5px" }}>
-                            {source.symbol}
-                        </Badge>
                     )}
 
                     <button
                         type="button"
                         onClick={handleCopy}
                         title="Copy path"
-                        style={{
-                            background: "transparent",
-                            border: "none",
-                            color: copied ? "var(--success)" : "var(--text-muted)",
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            padding: "2px",
-                        }}
+                        className="source-icon-copy"
                     >
-                        {copied ? <Check size={12} /> : <Copy size={12} />}
+                        {copied ? <Check size={11} /> : <Copy size={11} />}
                     </button>
 
                     {source.snippet && (
-                        <span style={{ color: "var(--text-muted)", display: "flex", alignItems: "center" }}>
-                            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        <span style={{ color: "var(--secondary-text)", display: "flex", alignItems: "center" }}>
+                            {expanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         </span>
                     )}
                 </div>
             </div>
 
-            {/* Expandable code snippet */}
             {expanded && source.snippet && (
                 <CodeSnippet snippet={source.snippet} language={source.language} />
             )}
@@ -253,152 +180,58 @@ function SourceCard({ source, index }) {
     );
 }
 
-// ─── Message Bubble ─────────────────────────────────────────────────────
+// Message Bubble
 function MessageBubble({ message }) {
     const isUser = message.role === "user";
 
     return (
-        <div
-            style={{
-                display: "flex",
-                gap: "10px",
-                alignItems: "flex-start",
-                flexDirection: isUser ? "row-reverse" : "row",
-                animation: "fadeSlideIn 0.25s ease-out",
-            }}
-        >
+        <div className={`chat-message-row ${isUser ? "user-row" : "assistant-row"}`}>
             {/* Avatar */}
-            <div
-                style={{
-                    width: "30px",
-                    height: "30px",
-                    borderRadius: "8px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    background: isUser ? "var(--active-background)" : "rgba(168, 179, 154, 0.12)",
-                    border: isUser ? "1px solid var(--card-border)" : "1px solid rgba(168, 179, 154, 0.25)",
-                    color: isUser ? "var(--text-secondary)" : "var(--primary)",
-                    marginTop: "2px",
-                }}
-            >
-                {isUser ? <User size={14} /> : <Bot size={14} />}
+            <div className={`chat-avatar ${isUser ? "user-avatar" : "assistant-avatar"}`}>
+                {isUser ? (
+                    <span className="font-mono">RP</span>
+                ) : (
+                    <BrandHexIcon size={16} />
+                )}
             </div>
 
-            {/* Content */}
-            <div
-                style={{
-                    maxWidth: "78%",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                }}
-            >
-                {/* Role Label */}
-                <span
-                    style={{
-                        fontSize: "10.5px",
-                        fontWeight: 600,
-                        color: isUser ? "var(--text-muted)" : "var(--primary)",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.4px",
-                        textAlign: isUser ? "right" : "left",
-                    }}
-                >
-                    {isUser ? "You" : "CodeSpec AI"}
-                </span>
-
-                {/* Message Card */}
-                <div
-                    style={{
-                        padding: "12px 14px",
-                        borderRadius: isUser ? "12px 2px 12px 12px" : "2px 12px 12px 12px",
-                        background: isUser ? "var(--active-background)" : "var(--card-background)",
-                        border: `1px solid ${isUser ? "var(--card-border)" : "rgba(168, 179, 154, 0.18)"}`,
-                        color: "var(--text-primary)",
-                        fontSize: "13px",
-                        lineHeight: 1.65,
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                    }}
-                >
-                    {message.content}
+            {/* Bubble Content */}
+            <div className="chat-bubble-container">
+                <div className="chat-sender-line">
+                    <span className="chat-sender-name">
+                        {isUser ? "You" : "CodeSpec AI"}
+                    </span>
+                    {!isUser && (
+                        <Badge variant="primary" className="ai-core-badge font-mono">
+                            INTELLIGENCE AGENT
+                        </Badge>
+                    )}
                 </div>
 
-                {/* Confidence indicator */}
-                {!isUser && message.confidence != null && (
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontSize: "10.5px",
-                            color: "var(--text-muted)",
-                        }}
-                    >
-                        <Sparkles size={11} color="var(--secondary)" />
-                        <span>
-                            Confidence: <strong style={{ color: "var(--text-secondary)" }}>{Math.round(message.confidence * 100)}%</strong>
-                        </span>
+                <div className={`chat-bubble-card ${isUser ? "user-bubble" : "assistant-bubble"}`}>
+                    <div className="chat-bubble-text">
+                        {message.content}
                     </div>
-                )}
 
-                {/* Source References */}
-                {!isUser && message.sources && message.sources.length > 0 && (
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "6px",
-                        }}
-                    >
-                        <span
-                            style={{
-                                fontSize: "10.5px",
-                                fontWeight: 600,
-                                color: "var(--text-muted)",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.4px",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "5px",
-                            }}
-                        >
-                            <FileCode size={11} color="var(--primary)" />
-                            Source References ({message.sources.length})
-                        </span>
-                        {message.sources.map((src, idx) => (
-                            <SourceCard key={`${src.file}-${idx}`} source={src} index={idx} />
-                        ))}
-                    </div>
-                )}
-
-                {/* Error state */}
-                {message.error && (
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "8px 10px",
-                            background: "rgba(184, 120, 112, 0.08)",
-                            border: "1px solid rgba(184, 120, 112, 0.25)",
-                            borderRadius: "6px",
-                            fontSize: "12px",
-                            color: "var(--danger)",
-                        }}
-                    >
-                        <AlertCircle size={13} />
-                        <span>{message.error}</span>
-                    </div>
-                )}
+                    {/* Sources section */}
+                    {message.sources && message.sources.length > 0 && (
+                        <div className="chat-sources-block">
+                            <span className="chat-sources-heading font-mono">
+                                SOURCE CITATIONS ({message.sources.length})
+                            </span>
+                            <div className="chat-sources-list">
+                                {message.sources.map((src, i) => (
+                                    <SourceCard key={i} source={src} index={i} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
 }
 
-// ─── SystemQA Page ──────────────────────────────────────────────────────
 function SystemQA() {
     const { activeRepository, repositories, setActiveRepository } = useRepositoryStore();
     const [messages, setMessages] = useState([]);
@@ -406,42 +239,55 @@ function SystemQA() {
     const [isLoading, setIsLoading] = useState(false);
     const [conversationId, setConversationId] = useState(null);
 
-    const messagesEndRef = useRef(null);
-    const inputRef = useRef(null);
-
     const readyRepositories = repositories.filter((r) => r.status === "Ready");
     const currentRepo = activeRepository?.status === "Ready" ? activeRepository : readyRepositories[0] || activeRepository;
 
-    // Auto-scroll to bottom on new messages
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
+    const inputRef = useRef(null);
+    const heroInputRef = useRef(null);
+    const messagesEndRef = useRef(null);
 
-    // Focus input on mount
+    const hasMessages = messages.length > 0;
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
     useEffect(() => {
-        inputRef.current?.focus();
-    }, []);
+        if (hasMessages) {
+            scrollToBottom();
+        }
+    }, [messages, isLoading, hasMessages]);
 
     const handleRepoChange = (e) => {
         const repoId = e.target.value;
         const found = repositories.find((r) => r.id === repoId);
         if (found) {
             setActiveRepository(found);
+            setConversationId(null);
         }
     };
 
+    const handleResetToHero = () => {
+        setMessages([]);
+        setConversationId(null);
+        setInputValue("");
+        setTimeout(() => {
+            heroInputRef.current?.focus();
+        }, 50);
+    };
+
     const handleSubmit = useCallback(
-        async (questionText) => {
-            const question = (questionText || inputValue).trim();
+        async (customText) => {
+            const question = (customText || inputValue).trim();
             if (!question || isLoading) return;
 
-            // Add user message
             const userMessage = {
                 id: `msg-${Date.now()}-user`,
                 role: "user",
                 content: question,
                 timestamp: Date.now(),
             };
+
             setMessages((prev) => [...prev, userMessage]);
             setInputValue("");
             setIsLoading(true);
@@ -452,7 +298,6 @@ function SystemQA() {
                     conversationId,
                 });
 
-                // Track conversation ID if the backend returns one
                 if (response.conversation_id) {
                     setConversationId(response.conversation_id);
                 }
@@ -460,9 +305,8 @@ function SystemQA() {
                 const aiMessage = {
                     id: `msg-${Date.now()}-ai`,
                     role: "assistant",
-                    content: response.answer || "No answer was returned for this question.",
+                    content: response.answer || "No response received.",
                     sources: response.sources || [],
-                    confidence: response.confidence ?? null,
                     timestamp: Date.now(),
                 };
                 setMessages((prev) => [...prev, aiMessage]);
@@ -471,8 +315,7 @@ function SystemQA() {
                 const errorMessage = {
                     id: `msg-${Date.now()}-error`,
                     role: "assistant",
-                    content: "I was unable to process your question at this time.",
-                    error: "Failed to reach the Q&A service. Please check network connectivity and try again.",
+                    content: "I encountered a problem processing your request. Please check that the backend is reachable.",
                     sources: [],
                     timestamp: Date.now(),
                 };
@@ -491,445 +334,964 @@ function SystemQA() {
         }
     };
 
-    const handleClearConversation = () => {
-        setMessages([]);
-        setConversationId(null);
-        inputRef.current?.focus();
-    };
-
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-                maxWidth: "1100px",
-                margin: "0 auto",
-                height: "calc(100vh - var(--topbar-height) - (var(--content-padding) * 2))",
-                gap: "0",
-            }}
-        >
-            {/* Header */}
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: "12px",
-                    borderBottom: "1px solid var(--card-border)",
-                    paddingBottom: "12px",
-                    flexShrink: 0,
-                }}
-            >
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div className="icon-accent icon-accent--violet" style={{ width: "42px", height: "42px", borderRadius: "14px" }}>
-                        <MessageSquare size={20} strokeWidth={2} />
+        <div className="system-qa-viewport">
+            {/* ══════════════════════════════════════════════════════════
+                HERO VIEW: Visual Centerpiece matching reference screenshot
+                ══════════════════════════════════════════════════════════ */}
+            {!hasMessages ? (
+                <div className="qa-hero-centerpiece">
+                    {/* Abstract Iridescent AI Orb */}
+                    <div className="qa-hero-orb-section">
+                        <IridescentOrb size={175} />
                     </div>
-                    <div>
-                        <h1
-                            style={{
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                color: "var(--text-primary)",
-                                margin: 0,
-                                letterSpacing: "-0.3px",
-                            }}
-                        >
-                            System Q&A
-                        </h1>
-                        <p
-                            style={{
-                                fontSize: "12.5px",
-                                color: "var(--text-secondary)",
-                                margin: "3px 0 0 0",
-                            }}
-                        >
-                            Ask questions about your codebase architecture, services, dependencies, and implementation details.
+
+                    {/* Centered Greeting & Subtitle */}
+                    <div className="qa-hero-text">
+                        <span className="qa-hero-salutation">Hi, Raj</span>
+                        <h1 className="qa-hero-headline">How can I help today?</h1>
+                        <p className="qa-hero-subheadline">
+                            I&apos;m here to help &mdash; from quick codebase answers to deep architectural insights.
                         </p>
                     </div>
-                </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                    {/* Repository Selector */}
-                    {repositories.length > 0 && (
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "6px",
-                                background: "var(--card-background)",
-                                padding: "4px 8px 4px 10px",
-                                borderRadius: "var(--border-radius)",
-                                border: "1px solid var(--card-border)",
-                                fontSize: "12px",
-                            }}
-                        >
-                            <FolderGit2 size={14} color="var(--secondary)" />
-                            <select
-                                value={currentRepo?.id || ""}
-                                onChange={handleRepoChange}
-                                style={{
-                                    background: "transparent",
-                                    border: "none",
-                                    color: "var(--text-primary)",
-                                    fontSize: "12px",
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    outline: "none",
-                                    paddingRight: "4px",
-                                }}
-                            >
-                                {repositories.map((repo) => (
-                                    <option
-                                        key={repo.id}
-                                        value={repo.id}
-                                        style={{ background: "var(--sidebar-background)", color: "var(--text-primary)" }}
-                                    >
-                                        {repo.name} ({repo.status})
-                                    </option>
-                                ))}
-                            </select>
+                    {/* Large Glass Prompt Composer Box */}
+                    <div className="qa-hero-composer-card">
+                        {/* Top banner pill */}
+                        <div className="qa-hero-composer-topbar">
+                            <div className="qa-hero-pro-tag">
+                                <Sparkles size={13} className="sparkle-tag-icon" />
+                                <span>Unlock more features with Pro</span>
+                            </div>
 
-                            {currentRepo?.branch && (
-                                <span
-                                    style={{
-                                        display: "inline-flex",
-                                        alignItems: "center",
-                                        gap: "3px",
-                                        color: "var(--text-muted)",
-                                        fontSize: "11px",
-                                        borderLeft: "1px solid var(--card-border)",
-                                        paddingLeft: "6px",
-                                    }}
-                                >
-                                    <GitBranch size={11} /> {currentRepo.branch}
-                                </span>
+                            {currentRepo && (
+                                <div className="qa-hero-repo-indicator">
+                                    <span className="repo-status-beacon" />
+                                    <span className="repo-tag-name font-mono">{currentRepo.name}</span>
+                                </div>
                             )}
                         </div>
-                    )}
 
-                    {/* Clear Conversation */}
-                    {messages.length > 0 && (
-                        <button
-                            type="button"
-                            onClick={handleClearConversation}
-                            className="cs-btn cs-btn-ghost"
-                            style={{ fontSize: "12px", height: "30px" }}
-                            title="Clear conversation"
-                        >
-                            <Trash2 size={13} />
-                            <span>Clear</span>
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            {/* Messages Area */}
-            <div
-                style={{
-                    flex: 1,
-                    minHeight: 0,
-                    overflowY: "auto",
-                    padding: "18px 0",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "20px",
-                }}
-            >
-                {/* Empty State / Welcome */}
-                {messages.length === 0 && !isLoading && (
-                    <div
-                        style={{
-                            flex: 1,
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "24px",
-                            padding: "40px 20px",
-                        }}
-                    >
-                        <div className="icon-accent icon-accent--violet" style={{ width: "56px", height: "56px", borderRadius: "18px" }}>
-                            <Bot size={28} />
-                        </div>
-
-                        <div style={{ textAlign: "center" }}>
-                            <h2
-                                style={{
-                                    fontSize: "16px",
-                                    fontWeight: 600,
-                                    color: "var(--text-primary)",
-                                    margin: "0 0 6px 0",
-                                }}
-                            >
-                                Ask anything about your codebase
-                            </h2>
-                            <p
-                                style={{
-                                    fontSize: "13px",
-                                    color: "var(--text-muted)",
-                                    margin: 0,
-                                    maxWidth: "460px",
-                                    lineHeight: 1.5,
-                                }}
-                            >
-                                Get AI-powered answers grounded in your indexed source code, architecture topology, and service dependencies.
-                            </p>
-                        </div>
-
-                        {/* Starter Questions */}
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-                                gap: "10px",
-                                width: "100%",
-                                maxWidth: "600px",
-                            }}
-                        >
-                            {STARTER_QUESTIONS.map((q, idx) => {
-                                const Icon = q.icon;
-                                const accents = ["violet", "blue", "teal", "rose", "amber", "cyan"];
-                                const accent = accents[idx % accents.length];
-                                return (
-                                    <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => handleSubmit(q.text)}
-                                        className={`cs-card cs-card--${accent}`}
-                                        style={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "12px",
-                                            padding: "12px 16px",
-                                            color: "var(--text-secondary)",
-                                            fontSize: "12.5px",
-                                            cursor: "pointer",
-                                            textAlign: "left",
-                                            lineHeight: 1.4,
-                                        }}
-                                    >
-                                        <div className={`icon-accent icon-accent--${accent}`} style={{ width: "30px", height: "30px", borderRadius: "9px", flexShrink: 0 }}>
-                                            <Icon size={14} strokeWidth={2.2} />
-                                        </div>
-                                        <span style={{ color: "var(--text-primary)", fontWeight: 500 }}>{q.text}</span>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-
-                {/* Conversation Messages */}
-                {messages.map((msg) => (
-                    <MessageBubble key={msg.id} message={msg} />
-                ))}
-
-                {/* Loading indicator */}
-                {isLoading && (
-                    <div
-                        style={{
-                            display: "flex",
-                            gap: "10px",
-                            alignItems: "flex-start",
-                            animation: "fadeSlideIn 0.2s ease-out",
-                        }}
-                    >
-                        <div
-                            style={{
-                                width: "30px",
-                                height: "30px",
-                                borderRadius: "8px",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                flexShrink: 0,
-                                background: "rgba(168, 179, 154, 0.12)",
-                                border: "1px solid rgba(168, 179, 154, 0.25)",
-                                color: "var(--primary)",
-                                marginTop: "2px",
-                            }}
-                        >
-                            <Bot size={14} />
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                            <span
-                                style={{
-                                    fontSize: "10.5px",
-                                    fontWeight: 600,
-                                    color: "var(--primary)",
-                                    textTransform: "uppercase",
-                                    letterSpacing: "0.4px",
-                                }}
-                            >
-                                CodeSpec AI
-                            </span>
-                            <div
-                                style={{
-                                    padding: "12px 14px",
-                                    borderRadius: "2px 12px 12px 12px",
-                                    background: "var(--card-background)",
-                                    border: "1px solid rgba(168, 179, 154, 0.18)",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                    color: "var(--text-muted)",
-                                    fontSize: "13px",
-                                }}
-                            >
-                                <Loader2
-                                    size={14}
-                                    style={{ animation: "spin 1s linear infinite" }}
-                                />
-                                <span>Analyzing codebase and generating response...</span>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input Area (Pinned to Bottom) */}
-            <div
-                style={{
-                    flexShrink: 0,
-                    paddingTop: "12px",
-                    borderTop: "1px solid var(--card-border)",
-                }}
-            >
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "10px",
-                        alignItems: "flex-end",
-                    }}
-                >
-                    <div
-                        className="cs-card cs-card--violet"
-                        style={{
-                            flex: 1,
-                            position: "relative",
-                            display: "flex",
-                            alignItems: "flex-end",
-                            borderRadius: "18px",
-                            transition: "all 0.2s ease",
-                        }}
-                    >
+                        {/* Large Textarea */}
                         <textarea
-                            ref={inputRef}
+                            ref={heroInputRef}
                             value={inputValue}
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Ask a question about your codebase..."
+                            placeholder="Ask me anything..."
+                            rows={3}
                             disabled={isLoading}
-                            rows={1}
-                            style={{
-                                flex: 1,
-                                background: "transparent",
-                                border: "none",
-                                outline: "none",
-                                color: "var(--text-primary)",
-                                fontSize: "13px",
-                                padding: "12px 14px",
-                                resize: "none",
-                                lineHeight: 1.5,
-                                fontFamily: "inherit",
-                                maxHeight: "120px",
-                                overflowY: "auto",
-                                opacity: isLoading ? 0.6 : 1,
-                            }}
-                            onInput={(e) => {
-                                e.target.style.height = "auto";
-                                e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
-                            }}
+                            className="qa-hero-textarea"
                         />
 
-                        <div
-                            style={{
-                                padding: "8px 10px 8px 0",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                flexShrink: 0,
-                            }}
-                        >
-                            <span
-                                style={{
-                                    fontSize: "10px",
-                                    color: "var(--text-muted)",
-                                    marginRight: "4px",
-                                }}
-                            >
-                                ⏎ Enter
-                            </span>
+                        {/* Bottom Actions Row */}
+                        <div className="qa-hero-composer-footer">
+                            <div className="qa-hero-footer-actions">
+                                <button
+                                    type="button"
+                                    className="qa-hero-pill-btn"
+                                    title="Import file or symbol reference"
+                                    onClick={() => heroInputRef.current?.focus()}
+                                >
+                                    <Paperclip size={13} />
+                                    <span>Import file</span>
+                                </button>
+
+                                <div className="qa-hero-repo-picker">
+                                    <select
+                                        value={currentRepo?.id || ""}
+                                        onChange={handleRepoChange}
+                                        className="qa-hero-select-menu font-mono"
+                                        title="Select active repository"
+                                    >
+                                        {repositories.map((repo) => (
+                                            <option key={repo.id} value={repo.id}>
+                                                {repo.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="qa-hero-footer-right">
+                                <span className="qa-hero-shortcut font-mono">
+                                    <CornerDownLeft size={10} /> Enter
+                                </span>
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleSubmit()}
+                                    disabled={!inputValue.trim() || isLoading}
+                                    className={`qa-hero-send-btn ${inputValue.trim() ? "ready" : ""}`}
+                                    title="Send prompt"
+                                >
+                                    {isLoading ? (
+                                        <Loader2 size={16} className="spin-icon" />
+                                    ) : (
+                                        <ArrowUp size={17} strokeWidth={2.4} />
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => handleSubmit()}
-                        disabled={!inputValue.trim() || isLoading}
-                        title="Send question"
-                        style={{
-                            width: "42px",
-                            height: "42px",
-                            borderRadius: "var(--border-radius)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            border: "none",
-                            background: inputValue.trim() && !isLoading ? "var(--primary)" : "var(--card-background)",
-                            color: inputValue.trim() && !isLoading ? "#121312" : "var(--text-muted)",
-                            cursor: inputValue.trim() && !isLoading ? "pointer" : "not-allowed",
-                            transition: "all 0.15s ease",
-                            flexShrink: 0,
-                        }}
-                    >
-                        {isLoading ? (
-                            <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
-                        ) : (
-                            <Send size={16} />
-                        )}
-                    </button>
+                    {/* Three Quick Action Cards below composer */}
+                    <div className="qa-hero-quick-cards-grid">
+                        {HERO_ACTION_CARDS.map((card) => {
+                            const Icon = card.icon;
+                            return (
+                                <button
+                                    key={card.id}
+                                    type="button"
+                                    onClick={() => handleSubmit(card.prompt)}
+                                    className="qa-hero-action-card"
+                                >
+                                    <div className="qa-action-card-header">
+                                        <div
+                                            className="qa-action-card-icon"
+                                            style={{ color: card.accentColor, borderColor: `${card.accentColor}40` }}
+                                        >
+                                            <Icon size={15} strokeWidth={2.2} />
+                                        </div>
+                                        <span className="qa-action-card-title">{card.title}</span>
+                                    </div>
+                                    <p className="qa-action-card-desc">{card.description}</p>
+                                </button>
+                            );
+                        })}
+                    </div>
                 </div>
+            ) : (
+                /* ══════════════════════════════════════════════════════════
+                   CONVERSATION STREAM VIEW: Interactive AI reasoning
+                   ══════════════════════════════════════════════════════════ */
+                <div className="chat-conversation-wrapper">
+                    {/* Stream Header */}
+                    <div className="chat-stream-header">
+                        <div className="chat-stream-title-group">
+                            <h1 className="chat-stream-title">AI Chat</h1>
+                            <span className="chat-stream-subtitle">
+                                Codebase architectural reasoning &amp; AST synthesis
+                            </span>
+                        </div>
 
-                {/* Conversation context indicator */}
-                <div
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "6px 2px 0 2px",
-                        fontSize: "10.5px",
-                        color: "var(--text-muted)",
-                    }}
-                >
-                    <span>
-                        {currentRepo
-                            ? `Scoped to ${currentRepo.name} • ${currentRepo.branch || "main"}`
-                            : "No repository selected"}
-                    </span>
-                    {conversationId && (
-                        <span style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                            <Sparkles size={10} />
-                            Context preserved ({messages.filter((m) => m.role === "user").length} questions)
-                        </span>
-                    )}
+                        <div className="chat-stream-actions">
+                            <button
+                                type="button"
+                                onClick={handleResetToHero}
+                                className="new-chat-btn"
+                                title="Start a fresh conversation"
+                            >
+                                <Plus size={13} />
+                                <span>New Chat</span>
+                            </button>
+
+                            {currentRepo && (
+                                <div className="chat-repo-select-wrap">
+                                    <FolderGit2 size={13} style={{ color: "var(--bright-red)" }} />
+                                    <select
+                                        value={currentRepo.id || ""}
+                                        onChange={handleRepoChange}
+                                        className="chat-repo-select font-mono"
+                                    >
+                                        {repositories.map((repo) => (
+                                            <option key={repo.id} value={repo.id}>
+                                                {repo.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={handleResetToHero}
+                                className="clear-chat-btn"
+                                title="Clear conversation"
+                            >
+                                <Trash2 size={13} />
+                                <span>Clear</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Messages Scroll Area */}
+                    <div className="chat-messages-stream">
+                        {messages.map((msg) => (
+                            <MessageBubble key={msg.id} message={msg} />
+                        ))}
+
+                        {isLoading && (
+                            <div className="chat-message-row assistant-row">
+                                <div className="chat-avatar assistant-avatar">
+                                    <BrandHexIcon size={16} />
+                                </div>
+                                <div className="chat-bubble-card assistant-bubble loading-bubble">
+                                    <Loader2 size={15} className="chat-spin-icon" />
+                                    <span>Reasoning across indexed AST &amp; dependency graphs...</span>
+                                </div>
+                            </div>
+                        )}
+
+                        <div ref={messagesEndRef} />
+                    </div>
+
+                    {/* Compact Persistent Message Composer at Bottom */}
+                    <div className="chat-bottom-composer-wrap">
+                        <div className="chat-bottom-composer-box">
+                            <button
+                                type="button"
+                                className="composer-attach-btn"
+                                title="Attach symbol or file"
+                                onClick={() => inputRef.current?.focus()}
+                            >
+                                <Paperclip size={14} />
+                            </button>
+
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Type your follow-up architectural question..."
+                                disabled={isLoading}
+                                className="chat-bottom-input"
+                            />
+
+                            <button
+                                type="button"
+                                onClick={() => handleSubmit()}
+                                disabled={!inputValue.trim() || isLoading}
+                                className={`chat-bottom-send-btn ${inputValue.trim() ? "ready" : ""}`}
+                                title="Send message"
+                            >
+                                <Send size={14} />
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <style>{`
-                @keyframes fadeSlideIn {
-                    from {
-                        opacity: 0;
-                        transform: translateY(8px);
+                .system-qa-viewport {
+                    width: 100%;
+                    min-height: calc(100vh - var(--topbar-height) - 48px);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    position: relative;
+                }
+
+                /* ─── Hero Centerpiece Styles (Matching Reference Screenshot) ─── */
+                .qa-hero-centerpiece {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    width: 100%;
+                    max-width: 820px;
+                    margin: 10px auto 40px auto;
+                    padding: 0 16px;
+                    text-align: center;
+                }
+
+                .qa-hero-orb-section {
+                    margin-bottom: 22px;
+                }
+
+                .qa-hero-text {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 6px;
+                    margin-bottom: 28px;
+                }
+
+                .qa-hero-salutation {
+                    font-size: 19px;
+                    font-weight: 500;
+                    color: #A1A1AC;
+                    letter-spacing: -0.2px;
+                }
+
+                .qa-hero-headline {
+                    font-size: 34px;
+                    font-weight: 800;
+                    color: #F5F5F7;
+                    letter-spacing: -0.8px;
+                    line-height: 1.15;
+                    margin: 0;
+                }
+
+                .qa-hero-subheadline {
+                    font-size: 13.5px;
+                    color: #8E8E98;
+                    margin: 2px 0 0 0;
+                    max-width: 520px;
+                    line-height: 1.45;
+                }
+
+                /* ─── Hero Large Composer Card ─── */
+                .qa-hero-composer-card {
+                    width: 100%;
+                    background: rgba(16, 21, 30, 0.78) !important;
+                    backdrop-filter: blur(24px) !important;
+                    -webkit-backdrop-filter: blur(24px) !important;
+                    border: 1px solid rgba(22, 140, 163, 0.28) !important;
+                    border-radius: 22px !important;
+                    padding: 16px 20px !important;
+                    box-shadow: 
+                        0 20px 50px rgba(0, 0, 0, 0.65),
+                        0 0 40px rgba(7, 90, 104, 0.16) !important;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    margin-bottom: 24px;
+                    transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+                }
+
+                .qa-hero-composer-card:focus-within {
+                    border-color: rgba(22, 140, 163, 0.55) !important;
+                    box-shadow: 
+                        0 24px 60px rgba(0, 0, 0, 0.7),
+                        0 0 50px rgba(22, 140, 163, 0.24) !important;
+                }
+
+                .qa-hero-composer-topbar {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+                }
+
+                .qa-hero-pro-tag {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 11.5px;
+                    font-weight: 600;
+                    color: #E2E8F0;
+                }
+
+                .sparkle-tag-icon {
+                    color: #00F2FE;
+                }
+
+                .qa-hero-repo-indicator {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-size: 11px;
+                    color: #A1A1AC;
+                }
+
+                .repo-status-beacon {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: #10B981;
+                    box-shadow: 0 0 8px #10B981;
+                }
+
+                .repo-tag-name {
+                    color: #E2E8F0;
+                    font-weight: 600;
+                }
+
+                .qa-hero-textarea {
+                    width: 100%;
+                    background: transparent !important;
+                    border: none !important;
+                    outline: none !important;
+                    resize: none;
+                    color: #F5F5F7 !important;
+                    font-size: 15px;
+                    line-height: 1.5;
+                    font-family: inherit;
+                    box-shadow: none !important;
+                    padding: 4px 0;
+                }
+
+                .qa-hero-textarea::placeholder {
+                    color: #686875;
+                }
+
+                .qa-hero-composer-footer {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    padding-top: 6px;
+                }
+
+                .qa-hero-footer-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .qa-hero-pill-btn {
+                    height: 30px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 0 12px;
+                    border-radius: 9999px;
+                    background: rgba(255, 255, 255, 0.04);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    color: #A1A1AC;
+                    font-size: 12px;
+                    cursor: pointer;
+                    transition: all var(--duration-fast) ease;
+                }
+
+                .qa-hero-pill-btn:hover {
+                    background: rgba(22, 140, 163, 0.15);
+                    border-color: rgba(22, 140, 163, 0.4);
+                    color: #FFFFFF;
+                }
+
+                .qa-hero-repo-picker {
+                    display: inline-flex;
+                    align-items: center;
+                    background: rgba(255, 255, 255, 0.04);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 9999px;
+                    padding: 0 8px;
+                    height: 30px;
+                }
+
+                .qa-hero-select-menu {
+                    background: transparent;
+                    border: none;
+                    color: #A1A1AC;
+                    font-size: 11.5px;
+                    outline: none;
+                    cursor: pointer;
+                }
+
+                .qa-hero-select-menu:hover {
+                    color: #FFFFFF;
+                }
+
+                .qa-hero-select-menu option {
+                    background: #151820;
+                    color: #F5F5F7;
+                }
+
+                .qa-hero-footer-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .qa-hero-shortcut {
+                    font-size: 10.5px;
+                    color: #686875;
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                }
+
+                .qa-hero-send-btn {
+                    width: 36px;
+                    height: 36px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: linear-gradient(135deg, #168CA3 0%, #254D9C 100%) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                    color: #FFFFFF !important;
+                    cursor: pointer;
+                    box-shadow: 0 4px 16px rgba(22, 140, 163, 0.45) !important;
+                    transition: all var(--duration-fast) ease;
+                }
+
+                .qa-hero-send-btn:hover:not(:disabled) {
+                    transform: scale(1.06);
+                    box-shadow: 0 6px 22px rgba(22, 140, 163, 0.65) !important;
+                }
+
+                .qa-hero-send-btn:disabled {
+                    opacity: 0.45;
+                    cursor: not-allowed;
+                    box-shadow: none !important;
+                }
+
+                .spin-icon {
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+
+                /* ─── Three Quick Action Cards ─── */
+                .qa-hero-quick-cards-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 14px;
+                    width: 100%;
+                }
+
+                @media (max-width: 720px) {
+                    .qa-hero-quick-cards-grid {
+                        grid-template-columns: 1fr;
                     }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
+                }
+
+                .qa-hero-action-card {
+                    background: rgba(16, 21, 30, 0.65) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+                    border-radius: 16px !important;
+                    padding: 16px !important;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 6px;
+                    cursor: pointer;
+                    text-align: left;
+                    transition: all var(--duration-fast) ease;
+                }
+
+                .qa-hero-action-card:hover {
+                    background: rgba(22, 140, 163, 0.12) !important;
+                    border-color: rgba(22, 140, 163, 0.35) !important;
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+                }
+
+                .qa-action-card-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .qa-action-card-icon {
+                    width: 26px;
+                    height: 26px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 8px;
+                    background: rgba(255, 255, 255, 0.04);
+                    border: 1px solid;
+                }
+
+                .qa-action-card-title {
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #F5F5F7;
+                }
+
+                .qa-action-card-desc {
+                    font-size: 11.5px;
+                    color: #8E8E98;
+                    line-height: 1.4;
+                    margin: 0;
+                }
+
+                /* ─── Stream Conversational Mode ─── */
+                .chat-conversation-wrapper {
+                    display: flex;
+                    flex-direction: column;
+                    width: 100%;
+                    max-width: 1000px;
+                    margin: 0 auto;
+                    height: calc(100vh - var(--topbar-height) - 48px);
+                    gap: 12px;
+                }
+
+                .chat-stream-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                    padding-bottom: 12px;
+                }
+
+                .chat-stream-title-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                }
+
+                .chat-stream-title {
+                    font-size: 22px;
+                    font-weight: 800;
+                    color: #F5F5F7;
+                    margin: 0;
+                    letter-spacing: -0.4px;
+                }
+
+                .chat-stream-subtitle {
+                    font-size: 12px;
+                    color: var(--secondary-text);
+                }
+
+                .chat-stream-actions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+
+                .new-chat-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 6px 12px;
+                    border-radius: 8px;
+                    background: linear-gradient(135deg, #168CA3 0%, #254D9C 100%);
+                    border: 1px solid rgba(255, 255, 255, 0.16);
+                    color: #FFFFFF;
+                    font-size: 11.5px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    box-shadow: 0 2px 10px rgba(22, 140, 163, 0.35);
+                    transition: all var(--duration-fast) ease;
+                }
+
+                .new-chat-btn:hover {
+                    box-shadow: 0 4px 14px rgba(22, 140, 163, 0.55);
+                    transform: translateY(-1px);
+                }
+
+                .chat-repo-select-wrap {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    background: #101115;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 8px;
+                    padding: 4px 10px;
+                }
+
+                .chat-repo-select {
+                    background: transparent;
+                    border: none;
+                    color: #F5F5F7;
+                    font-size: 11.5px;
+                    outline: none;
+                    cursor: pointer;
+                }
+
+                .clear-chat-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 5px 10px;
+                    border-radius: 8px;
+                    background: #101115;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    color: var(--secondary-text);
+                    font-size: 11.5px;
+                    cursor: pointer;
+                    transition: all var(--duration-fast) ease;
+                }
+
+                .clear-chat-btn:hover {
+                    color: #FFFFFF;
+                    border-color: rgba(227, 38, 54, 0.35);
+                }
+
+                /* ─── Stream Messages Area ─── */
+                .chat-messages-stream {
+                    flex: 1;
+                    overflow-y: auto;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                    padding-right: 6px;
+                }
+
+                .chat-message-row {
+                    display: flex;
+                    gap: 12px;
+                    align-items: flex-start;
+                }
+
+                .user-row {
+                    flex-direction: row-reverse;
+                }
+
+                .chat-avatar {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                }
+
+                .user-avatar {
+                    background: #1B1B22;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    color: #F5F5F7;
+                    font-size: 11px;
+                    font-weight: 700;
+                }
+
+                .assistant-avatar {
+                    background: #14151C;
+                    border: 1px solid rgba(255, 53, 72, 0.3);
+                }
+
+                .chat-bubble-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+                    max-width: 80%;
+                }
+
+                .user-row .chat-bubble-container {
+                    align-items: flex-end;
+                }
+
+                .chat-sender-line {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .chat-sender-name {
+                    font-size: 11px;
+                    font-weight: 600;
+                    color: var(--secondary-text);
+                }
+
+                .ai-core-badge {
+                    font-size: 9px;
+                    padding: 1px 5px;
+                }
+
+                .chat-bubble-card {
+                    padding: 14px 16px;
+                    border-radius: 14px;
+                    font-size: 13px;
+                    line-height: 1.55;
+                    border: 1px solid;
+                }
+
+                .user-bubble {
+                    background: #1A1B22;
+                    border-color: rgba(255, 255, 255, 0.1);
+                    color: #F5F5F7;
+                    border-top-right-radius: 4px;
+                }
+
+                .assistant-bubble {
+                    background: #121319;
+                    border-color: rgba(255, 255, 255, 0.08);
+                    color: #F5F5F7;
+                    border-top-left-radius: 4px;
+                }
+
+                .loading-bubble {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    color: var(--secondary-text);
+                }
+
+                .chat-spin-icon {
+                    animation: spin 1s linear infinite;
+                    color: var(--bright-red);
+                }
+
+                .chat-code-block {
+                    margin-top: 10px;
+                    border-radius: 10px;
+                    background: #08090D;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    overflow: hidden;
+                }
+
+                .chat-code-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 6px 12px;
+                    background: #0E0F14;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+                    font-size: 10.5px;
+                    color: var(--secondary-text);
+                }
+
+                .chat-copy-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: transparent;
+                    border: none;
+                    color: var(--secondary-text);
+                    cursor: pointer;
+                    font-size: 10.5px;
+                }
+
+                .chat-copy-btn:hover {
+                    color: #FFFFFF;
+                }
+
+                .chat-code-pre {
+                    margin: 0;
+                    padding: 12px;
+                    font-family: "JetBrains Mono", monospace;
+                    font-size: 12px;
+                    overflow-x: auto;
+                    color: #E2E8F0;
+                }
+
+                .chat-sources-block {
+                    margin-top: 12px;
+                    padding-top: 10px;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .chat-sources-heading {
+                    font-size: 10px;
+                    font-weight: 700;
+                    color: #8E8E98;
+                    letter-spacing: 0.05em;
+                }
+
+                .chat-sources-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+
+                .source-ref-card {
+                    background: #0B0C10;
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                    border-radius: 8px;
+                    overflow: hidden;
+                }
+
+                .source-ref-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 6px 10px;
+                    cursor: pointer;
+                    font-size: 11px;
+                }
+
+                .source-index-num {
+                    font-size: 10px;
+                    color: var(--secondary-text);
+                }
+
+                .source-file-path {
+                    color: #F5F5F7;
+                    font-weight: 600;
+                    max-width: 320px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .source-line-num {
+                    color: var(--bright-red);
+                }
+
+                .source-module-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 3px;
+                    font-size: 9.5px;
+                    color: var(--secondary-text);
+                    background: rgba(255, 255, 255, 0.04);
+                    padding: 1px 5px;
+                    border-radius: 4px;
+                }
+
+                .source-icon-copy {
+                    background: transparent;
+                    border: none;
+                    color: var(--secondary-text);
+                    cursor: pointer;
+                    padding: 2px;
+                }
+
+                /* ─── Bottom Persistent Composer in Stream Mode ─── */
+                .chat-bottom-composer-wrap {
+                    padding-top: 8px;
+                }
+
+                .chat-bottom-composer-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    background: rgba(16, 21, 30, 0.85);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 9999px;
+                    padding: 6px 12px;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                }
+
+                .chat-bottom-composer-box:focus-within {
+                    border-color: rgba(22, 140, 163, 0.5);
+                    box-shadow: 0 0 20px rgba(22, 140, 163, 0.2);
+                }
+
+                .composer-attach-btn {
+                    background: transparent;
+                    border: none;
+                    color: var(--secondary-text);
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    padding: 4px;
+                }
+
+                .composer-attach-btn:hover {
+                    color: #FFFFFF;
+                }
+
+                .chat-bottom-input {
+                    flex: 1;
+                    background: transparent !important;
+                    border: none !important;
+                    outline: none !important;
+                    color: #F5F5F7 !important;
+                    font-size: 13px;
+                    padding: 6px 0;
+                    box-shadow: none !important;
+                }
+
+                .chat-bottom-send-btn {
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #1B1B22;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    color: var(--secondary-text);
+                    cursor: pointer;
+                    transition: all var(--duration-fast) ease;
+                }
+
+                .chat-bottom-send-btn.ready {
+                    background: linear-gradient(135deg, #168CA3 0%, #254D9C 100%) !important;
+                    border-color: rgba(255, 255, 255, 0.18) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 2px 10px rgba(22, 140, 163, 0.45);
+                }
+
+                .chat-bottom-send-btn:hover:not(:disabled) {
+                    transform: scale(1.05);
                 }
             `}</style>
         </div>

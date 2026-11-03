@@ -21,28 +21,28 @@ function RepositoryList({ onOpenAddModal }) {
         useRepositoryStore();
 
     const [searchQuery, setSearchQuery] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all"); // 'all' | 'ready' | 'processing' | 'failed' | 'pending'
+    const [statusFilter, setStatusFilter] = useState("all");
 
     // Status filter options
     const filterTabs = [
         { id: "all", label: "All Repositories", count: repositories.length },
         {
             id: "ready",
-            label: "Ready",
+            label: "Healthy",
             count: repositories.filter(
                 (r) => (r.status || "").toLowerCase() === "ready" || (r.status || "").toLowerCase() === "analyzed"
             ).length,
             icon: CheckCircle2,
-            iconColor: "var(--success)",
+            iconColor: "#10B981",
         },
         {
             id: "processing",
-            label: "Processing",
+            label: "Indexing",
             count: repositories.filter(
                 (r) => (r.status || "").toLowerCase() === "processing" || (r.status || "").toLowerCase() === "indexing"
             ).length,
             icon: Loader2,
-            iconColor: "var(--warning)",
+            iconColor: "#F59E0B",
         },
         {
             id: "failed",
@@ -51,16 +51,7 @@ function RepositoryList({ onOpenAddModal }) {
                 (r) => (r.status || "").toLowerCase() === "failed" || (r.status || "").toLowerCase() === "error"
             ).length,
             icon: AlertTriangle,
-            iconColor: "var(--danger)",
-        },
-        {
-            id: "pending",
-            label: "Pending",
-            count: repositories.filter(
-                (r) => (r.status || "").toLowerCase() === "pending"
-            ).length,
-            icon: Clock,
-            iconColor: "var(--text-muted)",
+            iconColor: "#FF3548",
         },
     ];
 
@@ -81,7 +72,6 @@ function RepositoryList({ onOpenAddModal }) {
             if (statusFilter === "ready") return normalizedStatus === "ready" || normalizedStatus === "analyzed";
             if (statusFilter === "processing") return normalizedStatus === "processing" || normalizedStatus === "indexing";
             if (statusFilter === "failed") return normalizedStatus === "failed" || normalizedStatus === "error";
-            if (statusFilter === "pending") return normalizedStatus === "pending";
 
             return true;
         });
@@ -104,7 +94,7 @@ function RepositoryList({ onOpenAddModal }) {
                         <Search size={14} className="search-icon" />
                         <input
                             type="text"
-                            placeholder="Search by name, branch, stack, or URL..."
+                            placeholder="Filter repositories..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             aria-label="Search repositories"
@@ -123,23 +113,24 @@ function RepositoryList({ onOpenAddModal }) {
                     <div className="filter-pill-group" role="tablist">
                         {filterTabs.map((tab) => {
                             const TabIcon = tab.icon;
+                            const isActive = statusFilter === tab.id;
                             return (
                                 <button
                                     key={tab.id}
                                     type="button"
                                     role="tab"
-                                    aria-selected={statusFilter === tab.id}
-                                    className={`filter-pill ${statusFilter === tab.id ? "filter-pill-active" : ""}`}
+                                    aria-selected={isActive}
+                                    className={`filter-pill ${isActive ? "filter-pill-active" : ""}`}
                                     onClick={() => setStatusFilter(tab.id)}
                                 >
                                     {TabIcon && (
                                         <TabIcon
                                             size={12}
-                                            style={{ color: tab.iconColor }}
+                                            style={{ color: isActive ? "#FFFFFF" : tab.iconColor }}
                                         />
                                     )}
                                     <span>{tab.label}</span>
-                                    <span className="filter-count">{tab.count}</span>
+                                    <span className="filter-count font-mono">{tab.count}</span>
                                 </button>
                             );
                         })}
@@ -147,7 +138,7 @@ function RepositoryList({ onOpenAddModal }) {
                 </div>
             </div>
 
-            {/* Repositories Grid or Empty State */}
+            {/* Repositories 3-Column Grid or Empty State */}
             {filteredRepositories.length > 0 ? (
                 <div className="repo-grid">
                     {filteredRepositories.map((repo) => (
@@ -224,14 +215,19 @@ function RepositoryList({ onOpenAddModal }) {
                     align-items: center;
                     gap: 8px;
                     height: 36px;
-                    width: min(380px, 100%);
-                    padding: 0 10px;
-                    background: var(--card-background);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--border-radius);
+                    width: min(340px, 100%);
+                    padding: 0 12px;
+                    background: #101115;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 9999px;
+                    transition: all var(--duration-fast) ease;
+                }
+                .repo-search-box:focus-within {
+                    border-color: rgba(227, 38, 54, 0.5);
+                    box-shadow: 0 0 12px rgba(227, 38, 54, 0.2);
                 }
                 .search-icon {
-                    color: var(--text-muted);
+                    color: var(--secondary-text);
                     flex-shrink: 0;
                 }
                 .repo-search-box input {
@@ -240,25 +236,14 @@ function RepositoryList({ onOpenAddModal }) {
                     border: none;
                     outline: none;
                     background: transparent;
-                    color: var(--text-primary);
+                    color: #F5F5F7;
                     font-size: 12px;
                 }
-                .repo-search-box input::placeholder {
-                    color: var(--text-muted);
-                }
                 .clear-search-btn {
-                    background: transparent;
-                    border: none;
-                    color: var(--text-muted);
+                    color: var(--secondary-text);
+                    font-size: 14px;
                     cursor: pointer;
-                    font-size: 16px;
-                    line-height: 1;
-                    padding: 0 4px;
                 }
-                .clear-search-btn:hover {
-                    color: var(--text-primary);
-                }
-
                 .filter-pill-group {
                     display: flex;
                     align-items: center;
@@ -266,64 +251,57 @@ function RepositoryList({ onOpenAddModal }) {
                     flex-wrap: wrap;
                 }
                 .filter-pill {
+                    height: 30px;
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;
-                    padding: 6px 10px;
-                    background: var(--card-background);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    color: var(--text-secondary);
-                    font-size: 11px;
+                    padding: 0 10px;
+                    background: #15161B;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 8px;
+                    color: var(--secondary-text);
+                    font-size: 11.5px;
                     font-weight: 500;
                     cursor: pointer;
-                    transition: all 0.15s ease;
+                    transition: all var(--duration-fast) ease;
                 }
                 .filter-pill:hover {
-                    color: var(--text-primary);
-                    background: var(--card-background-hover);
+                    color: #FFFFFF;
+                    border-color: rgba(227, 38, 54, 0.3);
                 }
                 .filter-pill-active {
-                    background: var(--active-background);
-                    border-color: var(--active-border);
-                    color: var(--text-primary);
+                    background: linear-gradient(135deg, #FF3548 0%, #E32636 100%) !important;
+                    border-color: rgba(255, 255, 255, 0.18) !important;
+                    color: #FFFFFF !important;
                     font-weight: 600;
+                    box-shadow: 0 2px 10px rgba(227, 38, 54, 0.35);
                 }
                 .filter-count {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 1px 5px;
-                    border-radius: 10px;
-                    background: rgba(0, 0, 0, 0.25);
                     font-size: 10px;
-                    font-weight: 600;
+                    padding: 1px 5px;
+                    background: rgba(0, 0, 0, 0.3);
+                    border-radius: 4px;
                 }
-
                 .repo-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-                    gap: var(--card-gap);
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 16px;
                 }
-
-                .repo-empty-wrapper {
-                    padding: 24px;
+                @media (max-width: 1140px) {
+                    .repo-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
                 }
-                .repo-loading-card {
-                    padding: 40px;
-                }
-
-                @media (max-width: 768px) {
+                @media (max-width: 720px) {
                     .repo-grid {
                         grid-template-columns: 1fr;
                     }
-                    .search-filter-group {
-                        flex-direction: column;
-                        align-items: stretch;
-                    }
-                    .repo-search-box {
-                        width: 100%;
-                    }
+                }
+                .repo-empty-wrapper {
+                    padding: 30px;
+                }
+                .repo-loading-card {
+                    padding: 40px;
                 }
             `}</style>
         </div>

@@ -155,7 +155,7 @@ export default function NodesTableCard() {
                     width: 7px;
                     height: 7px;
                     border-radius: 50%;
-                    background: #c4b5fd;
+                    background: #FF3548;
                 }
 
                 .nodes-title {
@@ -172,7 +172,7 @@ export default function NodesTableCard() {
                     border-radius: 9999px;
                     font-size: 10px;
                     font-weight: 700;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .nodes-actions {
@@ -261,7 +261,7 @@ export default function NodesTableCard() {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .node-name-text {
@@ -297,8 +297,8 @@ export default function NodesTableCard() {
                 }
 
                 .node-toggle-switch.active {
-                    background: #8b5cf6;
-                    border-color: #a78bfa;
+                    background: #E32636;
+                    border-color: #d99ba5;
                 }
 
                 .toggle-thumb {

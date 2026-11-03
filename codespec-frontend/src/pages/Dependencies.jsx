@@ -386,7 +386,7 @@ function Dependencies() {
                         <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>Components</span>
                     </div>
 
-                    <span style={{ color: "rgba(255,255,255,0.15)" }}>•</span>
+                    <span style={{ color: "rgba(255,255,255,0.15)" }}>â€¢</span>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <div className="icon-accent icon-accent--cyan" style={{ width: "26px", height: "26px", borderRadius: "8px" }}>
@@ -398,7 +398,7 @@ function Dependencies() {
                         <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>Relationships</span>
                     </div>
 
-                    <span style={{ color: "rgba(255,255,255,0.15)" }}>•</span>
+                    <span style={{ color: "rgba(255,255,255,0.15)" }}>â€¢</span>
 
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <div className="icon-accent icon-accent--green" style={{ width: "26px", height: "26px", borderRadius: "8px" }}>
@@ -607,7 +607,7 @@ function Dependencies() {
                                 padding: "4px 8px",
                                 border: "none",
                                 borderRadius: "9999px",
-                                background: directionFilter === "outbound" ? "rgba(167, 139, 250, 0.2)" : "transparent",
+                                background: directionFilter === "outbound" ? "rgba(227, 38, 54, 0.2)" : "transparent",
                                 color: directionFilter === "outbound" ? "var(--primary)" : "var(--text-secondary)",
                                 fontWeight: directionFilter === "outbound" ? 600 : 400,
                                 cursor: activeNode ? "pointer" : "not-allowed",
@@ -838,7 +838,7 @@ function Dependencies() {
                             </div>
 
                             <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                                Source Component → Dependency Target
+                                Source Component â†’ Dependency Target
                             </span>
                         </div>
 

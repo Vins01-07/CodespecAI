@@ -1,23 +1,22 @@
-import { ArrowRight, MoreHorizontal } from "lucide-react";
+import { ArrowRight, MoreHorizontal, Sparkles } from "lucide-react";
 import Card from "../common/Card";
 
 function SystemEfficiencyCard({
-    efficiency = 94.8,
-    label = "Efficiency",
+    efficiency = 96.7,
+    label = "EFFICIENCY",
     sublabel = "AST & Service Health",
-    context = "100% of nodes parsed cleanly",
+    context = "100% of nodes parsed cleanly â€¢ 0 vulnerabilities",
 }) {
-    // Semi-circular arc math
-    const radius = 80;
-    const circumference = Math.PI * radius;
+    const radius = 68;
+    const circumference = 2 * Math.PI * radius;
     const progressOffset = circumference * (1 - efficiency / 100);
 
     return (
-        <Card className="efficiency-card cs-card--gold">
+        <Card className="efficiency-card">
             <div className="efficiency-header">
                 <div className="efficiency-title-wrap">
                     <span className="efficiency-title">System Analysis</span>
-                    <span className="efficiency-tag font-mono">AST / INDEX</span>
+                    <span className="efficiency-tag font-mono">AST / HEALTH SCORE</span>
                 </div>
 
                 <div className="efficiency-header-actions">
@@ -36,49 +35,48 @@ function SystemEfficiencyCard({
                     <span className="gauge-label font-mono">{label}</span>
                 </div>
 
-                <svg className="gauge-svg" viewBox="0 0 240 130">
+                <svg className="gauge-svg" viewBox="0 0 200 200">
                     <defs>
-                        <radialGradient id="gauge-glow" cx="50%" cy="100%" r="80%">
-                            <stop offset="0%" stopColor="rgba(124, 58, 237, 0.25)" />
-                            <stop offset="60%" stopColor="rgba(139, 92, 246, 0.05)" />
-                            <stop offset="100%" stopColor="transparent" />
-                        </radialGradient>
-                        <linearGradient id="gauge-arc-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#7c3aed" />
-                            <stop offset="50%" stopColor="#8b5cf6" />
-                            <stop offset="100%" stopColor="#c4b5fd" />
+                        <filter id="gauge-red-glow" x="-40%" y="-40%" width="180%" height="180%">
+                            <feGaussianBlur stdDeviation="4" result="blur" />
+                            <feMerge>
+                                <feMergeNode in="blur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                        <linearGradient id="gauge-arc-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stopColor="#A80018" />
+                            <stop offset="40%" stopColor="#E32636" />
+                            <stop offset="100%" stopColor="#FF3548" />
                         </linearGradient>
                     </defs>
-
-                    {/* Ambient glow fill under arc */}
-                    <path
-                        d="M 35 115 A 85 85 0 0 1 205 115 Z"
-                        fill="url(#gauge-glow)"
-                    />
-
-                    {/* Track Arch */}
-                    <path
-                        d="M 40 115 A 80 80 0 0 1 200 115"
+                    <circle
+                        cx="100"
+                        cy="100"
+                        r={radius}
                         fill="none"
-                        stroke="rgba(255, 255, 255, 0.08)"
-                        strokeWidth="12"
-                        strokeLinecap="square"
+                        stroke="rgba(255, 255, 255, 0.06)"
+                        strokeWidth="11"
                     />
-
-                    {/* Progress Arch */}
-                    <path
-                        d="M 40 115 A 80 80 0 0 1 200 115"
+                    <circle
+                        cx="100"
+                        cy="100"
+                        r={radius}
                         fill="none"
                         stroke="url(#gauge-arc-gradient)"
-                        strokeWidth="12"
-                        strokeLinecap="square"
+                        strokeWidth="11"
+                        strokeLinecap="round"
                         strokeDasharray={circumference}
                         strokeDashoffset={progressOffset}
-                        style={{
-                            transition: "stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1)",
-                        }}
+                        transform="rotate(-90 100 100)"
+                        filter="url(#gauge-red-glow)"
+                        style={{ transition: "stroke-dashoffset 0.8s cubic-bezier(0.16, 1, 0.3, 1)" }}
                     />
                 </svg>
+
+                <div className="sparkle-badge" aria-hidden="true">
+                    <Sparkles size={14} className="sparkle-icon" />
+                </div>
             </div>
 
             <div className="efficiency-footer">
@@ -87,7 +85,7 @@ function SystemEfficiencyCard({
 
             <style>{`
                 .efficiency-card {
-                    padding: 14px 18px;
+                    padding: 16px 18px;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
@@ -103,86 +101,87 @@ function SystemEfficiencyCard({
                 .efficiency-title-wrap {
                     display: flex;
                     flex-direction: column;
+                    gap: 1px;
                 }
                 .efficiency-title {
-                    font-size: 13.5px;
+                    font-size: 14.5px;
                     font-weight: 800;
-                    color: #ffffff;
+                    color: #F5F5F7;
                 }
                 .efficiency-tag {
                     font-size: 10px;
-                    color: var(--text-muted);
+                    color: var(--secondary-text);
                     font-weight: 600;
                     letter-spacing: 0.05em;
                 }
                 .efficiency-header-actions {
                     display: flex;
                     align-items: center;
-                    gap: 5px;
+                    gap: 6px;
                 }
                 .icon-tiny-btn {
                     width: 26px;
                     height: 26px;
-                    display: flex;
+                    display: inline-flex;
                     align-items: center;
                     justify-content: center;
-                    border-radius: var(--radius-sm);
-                    background: #090a0f;
-                    border: 1px solid var(--card-border);
-                    color: var(--text-secondary);
+                    border-radius: 6px;
+                    background: #101115;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    color: var(--secondary-text);
                     cursor: pointer;
-                    transition: all 0.15s ease;
+                    transition: all var(--duration-fast) ease;
                 }
                 .icon-tiny-btn:hover {
-                    color: #ffffff;
-                    background: #141620;
-                    border-color: rgba(255, 255, 255, 0.15);
+                    color: #FFFFFF;
+                    border-color: rgba(227, 38, 54, 0.4);
                 }
                 .gauge-container {
                     position: relative;
                     display: flex;
-                    justify-content: center;
                     align-items: center;
-                    margin: 4px 0 0;
-                    height: 120px;
+                    justify-content: center;
+                    padding: 8px 0;
                 }
                 .gauge-svg {
-                    width: 220px;
-                    height: 120px;
-                    display: block;
+                    width: 170px;
+                    height: 170px;
                 }
                 .gauge-center-text {
                     position: absolute;
-                    bottom: 14px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
+                    justify-content: center;
                     text-align: center;
-                    pointer-events: none;
                 }
                 .gauge-percentage {
-                    font-size: 24px;
+                    font-size: 28px;
                     font-weight: 800;
-                    color: #ffffff;
+                    color: #F5F5F7;
                     letter-spacing: -0.6px;
-                    line-height: 1.1;
+                    line-height: 1;
                 }
                 .gauge-label {
                     font-size: 10px;
-                    color: var(--text-muted);
                     font-weight: 700;
-                    letter-spacing: 0.06em;
-                    text-transform: uppercase;
-                    margin-top: 1px;
+                    color: var(--bright-red);
+                    letter-spacing: 0.08em;
+                    margin-top: 4px;
+                }
+                .sparkle-badge {
+                    position: absolute;
+                    bottom: 14px;
+                    right: 28px;
+                    color: var(--bright-red);
+                    filter: drop-shadow(0 0 6px rgba(255, 53, 72, 0.8));
                 }
                 .efficiency-footer {
-                    text-align: center;
-                    padding-top: 6px;
-                    border-top: 1px solid var(--card-border);
-                }
-                .efficiency-sublabel {
+                    padding-top: 8px;
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
                     font-size: 11px;
-                    color: var(--text-secondary);
+                    color: var(--secondary-text);
+                    text-align: center;
                 }
             `}</style>
         </Card>

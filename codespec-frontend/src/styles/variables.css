@@ -1,95 +1,104 @@
 :root {
-    /* Pure Dark Obsidian / Pitch Black Theme (Exact reference match) */
-    --app-background: #000000;
-    --sidebar-background: #050505;
-    --topbar-background: rgba(0, 0, 0, 0.95);
+    /* ─── Ambient Shifting Light Palette (Reference Theme) ─── */
+    --ambient-midnight: #08090D;
+    --ambient-charcoal: #151820;
+    --ambient-ocean-blue: #073A50;
+    --ambient-teal: #075A68;
+    --ambient-cyan: #168CA3;
+    --ambient-electric-blue: #254D9C;
+    --ambient-indigo: #292052;
 
-    --card-background: #09090b;
-    --card-background-gradient: #09090b;
-    --card-background-hover: #0f0f13;
-    --card-border: #1e1e24;
-    --card-border-strong: #2c2c36;
-    --card-border-gold: rgba(139, 92, 246, 0.35);
-    --card-border-glow: rgba(139, 92, 246, 0.15);
+    /* ─── CodeSpec AI Official Black & Crimson Palette ─── */
+    --app-background: #08090D;
+    --secondary-background: #101115;
+    --card-background: #15161B;
+    --elevated-panel: #1B1B22;
 
-    --graph-background: #000000;
+    --primary-crimson: #E32636;
+    --bright-red: #FF3548;
+    --crimson-dark: #A80018;
+    --crimson-glow: rgba(227, 38, 54, 0.22);
+    --crimson-glow-strong: rgba(255, 53, 72, 0.38);
+    --crimson-subtle: rgba(227, 38, 54, 0.12);
+
+    --primary: #E32636;
+    --primary-light: #FF3548;
+    --primary-solid: #E32636;
+    --primary-hover: #FF3548;
+    --primary-gradient: linear-gradient(135deg, #FF3548 0%, #E32636 100%);
+    --primary-gradient-hover: linear-gradient(135deg, #FF4D5E 0%, #F02839 100%);
+
+    --card-background-gradient: linear-gradient(180deg, #15161B 0%, #111217 100%);
+    --card-background-hover: #1A1B22;
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-strong: rgba(255, 255, 255, 0.14);
+    --card-border-crimson: rgba(227, 38, 54, 0.35);
+    --card-border-crimson-bright: rgba(255, 53, 72, 0.6);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-soft: rgba(255, 255, 255, 0.05);
+
+    --sidebar-background: #101115;
+    --topbar-background: rgba(8, 9, 13, 0.85);
+
+    --primary-text: #F5F5F7;
+    --text-primary: #F5F5F7;
+    --secondary-text: #A1A1AC;
+    --text-secondary: #A1A1AC;
+    --muted-text: #686875;
+    --text-muted: #686875;
+
+    /* Semantic Status */
+    --success: #10B981;
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --success-border: rgba(16, 185, 129, 0.3);
+
+    --warning: #F59E0B;
+    --warning-bg: rgba(245, 158, 11, 0.12);
+    --warning-border: rgba(245, 158, 11, 0.3);
+
+    --danger: #FF3548;
+    --danger-bg: rgba(255, 53, 72, 0.12);
+    --danger-border: rgba(255, 53, 72, 0.3);
+
+    --info: #38BDF8;
+
+    /* Graph & Architecture Categories */
+    --graph-frontend: #FF5A6E;
+    --graph-service: #E32636;
+    --graph-database: #10B981;
+    --graph-cache: #F59E0B;
+    --graph-external: #94A3B8;
+    --graph-background: #08090D;
     --graph-grid: rgba(255, 255, 255, 0.04);
 
-    /* Purple Primary Accent & Reference Tones */
-    --primary: #8b5cf6;
-    --primary-light: #a78bfa;
-    --primary-solid: #8b5cf6;
-    --primary-hover: #9f75ff;
-    --primary-gradient: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    --secondary: #a78bfa;
-
-    --gold-accent: #8b5cf6;
-    --gold-bright: #c4b5fd;
-    --gold-muted: #6d28d9;
-    --gold-soft-bg: rgba(139, 92, 246, 0.12);
-
-    /* High Contrast Typography */
-    --text-primary: #ffffff;
-    --text-secondary: #8e8e98;
-    --text-muted: #585862;
-
-    /* Semantic Status Accents */
-    --success: #22c55e;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-
-    /* Active Navigation State (Dark purple container from reference) */
-    --active-background: #191428;
-    --active-color: #c4b5fd;
-    --active-border: #3b2866;
-
-    /* Graph & Component Accents */
-    --graph-frontend: #8b5cf6;
-    --graph-service: #a78bfa;
-    --graph-database: #38bdf8;
-    --graph-cache: #f472b6;
-    --graph-external: #22c55e;
-
-    /* Semantic / Compatibility Aliases */
-    --bg-primary: var(--app-background);
-    --bg-sidebar: var(--sidebar-background);
-    --bg-topbar: var(--topbar-background);
-    --bg-card: var(--card-background);
-    --bg-card-hover: var(--card-background-hover);
-    --border: var(--card-border);
-    --border-soft: #18181c;
-
-    --accent-green: var(--success);
-    --accent-yellow: var(--warning);
-    --accent-blue: #60a5fa;
-    --accent-red: var(--danger);
-    --accent-purple: #8b5cf6;
-    --accent-gold: #8b5cf6;
-
-    /* Layout & Dimensions */
-    --sidebar-width: 240px;
-    --sidebar-dock-width: 70px;
+    /* Dimensions & Layout */
+    --sidebar-width: 250px;
+    --sidebar-dock-width: 72px;
     --topbar-height: 64px;
     --content-padding: 24px;
     --card-gap: 16px;
 
-    /* Neo-Brutalist Sharp Rectangular Borders (Reference standard) */
-    --border-radius: 4px;
-    --radius-sm: 3px;
-    --radius-md: 4px;
-    --radius-lg: 6px;
-    --radius-xl: 6px;
-    --radius-full: 4px;
+    /* Radii */
+    --border-radius: 16px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
 
-    /* Effects — Sharp Depth */
-    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
-    --card-glow: none;
-    --glow: none;
+    /* Shadows & Glows */
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    --card-glow: 0 0 25px rgba(227, 38, 54, 0.15);
+    --glow: 0 0 24px rgba(227, 38, 54, 0.22);
+    --glow-strong: 0 0 32px rgba(255, 53, 72, 0.4);
+    --crimson-btn-shadow: 0 4px 18px rgba(227, 38, 54, 0.38);
 
-    /* Animation tokens */
+    /* Transitions */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-    --duration-fast: 0.12s;
-    --duration-normal: 0.2s;
-    --duration-slow: 0.3s;
+    --duration-fast: 0.15s;
+    --duration-normal: 0.25s;
+    --duration-slow: 0.35s;
 }

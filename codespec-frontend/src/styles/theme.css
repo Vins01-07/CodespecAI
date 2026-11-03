@@ -14,7 +14,7 @@ body,
 
 body {
     background-color: var(--app-background);
-    color: var(--text-primary);
+    color: var(--primary-text);
     font-family:
         "Plus Jakarta Sans",
         "Inter",
@@ -30,6 +30,32 @@ body {
     letter-spacing: -0.015em;
     font-size: 13.5px;
     line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #090A0D;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1B1B22;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-crimson);
+}
+
+::selection {
+    background: rgba(227, 38, 54, 0.35);
+    color: #FFFFFF;
 }
 
 button,

@@ -1,5 +1,5 @@
-import { FileText, ChevronRight, Tag, Clock, RotateCcw, SearchX } from "lucide-react";
-import Badge from "../common/Badge";
+import { useState } from "react";
+import { ChevronRight, ChevronDown, SearchX, RotateCcw } from "lucide-react";
 
 function DocumentationList({
     documents = [],
@@ -7,11 +7,21 @@ function DocumentationList({
     onSelectDoc,
     onResetFilters,
 }) {
+    // Keep track of collapsed categories
+    const [collapsedCategories, setCollapsedCategories] = useState({});
+
+    const toggleCategory = (cat) => {
+        setCollapsedCategories((prev) => ({
+            ...prev,
+            [cat]: !prev[cat],
+        }));
+    };
+
     if (!documents || documents.length === 0) {
         return (
-            <div className="doc-list-empty-full cs-card">
+            <div className="doc-list-empty-full">
                 <div className="doc-empty-icon-wrap">
-                    <SearchX size={22} />
+                    <SearchX size={20} />
                 </div>
                 <h4 className="doc-empty-title">No Specifications Found</h4>
                 <p className="doc-empty-desc">
@@ -34,20 +44,21 @@ function DocumentationList({
                         flex-direction: column;
                         align-items: center;
                         justify-content: center;
-                        padding: 36px 20px;
+                        padding: 32px 16px;
                         text-align: center;
                         gap: 8px;
-                        height: 100%;
-                        min-height: 280px;
-                        border-style: dashed;
+                        background: rgba(16, 17, 21, 0.4);
+                        border: 1px dashed rgba(255, 255, 255, 0.08);
+                        border-radius: 12px;
+                        min-height: 220px;
                     }
                     .doc-empty-icon-wrap {
-                        width: 42px;
-                        height: 42px;
-                        border-radius: 12px;
-                        background: rgba(167, 139, 250, 0.12);
-                        border: 1px solid rgba(167, 139, 250, 0.25);
-                        color: var(--primary);
+                        width: 38px;
+                        height: 38px;
+                        border-radius: 10px;
+                        background: rgba(22, 140, 163, 0.12);
+                        border: 1px solid rgba(22, 140, 163, 0.3);
+                        color: #00F2FE;
                         display: flex;
                         align-items: center;
                         justify-content: center;
@@ -56,15 +67,15 @@ function DocumentationList({
                     .doc-empty-title {
                         margin: 0;
                         font-size: 13px;
-                        font-weight: 600;
-                        color: var(--text-primary);
+                        font-weight: 700;
+                        color: #F5F5F7;
                     }
                     .doc-empty-desc {
                         margin: 0;
                         font-size: 11.5px;
-                        color: var(--text-secondary);
-                        line-height: 1.45;
-                        max-width: 260px;
+                        color: #8E8E98;
+                        line-height: 1.4;
+                        max-width: 240px;
                     }
                     .doc-reset-filter-btn {
                         display: inline-flex;
@@ -73,268 +84,255 @@ function DocumentationList({
                         margin-top: 8px;
                         padding: 5px 12px;
                         font-size: 11px;
-                        font-weight: 500;
-                        background: var(--card-background-hover);
-                        border: 1px solid var(--card-border);
-                        border-radius: var(--radius-sm);
-                        color: var(--primary);
+                        font-weight: 600;
+                        background: #1B1B22;
+                        border: 1px solid rgba(255, 255, 255, 0.1);
+                        border-radius: 6px;
+                        color: #F5F5F7;
                         cursor: pointer;
                         transition: all 0.15s ease;
                     }
                     .doc-reset-filter-btn:hover {
-                        background: var(--active-background);
-                        border-color: var(--primary);
+                        background: rgba(22, 140, 163, 0.2);
+                        border-color: rgba(22, 140, 163, 0.4);
+                        color: #00F2FE;
                     }
                 `}</style>
             </div>
         );
     }
 
-    const getStatusBadge = (status) => {
+    // Group documents by category
+    const grouped = documents.reduce((acc, doc) => {
+        const cat = doc.category || "General";
+        if (!acc[cat]) acc[cat] = [];
+        acc[cat].push(doc);
+        return acc;
+    }, {});
+
+    const getStatusIndicator = (status) => {
         switch (status) {
             case "up-to-date":
-                return <Badge variant="success">Up to date</Badge>;
+                return <span className="status-dot dot-green" title="Up to date" />;
             case "needs-review":
-                return <Badge variant="warning">Needs review</Badge>;
+                return <span className="status-dot dot-amber" title="Needs review" />;
             case "outdated":
-                return <Badge variant="danger">Outdated</Badge>;
+                return <span className="status-dot dot-red" title="Outdated" />;
             default:
-                return <Badge variant="neutral">{status || "Draft"}</Badge>;
+                return <span className="status-dot dot-gray" title="Draft" />;
         }
     };
 
     return (
-        <div className="documentation-list">
-            {documents.map((doc) => {
-                const isSelected = selectedDocId === doc.id;
+        <div className="documentation-tree-nav">
+            {Object.entries(grouped).map(([category, docs]) => {
+                const isCollapsed = !!collapsedCategories[category];
+                const hasSelectedInCat = docs.some((d) => d.id === selectedDocId);
 
                 return (
-                    <div
-                        key={doc.id}
-                        className={`doc-item-card cs-card ${isSelected ? "selected" : ""}`}
-                        onClick={() => onSelectDoc && onSelectDoc(doc)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                                e.preventDefault();
-                                onSelectDoc && onSelectDoc(doc);
-                            }
-                        }}
-                    >
-                        <div className="doc-item-header">
-                            <div className="doc-item-title-row">
-                                <div className="doc-icon-wrap">
-                                    <FileText size={14} />
-                                </div>
-                                <div className="doc-title-container">
-                                    <h3 className="doc-item-title">{doc.title}</h3>
-                                    <div className="doc-item-sub">
-                                        {doc.category && (
-                                            <span className="doc-category-badge">{doc.category}</span>
-                                        )}
-                                        {doc.module && (
-                                            <span className="doc-module-badge font-mono">{doc.module}</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="doc-item-status-wrap">
-                                {getStatusBadge(doc.status)}
-                                <ChevronRight size={13} className="doc-item-arrow" />
-                            </div>
-                        </div>
+                    <div key={category} className="doc-tree-category-group">
+                        {/* Category Heading */}
+                        <button
+                            type="button"
+                            className={`doc-tree-cat-header ${hasSelectedInCat ? "has-active" : ""}`}
+                            onClick={() => toggleCategory(category)}
+                        >
+                            <span className="cat-title-wrap">
+                                {isCollapsed ? (
+                                    <ChevronRight size={12} className="cat-chevron" />
+                                ) : (
+                                    <ChevronDown size={12} className="cat-chevron" />
+                                )}
+                                <span className="cat-name">{category}</span>
+                            </span>
+                            <span className="cat-count font-mono">{docs.length}</span>
+                        </button>
 
-                        {doc.summary && (
-                            <p className="doc-item-summary">{doc.summary}</p>
+                        {/* Category Items */}
+                        {!isCollapsed && (
+                            <div className="doc-tree-items-list">
+                                {docs.map((doc) => {
+                                    const isSelected = selectedDocId === doc.id;
+
+                                    return (
+                                        <button
+                                            key={doc.id}
+                                            type="button"
+                                            className={`doc-tree-node-item ${isSelected ? "active" : ""}`}
+                                            onClick={() => onSelectDoc && onSelectDoc(doc)}
+                                        >
+                                            <div className="node-item-lead">
+                                                {getStatusIndicator(doc.status)}
+                                                <span className="node-item-title" title={doc.title}>
+                                                    {doc.title}
+                                                </span>
+                                            </div>
+
+                                            {doc.completeness && (
+                                                <span className="node-item-pct font-mono">
+                                                    {doc.completeness}%
+                                                </span>
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         )}
-
-                        <div className="doc-item-footer">
-                            <div className="doc-completeness-wrap">
-                                <div className="doc-progress-bar">
-                                    <div
-                                        className="doc-progress-fill"
-                                        style={{
-                                            width: `${doc.completeness || 0}%`,
-                                            backgroundColor:
-                                                doc.completeness > 85
-                                                    ? "var(--success)"
-                                                    : doc.completeness > 60
-                                                    ? "var(--warning)"
-                                                    : "var(--danger)",
-                                        }}
-                                    />
-                                </div>
-                                <span className="doc-completeness-text font-mono">
-                                    {doc.completeness || 0}%
-                                </span>
-                            </div>
-
-                            <div className="doc-meta-info">
-                                {doc.tags && doc.tags.length > 0 && (
-                                    <div className="doc-tags-mini">
-                                        <Tag size={10} />
-                                        <span>{doc.tags.slice(0, 2).join(", ")}</span>
-                                    </div>
-                                )}
-                                {doc.lastUpdated && (
-                                    <span className="doc-updated-date">
-                                        <Clock size={10} />
-                                        {doc.lastUpdated}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
                     </div>
                 );
             })}
 
             <style>{`
-                .documentation-list {
+                .documentation-tree-nav {
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
-                }
-                .doc-item-card {
-                    padding: 11px 13px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    cursor: pointer;
-                    transition: all 0.15s ease;
-                    outline: none;
-                }
-                .doc-item-card:hover {
-                    background: var(--card-background-hover);
-                    border-color: var(--card-border);
-                }
-                .doc-item-card.selected {
-                    background: var(--active-background);
-                    border-color: var(--active-border);
-                }
-                .doc-item-header {
-                    display: flex;
-                    align-items: flex-start;
-                    justify-content: space-between;
                     gap: 10px;
+                    width: 100%;
                 }
-                .doc-item-title-row {
+
+                .doc-tree-category-group {
                     display: flex;
-                    align-items: flex-start;
+                    flex-direction: column;
+                    gap: 2px;
+                }
+
+                .doc-tree-cat-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 6px 8px;
+                    background: transparent;
+                    border: none;
+                    color: #8E8E98;
+                    font-size: 11px;
+                    font-weight: 700;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    cursor: pointer;
+                    border-radius: 6px;
+                    transition: all var(--duration-fast) ease;
+                }
+
+                .doc-tree-cat-header:hover {
+                    color: #F5F5F7;
+                    background: rgba(255, 255, 255, 0.03);
+                }
+
+                .doc-tree-cat-header.has-active {
+                    color: #E2E8F0;
+                }
+
+                .cat-title-wrap {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .cat-chevron {
+                    color: var(--secondary-text);
+                    flex-shrink: 0;
+                }
+
+                .cat-count {
+                    font-size: 10px;
+                    background: rgba(255, 255, 255, 0.05);
+                    padding: 1px 6px;
+                    border-radius: 10px;
+                    color: #8E8E98;
+                }
+
+                .doc-tree-items-list {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                    padding-left: 8px;
+                }
+
+                .doc-tree-node-item {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 8px;
+                    padding: 8px 10px;
+                    background: transparent;
+                    border: 1px solid transparent;
+                    border-radius: 8px;
+                    color: #A1A1AC;
+                    cursor: pointer;
+                    text-align: left;
+                    font-size: 12px;
+                    font-weight: 500;
+                    transition: all var(--duration-fast) ease;
+                    width: 100%;
+                }
+
+                .doc-tree-node-item:hover:not(.active) {
+                    background: rgba(255, 255, 255, 0.04);
+                    color: #F5F5F7;
+                }
+
+                /* Active state matching reference pill */
+                .doc-tree-node-item.active {
+                    background: linear-gradient(135deg, rgba(227, 38, 54, 0.95) 0%, rgba(168, 0, 24, 0.9) 100%) !important;
+                    color: #FFFFFF !important;
+                    font-weight: 600;
+                    border-color: rgba(255, 255, 255, 0.16) !important;
+                    box-shadow: 0 4px 16px rgba(227, 38, 54, 0.4), 0 0 10px rgba(255, 53, 72, 0.25) !important;
+                }
+
+                .node-item-lead {
+                    display: flex;
+                    align-items: center;
                     gap: 8px;
                     min-width: 0;
                     flex: 1;
                 }
-                .doc-icon-wrap {
-                    width: 26px;
-                    height: 26px;
-                    border-radius: 8px;
-                    background: rgba(167, 139, 250, 0.15);
-                    color: var(--primary);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+
+                .status-dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
                     flex-shrink: 0;
                 }
-                .doc-title-container {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 2px;
-                    min-width: 0;
+
+                .dot-green {
+                    background: #10B981;
+                    box-shadow: 0 0 6px #10B981;
                 }
-                .doc-item-title {
-                    margin: 0;
-                    font-size: 12.5px;
-                    font-weight: 600;
-                    color: var(--text-primary);
-                    line-height: 1.35;
+
+                .dot-amber {
+                    background: #F59E0B;
+                    box-shadow: 0 0 6px #F59E0B;
                 }
-                .doc-item-sub {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    flex-wrap: wrap;
+
+                .dot-red {
+                    background: #FF3548;
+                    box-shadow: 0 0 6px #FF3548;
                 }
-                .doc-category-badge {
+
+                .dot-gray {
+                    background: #8E8E98;
+                }
+
+                .node-item-title {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.3;
+                }
+
+                .doc-tree-node-item.active .node-item-title {
+                    color: #FFFFFF !important;
+                }
+
+                .node-item-pct {
                     font-size: 10px;
-                    color: var(--text-secondary);
-                    background: var(--card-background-hover);
-                    padding: 1px 5px;
-                    border-radius: 3px;
-                }
-                .doc-module-badge {
-                    font-size: 10px;
-                    color: var(--primary);
-                    background: rgba(167, 139, 250, 0.12);
-                    padding: 2px 6px;
-                    border-radius: 9999px;
-                }
-                .doc-item-status-wrap {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
+                    color: #8E8E98;
                     flex-shrink: 0;
                 }
-                .doc-item-arrow {
-                    color: var(--text-muted);
-                    transition: transform 0.15s ease;
-                }
-                .doc-item-card:hover .doc-item-arrow {
-                    transform: translateX(2px);
-                    color: var(--primary);
-                }
-                .doc-item-summary {
-                    margin: 0;
-                    font-size: 11.5px;
-                    color: var(--text-secondary);
-                    line-height: 1.4;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                }
-                .doc-item-footer {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 10px;
-                    padding-top: 6px;
-                    border-top: 1px solid var(--card-border);
-                    flex-wrap: wrap;
-                }
-                .doc-completeness-wrap {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-                .doc-progress-bar {
-                    width: 50px;
-                    height: 4px;
-                    background: var(--app-background);
-                    border-radius: 2px;
-                    overflow: hidden;
-                }
-                .doc-progress-fill {
-                    height: 100%;
-                    border-radius: 2px;
-                    transition: width 0.3s ease;
-                }
-                .doc-completeness-text {
-                    font-size: 10px;
-                    color: var(--text-muted);
-                }
-                .doc-meta-info {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 10.5px;
-                    color: var(--text-muted);
-                }
-                .doc-tags-mini,
-                .doc-updated-date {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 3px;
+
+                .doc-tree-node-item.active .node-item-pct {
+                    color: rgba(255, 255, 255, 0.85);
                 }
             `}</style>
         </div>

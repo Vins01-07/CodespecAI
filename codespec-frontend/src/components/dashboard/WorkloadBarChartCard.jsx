@@ -22,7 +22,7 @@ export default function WorkloadBarChartCard() {
                     <span className="workload-sub">INGESTION WORKLOAD</span>
                     <div className="workload-hero-stat">
                         <span className="hero-number">20</span>
-                        <span className="hero-exponent">a7••</span>
+                        <span className="hero-exponent">a7â€¢â€¢</span>
                     </div>
                 </div>
 
@@ -55,8 +55,8 @@ export default function WorkloadBarChartCard() {
                                     height: `${bar.height}%`,
                                     background:
                                         bar.height >= 80
-                                            ? "linear-gradient(180deg, #c4b5fd 0%, #7c3aed 100%)"
-                                            : "linear-gradient(180deg, #8b5cf6 0%, #4c1d95 100%)",
+                                            ? "linear-gradient(180deg, #FF3548 0%, #9a4c61 100%)"
+                                            : "linear-gradient(180deg, #E32636 0%, #4c1d95 100%)",
                                 }}
                             >
                                 <span className="capsule-notch" />
@@ -121,7 +121,7 @@ export default function WorkloadBarChartCard() {
                 .hero-exponent {
                     font-size: 13px;
                     font-weight: 700;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .workload-indicator {
@@ -134,15 +134,15 @@ export default function WorkloadBarChartCard() {
                     border: 1px solid rgba(139, 92, 246, 0.25);
                     font-size: 10.5px;
                     font-weight: 600;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .gold-pulse-mini {
                     width: 6px;
                     height: 6px;
                     border-radius: 50%;
-                    background: #c4b5fd;
-                    box-shadow: 0 0 6px #c4b5fd;
+                    background: #FF3548;
+                    box-shadow: 0 0 6px #FF3548;
                 }
 
                 .bars-container {
@@ -176,7 +176,7 @@ export default function WorkloadBarChartCard() {
                     border-radius: 5px;
                     font-size: 9.5px;
                     font-weight: 700;
-                    color: #c4b5fd;
+                    color: #FF3548;
                     white-space: nowrap;
                     pointer-events: none;
                     z-index: 5;
@@ -236,7 +236,7 @@ export default function WorkloadBarChartCard() {
                 }
 
                 .footer-ops {
-                    color: #c4b5fd;
+                    color: #FF3548;
                     font-weight: 700;
                 }
             `}</style>

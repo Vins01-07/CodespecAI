@@ -1,19 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useLocation } from "react-router-dom";
 
 /**
  * ScrollAnimatedBackground
  *
- * Renders a high-performance, GPU-accelerated dark geometric ambient background
- * matching the reference dark Neo-Brutalist developer aesthetic:
- * - Subtle purple geometric wireframe polygons & isometric grid matrix
- * - Restrained slow ambient atmospheric purple glow
- * - Digital coordinate crosses & floating geometry
- * - Gentle scroll parallax without visual distraction
+ * Renders a continuously moving, organic ambient lighting background
+ * inspired by the reference AI-assistant design:
+ * - Mixed palette: Midnight Black (#08090D), Dark Charcoal (#151820),
+ *   Deep Ocean Blue (#073A50), Dark Teal (#075A68), Muted Cyan (#168CA3),
+ *   Soft Electric Blue (#254D9C), Subtle Indigo (#292052)
+ * - Flowing, multi-layered radial fields moving beneath a dark glass surface
+ * - Subtle dark vignette framing the viewport
+ * - Route-aware adaptation for System Q&A, Dashboard, Architecture, etc.
+ * - GPU-accelerated transforms & opacity, with prefers-reduced-motion fallback
  */
 export default function ScrollAnimatedBackground() {
+    const location = useLocation();
     const [scrollY, setScrollY] = useState(0);
     const rafId = useRef(null);
 
+    // Subtle parallax tracking on scroll
     useEffect(() => {
         let ticking = false;
 
@@ -49,224 +55,319 @@ export default function ScrollAnimatedBackground() {
         };
     }, []);
 
-    const parallax1 = scrollY * 0.12;
-    const parallax2 = scrollY * -0.08;
+    // Determine route modifier for contextual ambient intensity
+    const pageClass = useMemo(() => {
+        const path = location.pathname;
+        if (path === "/system-qa") return "bg-system-qa";
+        if (path === "/" || path === "/dashboard") return "bg-dashboard";
+        if (path === "/architecture") return "bg-architecture";
+        if (path === "/repository") return "bg-repository";
+        if (path === "/knowledge-search") return "bg-search";
+        if (path === "/dependencies") return "bg-dependencies";
+        if (path === "/documentation") return "bg-docs";
+        return "bg-default";
+    }, [location.pathname]);
+
+    // Very gentle parallax offsets
+    const p1 = Math.min(scrollY * 0.05, 40);
+    const p2 = Math.min(scrollY * -0.04, 30);
 
     return (
-        <div className="geometric-ambient-bg" aria-hidden="true">
-            {/* Ambient Deep Atmospheric Glows */}
+        <div className={`ambient-universe-bg ${pageClass}`} aria-hidden="true">
+            {/* Deep Midnight Base */}
+            <div className="ambient-base" />
+
+            {/* Layer 1: Deep Ocean Blue & Dark Teal flowing across lower screen */}
             <div
-                className="geo-glow geo-glow-top"
-                style={{
-                    transform: `translate3d(0, ${parallax1 * 0.5}px, 0)`,
-                }}
-            />
-            <div
-                className="geo-glow geo-glow-bottom"
-                style={{
-                    transform: `translate3d(0, ${parallax2 * 0.5}px, 0)`,
-                }}
+                className="ambient-field ambient-ocean-teal"
+                style={{ transform: `translate3d(0, ${p2}px, 0)` }}
             />
 
-            {/* Geometric Grid Texture */}
-            <div className="geo-grid-pattern" />
+            {/* Layer 2: Muted Cyan gently diffusing around the center */}
+            <div
+                className="ambient-field ambient-cyan-diffuse"
+                style={{ transform: `translate3d(0, ${p1 * 0.6}px, 0)` }}
+            />
 
-            {/* Subtle Purple Geometric Wireframe Vector Canvas */}
-            <svg
-                className="geo-vector-svg"
-                viewBox="0 0 1440 900"
-                preserveAspectRatio="none"
-            >
-                <defs>
-                    <linearGradient id="purpleLineGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stopColor="#7c3aed" stopOpacity="0.35" />
-                        <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.2" />
-                        <stop offset="100%" stopColor="#4c1d95" stopOpacity="0.05" />
-                    </linearGradient>
+            {/* Layer 3: Soft Electric Blue drifting in the upper & mid areas */}
+            <div
+                className="ambient-field ambient-electric-blue"
+                style={{ transform: `translate3d(0, ${p1}px, 0)` }}
+            />
 
-                    <linearGradient id="purpleLineGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#a855f7" stopOpacity="0.3" />
-                        <stop offset="60%" stopColor="#6366f1" stopOpacity="0.15" />
-                        <stop offset="100%" stopColor="#312e81" stopOpacity="0.03" />
-                    </linearGradient>
+            {/* Layer 4: Subtle Indigo in selected zones for depth */}
+            <div
+                className="ambient-field ambient-indigo-depth"
+                style={{ transform: `translate3d(0, ${p2 * 0.8}px, 0)` }}
+            />
 
-                    <pattern id="dotMatrix" x="0" y="0" width="32" height="32" patternUnits="userSpaceOnUse">
-                        <circle cx="2" cy="2" r="1" fill="rgba(139, 92, 246, 0.14)" />
-                    </pattern>
-                </defs>
+            {/* Layer 5: Dark Teal lateral drift */}
+            <div className="ambient-field ambient-teal-lateral" />
 
-                {/* Dot matrix grid */}
-                <rect width="100%" height="100%" fill="url(#dotMatrix)" opacity="0.6" />
+            {/* Subtle Glass Surface Texture & Technical Micro-Grid */}
+            <div className="ambient-glass-texture" />
 
-                {/* Top-Right Floating Geometric Wireframe Prism */}
-                <g
-                    className="floating-geo geo-prism-1"
-                    style={{
-                        transform: `translate3d(0, ${parallax1}px, 0)`,
-                    }}
-                >
-                    <polygon
-                        points="1180,120 1340,80 1400,220 1240,260"
-                        fill="rgba(124, 58, 237, 0.03)"
-                        stroke="url(#purpleLineGrad1)"
-                        strokeWidth="1.2"
-                    />
-                    <line x1="1180" y1="120" x2="1400" y2="220" stroke="url(#purpleLineGrad1)" strokeWidth="1" strokeDasharray="3 3" />
-                    <line x1="1340" y1="80" x2="1240" y2="260" stroke="url(#purpleLineGrad1)" strokeWidth="1" strokeDasharray="3 3" />
-                    
-                    {/* Corner Crosses */}
-                    <circle cx="1180" cy="120" r="2.5" fill="#a78bfa" opacity="0.6" />
-                    <circle cx="1340" cy="80" r="2.5" fill="#a78bfa" opacity="0.6" />
-                    <circle cx="1400" cy="220" r="2.5" fill="#a78bfa" opacity="0.6" />
-                    <circle cx="1240" cy="260" r="2.5" fill="#a78bfa" opacity="0.6" />
-                </g>
-
-                {/* Bottom-Left Floating Geometric Polygonal Cluster */}
-                <g
-                    className="floating-geo geo-prism-2"
-                    style={{
-                        transform: `translate3d(0, ${parallax2}px, 0)`,
-                    }}
-                >
-                    <polygon
-                        points="80,680 240,620 320,760 160,820"
-                        fill="rgba(139, 92, 246, 0.025)"
-                        stroke="url(#purpleLineGrad2)"
-                        strokeWidth="1.2"
-                    />
-                    <line x1="80" y1="680" x2="320" y2="760" stroke="url(#purpleLineGrad2)" strokeWidth="0.9" strokeDasharray="4 4" />
-                    <polygon
-                        points="240,620 380,580 440,700 320,760"
-                        fill="rgba(99, 102, 241, 0.02)"
-                        stroke="url(#purpleLineGrad2)"
-                        strokeWidth="1"
-                    />
-                    <circle cx="240" cy="620" r="2" fill="#c084fc" opacity="0.5" />
-                    <circle cx="320" cy="760" r="2" fill="#c084fc" opacity="0.5" />
-                    <circle cx="160" cy="820" r="2" fill="#c084fc" opacity="0.5" />
-                </g>
-
-                {/* Subtle Coordinate Axis Lines */}
-                <line x1="0" y1="450" x2="1440" y2="450" stroke="rgba(139, 92, 246, 0.05)" strokeWidth="1" strokeDasharray="8 8" />
-                <line x1="720" y1="0" x2="720" y2="900" stroke="rgba(139, 92, 246, 0.05)" strokeWidth="1" strokeDasharray="8 8" />
-            </svg>
-
-            {/* Subtle Floating Node Markers */}
-            <div className="geo-floating-nodes">
-                <span className="geo-node n1" />
-                <span className="geo-node n2" />
-                <span className="geo-node n3" />
-                <span className="geo-node n4" />
-            </div>
+            {/* Framing Vignette: Dark glass surface finish with edge shadow */}
+            <div className="ambient-vignette" />
 
             <style>{`
-                .geometric-ambient-bg {
+                .ambient-universe-bg {
                     position: fixed;
                     inset: 0;
+                    width: 100vw;
+                    height: 100vh;
                     pointer-events: none;
-                    z-index: 0;
+                    z-index: -1;
                     overflow: hidden;
+                    background-color: #08090D;
                     contain: strict;
-                    background: #07070a;
                 }
 
-                .geo-glow {
+                .ambient-base {
                     position: absolute;
-                    border-radius: 50%;
-                    pointer-events: none;
-                    will-change: transform;
-                    filter: blur(100px);
+                    inset: 0;
+                    background: radial-gradient(circle at 50% 40%, #151820 0%, #08090D 85%);
+                    opacity: 0.95;
                 }
 
-                .geo-glow-top {
-                    top: -15%;
+                /* Layer 1: Deep Ocean Blue & Dark Teal flow - lower screen */
+                .ambient-ocean-teal {
+                    position: absolute;
+                    bottom: -15%;
+                    left: -10%;
+                    width: 120%;
+                    height: 65%;
+                    background: radial-gradient(
+                        ellipse 70% 55% at 50% 85%,
+                        rgba(7, 90, 104, 0.42) 0%,
+                        rgba(7, 58, 80, 0.38) 35%,
+                        rgba(8, 9, 13, 0) 75%
+                    );
+                    filter: blur(60px);
+                    animation: flowOceanTeal 24s ease-in-out infinite alternate;
+                    will-change: transform, opacity;
+                }
+
+                /* Layer 2: Muted Cyan gently diffusing around center */
+                .ambient-cyan-diffuse {
+                    position: absolute;
+                    top: 25%;
                     left: 20%;
-                    width: 650px;
-                    height: 550px;
-                    background: radial-gradient(circle, rgba(124, 58, 237, 0.16) 0%, rgba(139, 92, 246, 0.05) 50%, transparent 75%);
-                    animation: subtlePulse 12s ease-in-out infinite alternate;
+                    width: 65%;
+                    height: 55%;
+                    background: radial-gradient(
+                        circle at 50% 50%,
+                        rgba(22, 140, 163, 0.22) 0%,
+                        rgba(7, 90, 104, 0.14) 45%,
+                        rgba(8, 9, 13, 0) 70%
+                    );
+                    filter: blur(75px);
+                    animation: diffuseCyan 20s ease-in-out 1s infinite alternate;
+                    will-change: transform, opacity;
                 }
 
-                .geo-glow-bottom {
+                /* Layer 3: Soft Electric Blue on upper right & mid areas */
+                .ambient-electric-blue {
+                    position: absolute;
+                    top: -10%;
+                    right: -5%;
+                    width: 60%;
+                    height: 60%;
+                    background: radial-gradient(
+                        circle at 60% 40%,
+                        rgba(37, 77, 156, 0.28) 0%,
+                        rgba(41, 32, 82, 0.18) 45%,
+                        rgba(8, 9, 13, 0) 75%
+                    );
+                    filter: blur(70px);
+                    animation: driftElectric 28s ease-in-out 3s infinite alternate;
+                    will-change: transform, opacity;
+                }
+
+                /* Layer 4: Subtle Indigo for chromatic depth */
+                .ambient-indigo-depth {
+                    position: absolute;
+                    bottom: 10%;
+                    right: 5%;
+                    width: 50%;
+                    height: 50%;
+                    background: radial-gradient(
+                        circle at 50% 50%,
+                        rgba(41, 32, 82, 0.36) 0%,
+                        rgba(7, 58, 80, 0.18) 50%,
+                        rgba(8, 9, 13, 0) 75%
+                    );
+                    filter: blur(80px);
+                    animation: depthIndigo 32s ease-in-out 2s infinite alternate;
+                    will-change: transform, opacity;
+                }
+
+                /* Layer 5: Dark Teal lateral drift */
+                .ambient-teal-lateral {
+                    position: absolute;
+                    top: 40%;
+                    left: -15%;
+                    width: 45%;
+                    height: 50%;
+                    background: radial-gradient(
+                        circle at 40% 50%,
+                        rgba(7, 90, 104, 0.26) 0%,
+                        rgba(22, 140, 163, 0.12) 50%,
+                        transparent 70%
+                    );
+                    filter: blur(65px);
+                    animation: lateralTeal 26s ease-in-out 4s infinite alternate;
+                    will-change: transform, opacity;
+                }
+
+                /* Contextual tweaks for System Q&A Hero */
+                .ambient-universe-bg.bg-system-qa .ambient-cyan-diffuse {
+                    top: 15%;
+                    left: 22%;
+                    width: 56%;
+                    height: 55%;
+                    background: radial-gradient(
+                        circle at 50% 45%,
+                        rgba(22, 140, 163, 0.32) 0%,
+                        rgba(37, 77, 156, 0.20) 45%,
+                        rgba(8, 9, 13, 0) 75%
+                    );
+                    filter: blur(65px);
+                    animation: diffuseCyanQA 18s ease-in-out infinite alternate;
+                }
+
+                .ambient-universe-bg.bg-system-qa .ambient-ocean-teal {
                     bottom: -20%;
-                    right: 15%;
-                    width: 750px;
-                    height: 600px;
-                    background: radial-gradient(circle, rgba(109, 40, 217, 0.14) 0%, rgba(99, 102, 241, 0.04) 55%, transparent 75%);
-                    animation: subtlePulse 15s ease-in-out 3s infinite alternate;
+                    height: 60%;
+                    opacity: 0.85;
                 }
 
-                .geo-grid-pattern {
+                /* Subtle glass micro-grid texture */
+                .ambient-glass-texture {
                     position: absolute;
                     inset: 0;
                     background-image: 
-                        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+                        linear-gradient(to right, rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255, 255, 255, 0.012) 1px, transparent 1px);
                     background-size: 48px 48px;
-                    opacity: 0.7;
+                    opacity: 0.5;
+                    mix-blend-mode: screen;
                 }
 
-                .geo-vector-svg {
+                /* Dark Vignette: Colored light moving beneath dark glass */
+                .ambient-vignette {
                     position: absolute;
                     inset: 0;
-                    width: 100%;
-                    height: 100%;
+                    background: radial-gradient(
+                        ellipse 85% 80% at 50% 50%,
+                        transparent 45%,
+                        rgba(8, 9, 13, 0.45) 75%,
+                        rgba(8, 9, 13, 0.92) 100%
+                    );
                     pointer-events: none;
                 }
 
-                .floating-geo {
-                    will-change: transform;
-                    transition: transform 0.15s ease-out;
+                /* ─── Smooth, Slow, Fluid Keyframe Animations ─── */
+                @keyframes flowOceanTeal {
+                    0% {
+                        transform: translate3d(0, 0, 0) scale(1);
+                        opacity: 0.85;
+                    }
+                    50% {
+                        transform: translate3d(40px, -20px, 0) scale(1.08);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate3d(-30px, 15px, 0) scale(0.96);
+                        opacity: 0.8;
+                    }
                 }
 
-                .geo-prism-1 {
-                    animation: geoDrift1 20s ease-in-out infinite alternate;
+                @keyframes diffuseCyan {
+                    0% {
+                        transform: translate3d(0, 0, 0) scale(0.95);
+                        opacity: 0.75;
+                    }
+                    50% {
+                        transform: translate3d(-25px, 20px, 0) scale(1.1);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate3d(20px, -15px, 0) scale(1);
+                        opacity: 0.8;
+                    }
                 }
 
-                .geo-prism-2 {
-                    animation: geoDrift2 24s ease-in-out infinite alternate;
+                @keyframes diffuseCyanQA {
+                    0% {
+                        transform: translate3d(0, 0, 0) scale(1);
+                        opacity: 0.9;
+                    }
+                    50% {
+                        transform: translate3d(0, -15px, 0) scale(1.12);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate3d(0, 10px, 0) scale(0.98);
+                        opacity: 0.85;
+                    }
                 }
 
-                .geo-floating-nodes {
-                    position: absolute;
-                    inset: 0;
+                @keyframes driftElectric {
+                    0% {
+                        transform: translate3d(0, 0, 0) scale(1);
+                        opacity: 0.75;
+                    }
+                    50% {
+                        transform: translate3d(-35px, 25px, 0) scale(1.06);
+                        opacity: 0.95;
+                    }
+                    100% {
+                        transform: translate3d(20px, -20px, 0) scale(0.94);
+                        opacity: 0.7;
+                    }
                 }
 
-                .geo-node {
-                    position: absolute;
-                    width: 3px;
-                    height: 3px;
-                    background: #a855f7;
-                    border-radius: 1px;
-                    box-shadow: 0 0 6px rgba(168, 85, 247, 0.8);
-                    opacity: 0.35;
+                @keyframes depthIndigo {
+                    0% {
+                        transform: translate3d(0, 0, 0) scale(1);
+                        opacity: 0.7;
+                    }
+                    50% {
+                        transform: translate3d(30px, -25px, 0) scale(1.12);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: translate3d(-20px, 15px, 0) scale(0.98);
+                        opacity: 0.75;
+                    }
                 }
 
-                .n1 { top: 22%; left: 35%; animation: nodeFloat 8s ease-in-out infinite alternate; }
-                .n2 { top: 65%; left: 78%; animation: nodeFloat 11s ease-in-out 1s infinite alternate; }
-                .n3 { top: 82%; left: 25%; animation: nodeFloat 9.5s ease-in-out 2s infinite alternate; }
-                .n4 { top: 30%; left: 88%; animation: nodeFloat 10s ease-in-out 0.5s infinite alternate; }
-
-                @keyframes geoDrift1 {
-                    0% { transform: translate(0, 0) rotate(0deg); }
-                    100% { transform: translate(-15px, 12px) rotate(1.5deg); }
+                @keyframes lateralTeal {
+                    0% {
+                        transform: translate3d(0, 0, 0) scale(1);
+                        opacity: 0.65;
+                    }
+                    50% {
+                        transform: translate3d(25px, 30px, 0) scale(1.08);
+                        opacity: 0.9;
+                    }
+                    100% {
+                        transform: translate3d(-15px, -20px, 0) scale(0.95);
+                        opacity: 0.65;
+                    }
                 }
 
-                @keyframes geoDrift2 {
-                    0% { transform: translate(0, 0) rotate(0deg); }
-                    100% { transform: translate(12px, -14px) rotate(-1.5deg); }
-                }
-
-                @keyframes nodeFloat {
-                    0% { transform: translateY(0); opacity: 0.25; }
-                    50% { transform: translateY(-8px); opacity: 0.65; }
-                    100% { transform: translateY(4px); opacity: 0.25; }
-                }
-
-                @keyframes subtlePulse {
-                    0% { transform: scale(1); opacity: 0.85; }
-                    50% { transform: scale(1.08); opacity: 1; }
-                    100% { transform: scale(0.95); opacity: 0.85; }
+                /* ─── Accessibility & Reduced Motion ─── */
+                @media (prefers-reduced-motion: reduce) {
+                    .ambient-ocean-teal,
+                    .ambient-cyan-diffuse,
+                    .ambient-electric-blue,
+                    .ambient-indigo-depth,
+                    .ambient-teal-lateral {
+                        animation: none !important;
+                        transition: none !important;
+                    }
                 }
             `}</style>
         </div>

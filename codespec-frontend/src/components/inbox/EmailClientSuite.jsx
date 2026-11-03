@@ -145,7 +145,7 @@ export default function EmailClientSuite() {
                     <span className="light light-minimize" title="Minimize" />
                     <span className="light light-expand" title="Expand" />
                 </div>
-                <div className="window-title-text">Dappr Mail • Communications Suite</div>
+                <div className="window-title-text">Dappr Mail â€¢ Communications Suite</div>
                 <div className="window-spacer" />
             </div>
 
@@ -344,7 +344,7 @@ export default function EmailClientSuite() {
                                     <div className="card-top-line">
                                         <div className="sender-group">
                                             {email.unread && <span className="unread-green-dot" />}
-                                            {email.starred && <Star size={11} className="star-icon filled" fill="#c4b5fd" color="#c4b5fd" />}
+                                            {email.starred && <Star size={11} className="star-icon filled" fill="#FF3548" color="#FF3548" />}
                                             <span className="sender-name">{email.sender}</span>
                                         </div>
                                         <span className="email-time-stamp">{email.time}</span>
@@ -373,11 +373,11 @@ export default function EmailClientSuite() {
                                             <div className="context-star-row">
                                                 <span className="star-row-label">Star</span>
                                                 <div className="stars-palette">
-                                                    <span className="color-star" style={{ color: "#c4b5fd" }}>★</span>
-                                                    <span className="color-star" style={{ color: "#ef4444" }}>★</span>
-                                                    <span className="color-star" style={{ color: "#3b82f6" }}>★</span>
-                                                    <span className="color-star" style={{ color: "#10b981" }}>★</span>
-                                                    <span className="color-star" style={{ color: "#9ca3af" }}>★</span>
+                                                    <span className="color-star" style={{ color: "#FF3548" }}>â˜…</span>
+                                                    <span className="color-star" style={{ color: "#ef4444" }}>â˜…</span>
+                                                    <span className="color-star" style={{ color: "#3b82f6" }}>â˜…</span>
+                                                    <span className="color-star" style={{ color: "#10b981" }}>â˜…</span>
+                                                    <span className="color-star" style={{ color: "#9ca3af" }}>â˜…</span>
                                                 </div>
                                             </div>
 

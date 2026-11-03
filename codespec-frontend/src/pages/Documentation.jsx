@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
     BookOpen,
     ShieldAlert,
@@ -6,24 +6,18 @@ import {
     Search,
     RefreshCw,
     FolderGit2,
-    Filter,
-    FileText,
-    CheckCircle2,
     AlertTriangle,
-    Tag,
-    Copy,
-    Check,
+    X,
 } from "lucide-react";
 import useRepositoryStore from "../store/repositoryStore";
 import documentationApi from "../services/documentationApi";
 import DocumentationList from "../components/documentation/DocumentationList";
+import DocumentationReader from "../components/documentation/DocumentationReader";
 import DocumentationAlert from "../components/documentation/DocumentationAlert";
 import UpdateSuggestion from "../components/documentation/UpdateSuggestion";
-import Card from "../components/common/Card";
-import Badge from "../components/common/Badge";
-import Button from "../components/common/Button";
 import Loading from "../components/common/Loading";
 import EmptyState from "../components/common/EmptyState";
+import Button from "../components/common/Button";
 
 function Documentation() {
     const { activeRepository, repositories, setActiveRepository } = useRepositoryStore();
@@ -38,24 +32,24 @@ function Documentation() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSyncing, setIsSyncing] = useState(false);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState("all"); // "all", "alerts", "suggestions"
+    const [activeTab, setActiveTab] = useState("all"); // "all" | "alerts" | "suggestions"
     const [searchQuery, setSearchQuery] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("all");
-    const [statusFilter, setStatusFilter] = useState("all");
-    const [copiedDoc, setCopiedDoc] = useState(false);
+    const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
     const readyRepositories = repositories.filter((r) => r.status === "Ready");
     const currentRepo = activeRepository?.status === "Ready" ? activeRepository : readyRepositories[0] || activeRepository;
+    const currentRepoId = currentRepo?.id;
 
     // Load documentation data from API
-    const loadDocumentationData = async () => {
+    const loadDocumentationData = useCallback(async () => {
         setIsLoading(true);
         setError(null);
         try {
             const [docsRes, alertsRes, suggsRes] = await Promise.all([
-                documentationApi.getDocumentation(currentRepo?.id),
-                documentationApi.getDocumentationAlerts(currentRepo?.id),
-                documentationApi.getUpdateSuggestions(currentRepo?.id),
+                documentationApi.getDocumentation(currentRepoId),
+                documentationApi.getDocumentationAlerts(currentRepoId),
+                documentationApi.getUpdateSuggestions(currentRepoId),
             ]);
 
             const docItems = docsRes?.items || (Array.isArray(docsRes) ? docsRes : []);
@@ -78,11 +72,47 @@ function Documentation() {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [currentRepoId]);
 
     useEffect(() => {
-        loadDocumentationData();
-    }, [currentRepo?.id]);
+        let isMounted = true;
+        async function init() {
+            try {
+                const [docsRes, alertsRes, suggsRes] = await Promise.all([
+                    documentationApi.getDocumentation(currentRepoId),
+                    documentationApi.getDocumentationAlerts(currentRepoId),
+                    documentationApi.getUpdateSuggestions(currentRepoId),
+                ]);
+                if (isMounted) {
+                    const docItems = docsRes?.items || (Array.isArray(docsRes) ? docsRes : []);
+                    const alertItems = alertsRes?.alerts || (Array.isArray(alertsRes) ? alertsRes : []);
+                    const suggItems = suggsRes?.suggestions || (Array.isArray(suggsRes) ? suggsRes : []);
+
+                    setDocuments(docItems);
+                    setAlerts(alertItems);
+                    setSuggestions(suggItems);
+
+                    setSelectedDoc((prev) => {
+                        if (prev && docItems.some((d) => d.id === prev.id)) {
+                            return prev;
+                        }
+                        return docItems[0] || null;
+                    });
+                    setIsLoading(false);
+                }
+            } catch (err) {
+                if (isMounted) {
+                    console.error("Failed to load documentation data:", err);
+                    setError(err.message || "Failed to load documentation from server");
+                    setIsLoading(false);
+                }
+            }
+        }
+        init();
+        return () => {
+            isMounted = false;
+        };
+    }, [currentRepoId]);
 
     const handleSync = async () => {
         setIsSyncing(true);
@@ -106,14 +136,6 @@ function Documentation() {
         }, 1500);
     };
 
-    const handleCopyDocContent = () => {
-        if (selectedDoc?.content) {
-            navigator.clipboard.writeText(selectedDoc.content);
-            setCopiedDoc(true);
-            setTimeout(() => setCopiedDoc(false), 2000);
-        }
-    };
-
     // Extract unique categories
     const categories = useMemo(() => {
         const set = new Set(["all"]);
@@ -127,7 +149,6 @@ function Documentation() {
     const filteredDocuments = useMemo(() => {
         return documents.filter((doc) => {
             const matchesCategory = categoryFilter === "all" || doc.category === categoryFilter;
-            const matchesStatus = statusFilter === "all" || doc.status === statusFilter;
             const q = searchQuery.toLowerCase().trim();
             const matchesSearch =
                 !q ||
@@ -136,9 +157,20 @@ function Documentation() {
                 doc.summary?.toLowerCase().includes(q) ||
                 (doc.tags && doc.tags.some((t) => t.toLowerCase().includes(q)));
 
-            return matchesCategory && matchesStatus && matchesSearch;
+            return matchesCategory && matchesSearch;
         });
-    }, [documents, categoryFilter, statusFilter, searchQuery]);
+    }, [documents, categoryFilter, searchQuery]);
+
+    // Previous and Next document resolution
+    const { previousDoc, nextDoc } = useMemo(() => {
+        if (!selectedDoc || !filteredDocuments.length) {
+            return { previousDoc: null, nextDoc: null };
+        }
+        const index = filteredDocuments.findIndex((d) => d.id === selectedDoc.id);
+        const prev = index > 0 ? filteredDocuments[index - 1] : null;
+        const next = index >= 0 && index < filteredDocuments.length - 1 ? filteredDocuments[index + 1] : null;
+        return { previousDoc: prev, nextDoc: next };
+    }, [selectedDoc, filteredDocuments]);
 
     // Calculate health & completeness score
     const healthScore = useMemo(() => {
@@ -150,28 +182,26 @@ function Documentation() {
     }, [documents, alerts]);
 
     return (
-        <div className="documentation-page">
-            {/* ── Top Header Bar ────────────────────────────────────────────── */}
-            <div className="doc-page-header cs-card cs-card--blue">
-                <div className="doc-header-main">
-                    <div className="doc-title-row">
-                        <div className="icon-accent icon-accent--blue" style={{ width: "42px", height: "42px", borderRadius: "14px" }}>
-                            <BookOpen size={18} />
-                        </div>
-                        <div>
-                            <h1 className="doc-page-title">Documentation Hub</h1>
-                            <p className="doc-page-subtitle">
-                                Codebase specifications, OpenAPI schemas, AST docstrings & drift tracking
-                            </p>
-                        </div>
-                    </div>
+        <div className="doc-page-container">
+            {/* Top Page Header Banner */}
+            <header className="doc-top-banner">
+                <div className="doc-top-title-group">
+                    <h1 className="doc-page-title">
+                        <span className="title-white">Git </span>
+                        <span className="title-red">Docs</span>
+                    </h1>
+                    <span className="doc-page-subtitle">
+                        Codebase specifications, architectural topology &amp; continuous AST sync
+                    </span>
+                </div>
 
-                    <div className="doc-header-controls">
-                        {/* Repository Selector */}
-                        <div className="doc-repo-select-wrap">
-                            <FolderGit2 size={13} className="repo-icon" />
+                <div className="doc-top-controls">
+                    {/* Repository Selector */}
+                    {currentRepo && (
+                        <div className="doc-repo-selector">
+                            <FolderGit2 size={13} className="repo-icon-accent" />
                             <select
-                                className="doc-repo-select"
+                                className="doc-repo-select-element font-mono"
                                 value={currentRepo?.id || ""}
                                 onChange={(e) => {
                                     const r = repositories.find((x) => x.id === e.target.value);
@@ -185,110 +215,80 @@ function Documentation() {
                                 ))}
                             </select>
                         </div>
+                    )}
 
-                        {/* Sync Button */}
-                        <Button
-                            variant="secondary"
-                            onClick={handleSync}
-                            disabled={isSyncing || isLoading}
-                            className="doc-sync-btn"
-                        >
-                            <RefreshCw size={13} className={isSyncing ? "spinning" : ""} />
-                            <span>{isSyncing ? "Syncing AST..." : "Rescan Docs"}</span>
-                        </Button>
-                    </div>
+                    {/* Rescan Button */}
+                    <button
+                        type="button"
+                        onClick={handleSync}
+                        disabled={isSyncing || isLoading}
+                        className="doc-sync-btn"
+                        title="Rescan repository AST and sync docstrings"
+                    >
+                        <RefreshCw size={13} className={isSyncing ? "spin-icon" : ""} />
+                        <span>{isSyncing ? "Syncing AST..." : "Rescan Docs"}</span>
+                    </button>
+                </div>
+            </header>
+
+            {/* Metrics Status Strip */}
+            <section className="doc-metrics-strip" aria-label="Documentation Health">
+                <div className="strip-metric-item">
+                    <span className="strip-label">Total Specs</span>
+                    <span className="strip-value font-mono">{documents.length}</span>
                 </div>
 
-                {/* ── Key Metrics Summary Bar ───────────────────────────────── */}
-                <div className="doc-metrics-bar">
-                    <div className="metric-pill">
-                        <span className="metric-label">Total Specs:</span>
-                        <span className="metric-value font-mono">{documents.length}</span>
-                    </div>
-                    <div className="metric-divider" />
-                    <div className="metric-pill">
-                        <span className="metric-label">Alerts:</span>
-                        <span
-                            className="metric-value font-mono"
-                            style={{
-                                color: alerts.length > 0 ? "var(--warning)" : "var(--success)",
-                            }}
-                        >
-                            {alerts.length} issues
-                        </span>
-                    </div>
-                    <div className="metric-divider" />
-                    <div className="metric-pill">
-                        <span className="metric-label">AI Suggestions:</span>
-                        <span className="metric-value font-mono" style={{ color: "var(--primary)" }}>
-                            {suggestions.length} ready
-                        </span>
-                    </div>
-                    <div className="metric-divider" />
-                    <div className="metric-pill">
-                        <span className="metric-label">Doc Health:</span>
-                        <span
-                            className="metric-value font-mono"
-                            style={{
-                                color:
-                                    healthScore > 80
-                                        ? "var(--success)"
-                                        : healthScore > 50
-                                        ? "var(--warning)"
-                                        : "var(--danger)",
-                            }}
-                        >
-                            {healthScore}%
-                        </span>
-                    </div>
+                <div className="strip-divider" />
+
+                <div className="strip-metric-item">
+                    <span className="strip-label">Drift Alerts</span>
+                    <span
+                        className="strip-value font-mono"
+                        style={{ color: alerts.length > 0 ? "#F59E0B" : "#10B981" }}
+                    >
+                        {alerts.length} issues
+                    </span>
                 </div>
-            </div>
 
-            {/* ── Navigation Tabs ───────────────────────────────────────────── */}
-            <div className="doc-nav-tabs">
-                <button
-                    type="button"
-                    className={`nav-tab-btn ${activeTab === "all" ? "active" : ""}`}
-                    onClick={() => setActiveTab("all")}
-                >
-                    <BookOpen size={14} />
-                    <span>Documentation Index</span>
-                    <span className="tab-count font-mono">{documents.length}</span>
-                </button>
-                <button
-                    type="button"
-                    className={`nav-tab-btn ${activeTab === "alerts" ? "active" : ""}`}
-                    onClick={() => setActiveTab("alerts")}
-                >
-                    <ShieldAlert size={14} />
-                    <span>Alerts & Discrepancies</span>
-                    {alerts.length > 0 && (
-                        <span className="tab-count warning font-mono">{alerts.length}</span>
-                    )}
-                </button>
-                <button
-                    type="button"
-                    className={`nav-tab-btn ${activeTab === "suggestions" ? "active" : ""}`}
-                    onClick={() => setActiveTab("suggestions")}
-                >
-                    <Sparkles size={14} />
-                    <span>Update Recommendations</span>
-                    {suggestions.length > 0 && (
-                        <span className="tab-count primary font-mono">{suggestions.length}</span>
-                    )}
-                </button>
-            </div>
+                <div className="strip-divider" />
 
-            {/* ── Error & Loading States ────────────────────────────────────── */}
+                <div className="strip-metric-item">
+                    <span className="strip-label">AI Suggestions</span>
+                    <span className="strip-value font-mono" style={{ color: "#00F2FE" }}>
+                        {suggestions.length} ready
+                    </span>
+                </div>
+
+                <div className="strip-divider" />
+
+                <div className="strip-metric-item">
+                    <span className="strip-label">Doc Health</span>
+                    <span
+                        className="strip-value font-mono"
+                        style={{
+                            color:
+                                healthScore > 80
+                                    ? "#10B981"
+                                    : healthScore > 50
+                                    ? "#F59E0B"
+                                    : "var(--bright-red)",
+                        }}
+                    >
+                        {healthScore}%
+                    </span>
+                </div>
+            </section>
+
+            {/* Loading & Error States */}
             {isLoading && (
-                <div className="doc-loading-container cs-card">
+                <div className="doc-state-container">
                     <Loading message="Scanning repository specifications & AST docstrings..." />
                 </div>
             )}
 
             {!isLoading && error && (
-                <div className="doc-error-card cs-card">
-                    <AlertTriangle size={20} className="error-icon" />
+                <div className="doc-error-box">
+                    <AlertTriangle size={22} className="error-icon" />
                     <div className="error-content">
                         <h3>Failed to retrieve documentation</h3>
                         <p>{error}</p>
@@ -299,654 +299,599 @@ function Documentation() {
                 </div>
             )}
 
-            {/* ── Main Tab Views ────────────────────────────────────────────── */}
+            {/* ══════════════════════════════════════════════════════════
+                THREE-AREA DOCUMENTATION WORKSPACE
+                Area 1: Left Section Tree Navigation
+                Area 2: Central Reading Area with Breadcrumbs & Code Blocks
+                Area 3: Right-Side Table of Contents (Inside Reader)
+                ══════════════════════════════════════════════════════════ */}
             {!isLoading && !error && (
-                <>
-                    {/* TAB 1: ALL DOCUMENTATION (SPLIT EXPLORER & VIEWER) */}
-                    {activeTab === "all" && (
-                        <div className="doc-explorer-layout">
-                            {/* Left Pane: Filters & Document List */}
-                            <div className="doc-left-panel">
-                                <div className="doc-search-filter-bar cs-card">
-                                    <div className="doc-search-input-wrap">
-                                        <Search size={13} className="search-icon" />
-                                        <input
-                                            type="text"
-                                            placeholder="Filter specifications, symbols..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="doc-search-input"
-                                        />
-                                    </div>
+                <div className="doc-workspace-grid">
+                    {/* AREA 1: Left Sidebar Section Tree */}
+                    <aside className={`doc-left-sidebar ${mobileDrawerOpen ? "mobile-open" : ""}`}>
+                        <div className="sidebar-inner-card">
+                            {/* Mode Switcher Pills */}
+                            <div className="doc-mode-tabs">
+                                <button
+                                    type="button"
+                                    className={`mode-tab-btn ${activeTab === "all" ? "active" : ""}`}
+                                    onClick={() => setActiveTab("all")}
+                                >
+                                    <BookOpen size={13} />
+                                    <span>Specs</span>
+                                    <span className="mode-tab-count font-mono">{documents.length}</span>
+                                </button>
 
-                                    <div className="doc-dropdowns-row">
-                                        <select
-                                            className="doc-filter-select"
-                                            value={categoryFilter}
-                                            onChange={(e) => setCategoryFilter(e.target.value)}
-                                        >
-                                            <option value="all">All Categories</option>
-                                            {categories
-                                                .filter((c) => c !== "all")
-                                                .map((cat) => (
-                                                    <option key={cat} value={cat}>
-                                                        {cat}
-                                                    </option>
-                                                ))}
-                                        </select>
+                                <button
+                                    type="button"
+                                    className={`mode-tab-btn ${activeTab === "alerts" ? "active" : ""}`}
+                                    onClick={() => setActiveTab("alerts")}
+                                >
+                                    <ShieldAlert size={13} />
+                                    <span>Alerts</span>
+                                    {alerts.length > 0 && (
+                                        <span className="mode-tab-count alert font-mono">{alerts.length}</span>
+                                    )}
+                                </button>
 
-                                        <select
-                                            className="doc-filter-select"
-                                            value={statusFilter}
-                                            onChange={(e) => setStatusFilter(e.target.value)}
-                                        >
-                                            <option value="all">All Statuses</option>
-                                            <option value="up-to-date">Up to Date</option>
-                                            <option value="needs-review">Needs Review</option>
-                                            <option value="outdated">Outdated</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div className="doc-list-scroll-wrap">
-                                    <DocumentationList
-                                        documents={filteredDocuments}
-                                        selectedDocId={selectedDoc?.id}
-                                        onSelectDoc={(doc) => setSelectedDoc(doc)}
-                                        onResetFilters={() => {
-                                            setSearchQuery("");
-                                            setCategoryFilter("all");
-                                            setStatusFilter("all");
-                                        }}
-                                    />
-                                </div>
+                                <button
+                                    type="button"
+                                    className={`mode-tab-btn ${activeTab === "suggestions" ? "active" : ""}`}
+                                    onClick={() => setActiveTab("suggestions")}
+                                >
+                                    <Sparkles size={13} />
+                                    <span>AI Fixes</span>
+                                    {suggestions.length > 0 && (
+                                        <span className="mode-tab-count ai font-mono">{suggestions.length}</span>
+                                    )}
+                                </button>
                             </div>
 
-                            {/* Right Pane: Document Detail / Reader View */}
-                            <div className="doc-right-panel">
-                                {selectedDoc ? (
-                                    <div className="doc-viewer-card cs-card">
-                                        {/* Document Header */}
-                                        <div className="doc-viewer-header">
-                                            <div className="viewer-title-section">
-                                                <div className="viewer-badges">
-                                                    {selectedDoc.category && (
-                                                        <Badge variant="neutral">{selectedDoc.category}</Badge>
-                                                    )}
-                                                    {selectedDoc.module && (
-                                                        <Badge variant="default" className="font-mono">
-                                                            {selectedDoc.module}
-                                                        </Badge>
-                                                    )}
-                                                    <span className="viewer-completeness font-mono">
-                                                        {selectedDoc.completeness}% completeness
-                                                    </span>
-                                                </div>
-                                                <h2 className="viewer-title">{selectedDoc.title}</h2>
-                                                <div className="viewer-meta-row">
-                                                    {selectedDoc.author && (
-                                                        <span>Author: {selectedDoc.author}</span>
-                                                    )}
-                                                    {selectedDoc.lastUpdated && (
-                                                        <span>Last Updated: {selectedDoc.lastUpdated}</span>
-                                                    )}
-                                                </div>
-                                            </div>
+                            {/* Search bar inside section tree */}
+                            <div className="doc-tree-search-wrap">
+                                <Search size={13} className="search-icon-muted" />
+                                <input
+                                    type="text"
+                                    placeholder="Filter documentation..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="doc-tree-search-input"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchQuery("")}
+                                        className="search-clear-btn"
+                                    >
+                                        <X size={12} />
+                                    </button>
+                                )}
+                            </div>
 
-                                            <div className="viewer-actions">
-                                                <button
-                                                    type="button"
-                                                    className="viewer-copy-btn"
-                                                    onClick={handleCopyDocContent}
-                                                    title="Copy Markdown specification"
-                                                >
-                                                    {copiedDoc ? <Check size={13} /> : <Copy size={13} />}
-                                                    <span>{copiedDoc ? "Copied" : "Copy Markdown"}</span>
-                                                </button>
-                                            </div>
-                                        </div>
+                            {/* Category Filter Dropdown */}
+                            {categories.length > 1 && (
+                                <div className="doc-category-filter-row">
+                                    <span className="filter-label">Category:</span>
+                                    <select
+                                        value={categoryFilter}
+                                        onChange={(e) => setCategoryFilter(e.target.value)}
+                                        className="doc-cat-select font-mono"
+                                    >
+                                        {categories.map((c) => (
+                                            <option key={c} value={c}>
+                                                {c === "all" ? "All Categories" : c}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
 
-                                        {/* Markdown / Document Content */}
-                                        <div className="doc-viewer-body">
-                                            <div className="markdown-prose">
-                                                <pre className="doc-content-view font-mono">
-                                                    {selectedDoc.content || selectedDoc.summary || "No content available for this document."}
-                                                </pre>
-                                            </div>
-                                        </div>
+                            {/* Section Tree List */}
+                            <div className="doc-tree-scroll-pane">
+                                <DocumentationList
+                                    documents={filteredDocuments}
+                                    selectedDocId={selectedDoc?.id}
+                                    onSelectDoc={(doc) => {
+                                        setSelectedDoc(doc);
+                                        setActiveTab("all");
+                                        setMobileDrawerOpen(false);
+                                    }}
+                                    onResetFilters={() => {
+                                        setSearchQuery("");
+                                        setCategoryFilter("all");
+                                    }}
+                                />
+                            </div>
+                        </div>
+                    </aside>
 
-                                        {/* Tags & Linked Alerts */}
-                                        {selectedDoc.tags && selectedDoc.tags.length > 0 && (
-                                            <div className="doc-viewer-footer">
-                                                <span className="footer-label">Indexed Topics:</span>
-                                                <div className="doc-tags-list">
-                                                    {selectedDoc.tags.map((tag) => (
-                                                        <span key={tag} className="doc-tag-item">
-                                                            #{tag}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                    {/* AREA 2 & 3: Central Reading Area & Right TOC */}
+                    <main className="doc-main-content-pane">
+                        {activeTab === "all" && (
+                            <DocumentationReader
+                                document={selectedDoc}
+                                previousDoc={previousDoc}
+                                nextDoc={nextDoc}
+                                onNavigateDoc={(doc) => {
+                                    setSelectedDoc(doc);
+                                    window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                                onRescan={handleSync}
+                                isSyncing={isSyncing}
+                            />
+                        )}
+
+                        {activeTab === "alerts" && (
+                            <div className="doc-alerts-container">
+                                <div className="alerts-header-card">
+                                    <h2 className="alerts-title">Documentation Alerts &amp; Codebase Drift</h2>
+                                    <p className="alerts-sub">
+                                        Missing docstrings, undocumented endpoints, and schema drift detected by AST analysis.
+                                    </p>
+                                </div>
+
+                                {alerts.length > 0 ? (
+                                    <div className="alerts-feed-list">
+                                        {alerts.map((alert) => (
+                                            <DocumentationAlert
+                                                key={alert.id}
+                                                alert={alert}
+                                                onFix={handleResolveAlert}
+                                            />
+                                        ))}
                                     </div>
                                 ) : (
-                                    <div className="doc-viewer-empty cs-card">
+                                    <div className="alerts-empty-card">
                                         <EmptyState
-                                            title="No specification selected"
-                                            message="Select a document from the left list to read architecture specs and API schemas."
+                                            title="No Documentation Drift"
+                                            message="All symbols and API routes are documented and up to date."
                                             icon={BookOpen}
                                         />
                                     </div>
                                 )}
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* TAB 2: ALERTS & DISCREPANCIES */}
-                    {activeTab === "alerts" && (
-                        <div className="doc-alerts-view">
-                            <div className="alerts-section-intro cs-card">
-                                <div>
-                                    <h3 className="section-title">Documentation Alerts & Codebase Drift</h3>
-                                    <p className="section-subtitle">
-                                        Missing docstrings, undocumented API endpoints, and schema drift detected by AST static analysis.
+                        {activeTab === "suggestions" && (
+                            <div className="doc-suggestions-container">
+                                <div className="suggestions-header-card">
+                                    <h2 className="suggestions-title">AI Documentation Recommendations</h2>
+                                    <p className="suggestions-sub">
+                                        Automated docstring generation and OpenAPI annotations ready to be applied.
                                     </p>
                                 </div>
-                                <Badge variant="warning">{alerts.length} Issues Detected</Badge>
-                            </div>
 
-                            {alerts.length === 0 ? (
-                                <div className="cs-card">
-                                    <EmptyState
-                                        title="No documentation alerts"
-                                        message="All indexed functions, schemas, and endpoints have up-to-date specifications."
-                                        icon={CheckCircle2}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="alerts-grid">
-                                    {alerts.map((alert) => (
-                                        <DocumentationAlert
-                                            key={alert.id}
-                                            alert={alert}
-                                            onFix={handleResolveAlert}
+                                {suggestions.length > 0 ? (
+                                    <div className="suggestions-feed-list">
+                                        {suggestions.map((sug) => (
+                                            <UpdateSuggestion
+                                                key={sug.id}
+                                                suggestion={sug}
+                                                onApply={handleApplySuggestion}
+                                            />
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="suggestions-empty-card">
+                                        <EmptyState
+                                            title="No Pending Recommendations"
+                                            message="All documentation specifications match existing code signatures."
+                                            icon={Sparkles}
                                         />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* TAB 3: UPDATE RECOMMENDATIONS */}
-                    {activeTab === "suggestions" && (
-                        <div className="doc-suggestions-view">
-                            <div className="suggestions-section-intro cs-card">
-                                <div>
-                                    <h3 className="section-title">Automated Update Suggestions</h3>
-                                    <p className="section-subtitle">
-                                        AI-generated docstrings and schema patches ready for automatic synchronization with your active codebase.
-                                    </p>
-                                </div>
-                                <Badge variant="default">{suggestions.length} Recommendations</Badge>
+                                    </div>
+                                )}
                             </div>
-
-                            {suggestions.length === 0 ? (
-                                <div className="cs-card">
-                                    <EmptyState
-                                        title="No pending suggestions"
-                                        message="Specifications match current repository AST declarations."
-                                        icon={CheckCircle2}
-                                    />
-                                </div>
-                            ) : (
-                                <div className="suggestions-grid">
-                                    {suggestions.map((suggestion) => (
-                                        <UpdateSuggestion
-                                            key={suggestion.id}
-                                            suggestion={suggestion}
-                                            onApply={handleApplySuggestion}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </>
+                        )}
+                    </main>
+                </div>
             )}
 
-            {/* ── Page Styles ───────────────────────────────────────────────── */}
             <style>{`
-                .documentation-page {
+                .doc-page-container {
                     display: flex;
                     flex-direction: column;
-                    gap: 14px;
                     width: 100%;
                     max-width: 1600px;
                     margin: 0 auto;
+                    gap: 16px;
                 }
-                .doc-page-header {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                    padding: 14px 18px;
-                }
-                .doc-header-main {
+
+                /* Top Banner */
+                .doc-top-banner {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    gap: 14px;
                     flex-wrap: wrap;
+                    gap: 12px;
                 }
-                .doc-title-row {
+
+                .doc-top-title-group {
                     display: flex;
-                    align-items: center;
-                    gap: 10px;
+                    flex-direction: column;
+                    gap: 2px;
                 }
-                .doc-icon-header {
-                    width: 34px;
-                    height: 34px;
-                    border-radius: 12px;
-                    background: rgba(167, 139, 250, 0.15);
-                    border: 1px solid rgba(167, 139, 250, 0.3);
-                    color: var(--primary);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-shrink: 0;
-                }
+
                 .doc-page-title {
                     margin: 0;
-                    font-size: 16.5px;
-                    font-weight: 600;
-                    color: var(--text-primary);
-                    letter-spacing: -0.01em;
+                    font-size: 26px;
+                    font-weight: 800;
+                    letter-spacing: -0.5px;
                 }
+
+                .title-white {
+                    color: #F5F5F7;
+                }
+
+                .title-red {
+                    color: #FF3548;
+                    text-shadow: 0 0 16px rgba(255, 53, 72, 0.4);
+                }
+
                 .doc-page-subtitle {
-                    margin: 2px 0 0;
-                    font-size: 11.5px;
-                    color: var(--text-secondary);
+                    font-size: 12.5px;
+                    color: #A1A1AC;
                 }
-                .doc-header-controls {
+
+                .doc-top-controls {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    flex-wrap: wrap;
                 }
-                .doc-repo-select-wrap {
+
+                .doc-repo-selector {
                     display: flex;
                     align-items: center;
                     gap: 6px;
-                    background: var(--card-background-hover);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--border-radius);
-                    padding: 4px 8px;
+                    background: #101115;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 10px;
+                    padding: 6px 12px;
                 }
-                .repo-icon {
-                    color: var(--secondary);
+
+                .repo-icon-accent {
+                    color: #FF3548;
+                    flex-shrink: 0;
                 }
-                .doc-repo-select {
+
+                .doc-repo-select-element {
                     background: transparent;
                     border: none;
-                    color: var(--text-primary);
+                    color: #F5F5F7;
                     font-size: 11.5px;
                     outline: none;
                     cursor: pointer;
                 }
-                .doc-repo-select option {
-                    background: var(--card-background);
-                    color: var(--text-primary);
+
+                .doc-repo-select-element option {
+                    background: #151820;
+                    color: #F5F5F7;
                 }
+
                 .doc-sync-btn {
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;
+                    height: 34px;
+                    padding: 0 14px;
+                    background: linear-gradient(135deg, #FF3548 0%, #E32636 100%);
+                    border: 1px solid rgba(255, 255, 255, 0.18);
+                    border-radius: 9px;
+                    color: #FFFFFF;
+                    font-size: 11.5px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    box-shadow: 0 2px 10px rgba(227, 38, 54, 0.35);
+                    transition: all var(--duration-fast) ease;
                 }
-                .spinning {
+
+                .doc-sync-btn:hover:not(:disabled) {
+                    box-shadow: 0 4px 16px rgba(227, 38, 54, 0.55);
+                    transform: translateY(-1px);
+                }
+
+                .doc-sync-btn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+
+                .spin-icon {
                     animation: spin 1s linear infinite;
                 }
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                .doc-metrics-bar {
+
+                /* Metrics Status Strip */
+                .doc-metrics-strip {
                     display: flex;
                     align-items: center;
-                    gap: 14px;
-                    padding-top: 10px;
-                    border-top: 1px solid var(--card-border);
-                    flex-wrap: wrap;
-                }
-                .metric-pill {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    font-size: 11px;
-                }
-                .metric-label {
-                    color: var(--text-muted);
-                }
-                .metric-value {
-                    font-weight: 600;
-                    color: var(--text-primary);
-                }
-                .metric-divider {
-                    width: 1px;
-                    height: 12px;
-                    background: var(--card-border);
-                }
-                .doc-nav-tabs {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    border-bottom: 1px solid var(--card-border);
-                    padding-bottom: 4px;
+                    background: rgba(16, 21, 30, 0.7);
+                    backdrop-filter: blur(16px);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 14px;
+                    padding: 10px 20px;
+                    gap: 20px;
                     overflow-x: auto;
                 }
-                .nav-tab-btn {
-                    display: inline-flex;
+
+                .strip-metric-item {
+                    display: flex;
                     align-items: center;
-                    gap: 6px;
-                    padding: 7px 12px;
-                    font-size: 12px;
-                    font-weight: 500;
-                    background: transparent;
-                    color: var(--text-secondary);
-                    border: 1px solid transparent;
-                    border-radius: var(--border-radius);
-                    cursor: pointer;
-                    transition: all 0.15s ease;
+                    gap: 8px;
                     white-space: nowrap;
                 }
-                .nav-tab-btn:hover {
-                    color: var(--text-primary);
-                    background: var(--card-background-hover);
-                }
-                .nav-tab-btn.active {
-                    color: var(--primary);
-                    background: var(--active-background);
-                    border-color: var(--active-border);
-                    font-weight: 600;
-                }
-                .tab-count {
-                    font-size: 10px;
-                    padding: 1px 5px;
-                    border-radius: 10px;
-                    background: var(--card-background);
-                    color: var(--text-secondary);
-                    border: 1px solid var(--card-border);
-                }
-                .tab-count.warning {
-                    background: rgba(182, 154, 103, 0.15);
-                    color: var(--warning);
-                    border-color: rgba(182, 154, 103, 0.3);
-                }
-                .tab-count.primary {
-                    background: rgba(167, 139, 250, 0.15);
-                    color: var(--primary);
-                    border-color: rgba(167, 139, 250, 0.35);
-                }
-                .doc-explorer-layout {
-                    display: grid;
-                    grid-template-columns: 350px minmax(0, 1fr);
-                    gap: 14px;
-                    align-items: stretch;
-                    min-height: calc(100vh - 240px);
-                }
-                @media (max-width: 1024px) {
-                    .doc-explorer-layout {
-                        grid-template-columns: 1fr;
-                        min-height: auto;
-                    }
-                }
-                .doc-left-panel {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 10px;
-                    height: 100%;
-                }
-                .doc-search-filter-bar {
-                    padding: 10px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                    flex-shrink: 0;
-                }
-                .doc-search-input-wrap {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    background: var(--card-background-hover);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    padding: 5px 8px;
-                }
-                .search-icon {
-                    color: var(--text-muted);
-                    flex-shrink: 0;
-                }
-                .doc-search-input {
-                    background: transparent;
-                    border: none;
-                    color: var(--text-primary);
+
+                .strip-label {
                     font-size: 11.5px;
-                    outline: none;
-                    width: 100%;
+                    color: #8E8E98;
+                    font-weight: 500;
                 }
-                .doc-dropdowns-row {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 6px;
+
+                .strip-value {
+                    font-size: 12.5px;
+                    font-weight: 700;
+                    color: #F5F5F7;
                 }
-                .doc-filter-select {
-                    background: var(--card-background-hover);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    padding: 4px 6px;
-                    font-size: 11px;
-                    color: var(--text-secondary);
-                    outline: none;
-                    cursor: pointer;
-                    width: 100%;
+
+                .strip-divider {
+                    width: 1px;
+                    height: 16px;
+                    background: rgba(255, 255, 255, 0.08);
+                    flex-shrink: 0;
                 }
-                .doc-filter-select option {
-                    background: var(--card-background);
-                    color: var(--text-primary);
-                }
-                .doc-list-scroll-wrap {
-                    flex: 1;
-                    display: flex;
-                    flex-direction: column;
-                    max-height: calc(100vh - 270px);
-                    overflow-y: auto;
-                    padding-right: 2px;
-                }
-                .doc-right-panel {
-                    min-width: 0;
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                }
-                .doc-viewer-card {
-                    padding: 18px 20px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 14px;
-                    flex: 1;
-                }
-                .doc-viewer-empty {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 380px;
-                    flex: 1;
-                }
-                .doc-viewer-header {
+
+                /* Three-Area Workspace */
+                .doc-workspace-grid {
                     display: flex;
                     align-items: flex-start;
-                    justify-content: space-between;
-                    gap: 14px;
-                    padding-bottom: 12px;
-                    border-bottom: 1px solid var(--card-border);
-                    flex-wrap: wrap;
+                    gap: 20px;
+                    width: 100%;
                 }
-                .viewer-title-section {
+
+                /* AREA 1: Left Section Tree Sidebar */
+                .doc-left-sidebar {
+                    width: 290px;
+                    flex-shrink: 0;
+                    position: sticky;
+                    top: calc(var(--topbar-height) + 14px);
+                    max-height: calc(100vh - var(--topbar-height) - 36px);
                     display: flex;
                     flex-direction: column;
-                    gap: 5px;
-                    min-width: 0;
-                    flex: 1;
                 }
-                .viewer-badges {
+
+                @media (max-width: 900px) {
+                    .doc-left-sidebar {
+                        width: 100%;
+                        position: static;
+                        max-height: none;
+                    }
+                }
+
+                .sidebar-inner-card {
+                    background: rgba(16, 21, 30, 0.8) !important;
+                    backdrop-filter: blur(20px) !important;
+                    -webkit-backdrop-filter: blur(20px) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                    border-radius: 18px !important;
+                    padding: 14px !important;
                     display: flex;
-                    align-items: center;
-                    gap: 6px;
-                    flex-wrap: wrap;
-                }
-                .viewer-completeness {
-                    font-size: 10.5px;
-                    color: var(--primary);
-                    background: rgba(167, 139, 250, 0.15);
-                    border: 1px solid rgba(167, 139, 250, 0.3);
-                    padding: 2px 8px;
-                    border-radius: 9999px;
-                }
-                .viewer-title {
-                    margin: 0;
-                    font-size: 16px;
-                    font-weight: 600;
-                    color: var(--text-primary);
-                    line-height: 1.35;
-                }
-                .viewer-meta-row {
-                    display: flex;
-                    align-items: center;
+                    flex-direction: column;
                     gap: 12px;
-                    font-size: 11px;
-                    color: var(--text-muted);
+                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+                    height: 100%;
                 }
-                .viewer-actions {
+
+                .doc-mode-tabs {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 4px;
+                    background: #090A0D;
+                    padding: 3px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                }
+
+                .mode-tab-btn {
                     display: flex;
                     align-items: center;
-                    gap: 8px;
-                }
-                .viewer-copy-btn {
-                    display: inline-flex;
-                    align-items: center;
+                    justify-content: center;
                     gap: 5px;
-                    padding: 4px 9px;
+                    padding: 6px 4px;
+                    background: transparent;
+                    border: none;
+                    border-radius: 7px;
+                    color: #8E8E98;
                     font-size: 11px;
-                    font-weight: 500;
-                    background: var(--card-background-hover);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    color: var(--text-secondary);
+                    font-weight: 600;
                     cursor: pointer;
-                    transition: all 0.15s ease;
+                    transition: all var(--duration-fast) ease;
+                    white-space: nowrap;
                 }
-                .viewer-copy-btn:hover {
-                    color: var(--text-primary);
-                    border-color: var(--primary);
+
+                .mode-tab-btn:hover {
+                    color: #F5F5F7;
                 }
-                .doc-viewer-body {
-                    background: var(--app-background);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    padding: 14px 16px;
-                    max-height: 520px;
-                    overflow-y: auto;
+
+                .mode-tab-btn.active {
+                    background: #1B1B22;
+                    color: #F5F5F7;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
                 }
-                .doc-content-view {
-                    margin: 0;
-                    font-size: 12px;
-                    line-height: 1.6;
-                    color: var(--text-primary);
-                    white-space: pre-wrap;
-                    word-break: break-word;
+
+                .mode-tab-count {
+                    font-size: 9.5px;
+                    background: rgba(255, 255, 255, 0.08);
+                    padding: 0 4px;
+                    border-radius: 4px;
                 }
-                .doc-viewer-footer {
+
+                .mode-tab-count.alert {
+                    background: rgba(245, 158, 11, 0.2);
+                    color: #F59E0B;
+                }
+
+                .mode-tab-count.ai {
+                    background: rgba(22, 140, 163, 0.25);
+                    color: #00F2FE;
+                }
+
+                .doc-tree-search-wrap {
                     display: flex;
                     align-items: center;
                     gap: 8px;
-                    padding-top: 10px;
-                    border-top: 1px solid var(--card-border);
-                    flex-wrap: wrap;
+                    background: #090A0D;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 9px;
+                    padding: 6px 10px;
+                    transition: border-color var(--duration-fast) ease;
                 }
-                .footer-label {
-                    font-size: 11px;
-                    color: var(--text-muted);
+
+                .doc-tree-search-wrap:focus-within {
+                    border-color: rgba(22, 140, 163, 0.45);
+                    box-shadow: 0 0 12px rgba(22, 140, 163, 0.15);
                 }
-                .doc-tags-list {
+
+                .search-icon-muted {
+                    color: #686875;
+                    flex-shrink: 0;
+                }
+
+                .doc-tree-search-input {
+                    flex: 1;
+                    background: transparent !important;
+                    border: none !important;
+                    outline: none !important;
+                    color: #F5F5F7 !important;
+                    font-size: 11.5px;
+                    padding: 0;
+                    box-shadow: none !important;
+                }
+
+                .search-clear-btn {
+                    background: transparent;
+                    border: none;
+                    color: #8E8E98;
+                    cursor: pointer;
                     display: flex;
                     align-items: center;
-                    gap: 5px;
-                    flex-wrap: wrap;
+                    padding: 0;
                 }
-                .doc-tag-item {
-                    font-size: 10.5px;
-                    color: var(--text-secondary);
-                    background: var(--card-background-hover);
-                    border: 1px solid var(--card-border);
-                    padding: 1px 6px;
-                    border-radius: 3px;
-                }
-                .doc-alerts-view,
-                .doc-suggestions-view {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 12px;
-                }
-                .alerts-section-intro,
-                .suggestions-section-intro {
+
+                .doc-category-filter-row {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    padding: 12px 16px;
+                    gap: 8px;
+                    padding: 0 2px;
+                }
+
+                .filter-label {
+                    font-size: 10.5px;
+                    color: #8E8E98;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.04em;
+                }
+
+                .doc-cat-select {
+                    background: #090A0D;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 6px;
+                    color: #A1A1AC;
+                    font-size: 10.5px;
+                    padding: 3px 6px;
+                    outline: none;
+                    cursor: pointer;
+                }
+
+                .doc-tree-scroll-pane {
+                    flex: 1;
+                    overflow-y: auto;
+                    max-height: calc(100vh - 320px);
+                    padding-right: 4px;
+                }
+
+                /* AREA 2 & 3: Main Pane */
+                .doc-main-content-pane {
+                    flex: 1;
+                    min-width: 0;
+                }
+
+                /* Alerts View */
+                .doc-alerts-container,
+                .doc-suggestions-container {
+                    display: flex;
+                    flex-direction: column;
                     gap: 14px;
                 }
-                .section-title {
+
+                .alerts-header-card,
+                .suggestions-header-card {
+                    background: rgba(16, 21, 30, 0.75);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 16px;
+                    padding: 18px 22px;
+                }
+
+                .alerts-title,
+                .suggestions-title {
+                    font-size: 18px;
+                    font-weight: 800;
+                    color: #F5F5F7;
+                    margin: 0 0 4px 0;
+                }
+
+                .alerts-sub,
+                .suggestions-sub {
+                    font-size: 12px;
+                    color: #A1A1AC;
                     margin: 0;
-                    font-size: 13.5px;
-                    font-weight: 600;
-                    color: var(--text-primary);
                 }
-                .section-subtitle {
-                    margin: 2px 0 0;
-                    font-size: 11.5px;
-                    color: var(--text-secondary);
-                }
-                .alerts-grid,
-                .suggestions-grid {
+
+                .alerts-feed-list,
+                .suggestions-feed-list {
                     display: flex;
                     flex-direction: column;
                     gap: 10px;
                 }
-                .doc-loading-container {
-                    padding: 48px 0;
-                    display: flex;
-                    justify-content: center;
+
+                .alerts-empty-card,
+                .suggestions-empty-card {
+                    background: rgba(16, 21, 30, 0.6);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 16px;
+                    padding: 36px;
                 }
-                .doc-error-card {
-                    background: rgba(184, 120, 112, 0.08);
-                    border: 1px solid rgba(184, 120, 112, 0.3);
-                    border-radius: var(--border-radius);
-                    padding: 16px 18px;
+
+                .doc-state-container {
+                    padding: 40px;
+                    background: rgba(16, 21, 30, 0.6);
+                    border-radius: 16px;
+                }
+
+                .doc-error-box {
                     display: flex;
                     align-items: center;
-                    gap: 14px;
+                    gap: 16px;
+                    background: rgba(255, 53, 72, 0.08);
+                    border: 1px solid rgba(255, 53, 72, 0.3);
+                    border-radius: 14px;
+                    padding: 20px;
                 }
+
                 .error-icon {
-                    color: var(--danger);
+                    color: var(--bright-red);
                     flex-shrink: 0;
                 }
+
                 .error-content h3 {
-                    margin: 0;
-                    font-size: 13.5px;
-                    color: var(--danger);
+                    margin: 0 0 4px 0;
+                    font-size: 14px;
+                    color: #F5F5F7;
                 }
+
                 .error-content p {
-                    margin: 2px 0 0;
-                    font-size: 11.5px;
-                    color: var(--text-secondary);
+                    margin: 0;
+                    font-size: 12px;
+                    color: #A1A1AC;
                 }
             `}</style>
         </div>

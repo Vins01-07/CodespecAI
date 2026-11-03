@@ -3,12 +3,14 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import ScrollAnimatedBackground from "../common/ScrollAnimatedBackground";
+import useUiStore from "../../store/uiStore";
 
 function AppLayout() {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const sidebarCollapsed = useUiStore((state) => state.sidebarCollapsed);
 
     return (
-        <div className="app-shell">
+        <div className={`app-shell ${sidebarCollapsed ? "sidebar-collapsed" : ""}`}>
             {/* Background Scroll Animation across all pages */}
             <ScrollAnimatedBackground />
 

@@ -3,7 +3,9 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
+import "remixicon/fonts/remixicon.css";
 import "./styles/global.css";
+import "./styles/redesign.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>

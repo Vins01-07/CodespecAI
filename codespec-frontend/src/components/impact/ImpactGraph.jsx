@@ -32,8 +32,8 @@ import Badge from "../common/Badge";
 
 const SEVERITY_COLORS = {
     CRITICAL: "#E06C75", // Red
-    HIGH: "#E5C07B",     // Amber/Yellow
-    MEDIUM: "#91A78A",   // Sage/Primary
+    HIGH: "var(--warning)",     // Amber/Yellow
+    MEDIUM: "var(--success)",   // Sage/Primary
     LOW: "#7A8274",      // Muted Sage
 };
 
@@ -43,7 +43,7 @@ const SEVERITY_COLORS = {
 function ImpactCustomNode({ id, data, selected }) {
     const isTarget = data.isTarget;
     const severity = data.severity || (isTarget ? "CRITICAL" : "MEDIUM");
-    const accentColor = SEVERITY_COLORS[severity] || "#91A78A";
+    const accentColor = SEVERITY_COLORS[severity] || "var(--success)";
 
     return (
         <div
@@ -68,7 +68,7 @@ function ImpactCustomNode({ id, data, selected }) {
                 type="target"
                 position={Position.Left}
                 style={{
-                    background: "#282C26",
+                    background: "var(--card-background)",
                     border: `2px solid ${accentColor}`,
                     width: 7,
                     height: 7,
@@ -114,7 +114,7 @@ function ImpactCustomNode({ id, data, selected }) {
                             fontWeight: 700,
                             padding: "1px 4px",
                             borderRadius: "9999px",
-                            background: isTarget ? "rgba(248, 113, 113, 0.2)" : "rgba(167, 139, 250, 0.15)",
+                            background: isTarget ? "rgba(248, 113, 113, 0.2)" : "rgba(227, 38, 54, 0.15)",
                             color: isTarget ? "var(--danger)" : accentColor,
                             textTransform: "uppercase",
                             flexShrink: 0,
@@ -135,7 +135,7 @@ function ImpactCustomNode({ id, data, selected }) {
                 type="source"
                 position={Position.Right}
                 style={{
-                    background: "#282C26",
+                    background: "var(--card-background)",
                     border: `2px solid ${accentColor}`,
                     width: 7,
                     height: 7,
@@ -231,7 +231,7 @@ function ImpactGraphInner({ graphData, onSelectNode }) {
                     type: MarkerType.ArrowClosed,
                     width: 14,
                     height: 14,
-                    color: isHigh ? "var(--danger)" : "#5C6356",
+                    color: isHigh ? "var(--danger)" : "var(--text-secondary)",
                 },
             };
         });
@@ -279,7 +279,7 @@ function ImpactGraphInner({ graphData, onSelectNode }) {
                 minZoom={0.2}
                 maxZoom={2}
                 proOptions={{ hideAttribution: true }}
-                style={{ background: "#000000" }}
+                style={{ background: "var(--graph-background)" }}
             >
                 <Background color="#1e1e24" gap={20} size={1} />
             </ReactFlow>
@@ -290,7 +290,7 @@ function ImpactGraphInner({ graphData, onSelectNode }) {
                     position: "absolute",
                     bottom: "12px",
                     left: "12px",
-                    background: "#09090b",
+                    background: "var(--card-background)",
                     border: "1px solid var(--card-border)",
                     borderRadius: "var(--radius-sm)",
                     padding: "8px 12px",
@@ -307,11 +307,11 @@ function ImpactGraphInner({ graphData, onSelectNode }) {
                     <span style={{ color: "var(--text-primary)" }}>Target / Critical</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#E5C07B" }} />
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--warning)" }} />
                     <span>Direct Impact</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#91A78A" }} />
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--success)" }} />
                     <span>Indirect Impact</span>
                 </div>
             </div>

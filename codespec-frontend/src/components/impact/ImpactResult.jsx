@@ -18,7 +18,7 @@ import Badge from "../common/Badge";
 
 const RISK_BADGES = {
     CRITICAL: { variant: "danger", icon: ShieldAlert, color: "var(--danger)" },
-    HIGH: { variant: "warning", icon: AlertTriangle, color: "#E5C07B" },
+    HIGH: { variant: "warning", icon: AlertTriangle, color: "var(--warning)" },
     MEDIUM: { variant: "primary", icon: Info, color: "var(--primary)" },
     LOW: { variant: "success", icon: CheckCircle2, color: "var(--success)" },
 };
@@ -134,8 +134,8 @@ export function ImpactResult({ result }) {
                             <CheckSquare size={12} strokeWidth={2.2} />
                         </div>
                     </div>
-                    <div style={{ fontSize: "24px", fontWeight: 800, color: "#2dd4bf", marginTop: "6px", letterSpacing: "-0.5px" }}>
-                        {blast_radius.affected_tests ?? "—"}
+                    <div style={{ fontSize: "24px", fontWeight: 800, color: "var(--success)", marginTop: "6px", letterSpacing: "-0.5px" }}>
+                        {blast_radius.affected_tests ?? "â€”"}
                     </div>
                 </Card>
             </div>
@@ -227,7 +227,7 @@ export function ImpactResult({ result }) {
                                             </Badge>
                                             {item.type && (
                                                 <span style={{ fontSize: "11px", color: "var(--text-muted)", textTransform: "capitalize" }}>
-                                                    • {item.type}
+                                                    â€¢ {item.type}
                                                 </span>
                                             )}
                                         </div>
@@ -253,9 +253,9 @@ export function ImpactResult({ result }) {
                                                 fontWeight: 700,
                                                 padding: "2px 6px",
                                                 borderRadius: "9999px",
-                                                background: item.severity === "HIGH" ? "rgba(248, 113, 113, 0.15)" : "rgba(167, 139, 250, 0.15)",
+                                                background: item.severity === "HIGH" ? "rgba(248, 113, 113, 0.15)" : "rgba(227, 38, 54, 0.15)",
                                                 color: item.severity === "HIGH" ? "var(--danger)" : "var(--primary)",
-                                                border: `1px solid ${item.severity === "HIGH" ? "rgba(248, 113, 113, 0.35)" : "rgba(167, 139, 250, 0.35)"}`,
+                                                border: `1px solid ${item.severity === "HIGH" ? "rgba(248, 113, 113, 0.35)" : "rgba(227, 38, 54, 0.35)"}`,
                                                 flexShrink: 0,
                                             }}
                                         >
@@ -292,7 +292,7 @@ export function ImpactResult({ result }) {
                                     lineHeight: 1.4,
                                 }}
                             >
-                                <span style={{ color: "var(--primary)", fontWeight: 700 }}>•</span>
+                                <span style={{ color: "var(--primary)", fontWeight: 700 }}>â€¢</span>
                                 <span>{action}</span>
                             </div>
                         ))}

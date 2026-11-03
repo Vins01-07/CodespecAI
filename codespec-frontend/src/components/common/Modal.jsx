@@ -8,8 +8,8 @@ function Modal({ isOpen, onClose, title, children }) {
             style={{
                 position: "fixed",
                 inset: 0,
-                backgroundColor: "rgba(0, 0, 0, 0.8)",
-                backdropFilter: "blur(6px)",
+                backgroundColor: "rgba(0, 0, 0, 0.85)",
+                backdropFilter: "blur(8px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -19,19 +19,20 @@ function Modal({ isOpen, onClose, title, children }) {
             onClick={onClose}
         >
             <div
-                className="cs-card cs-card--violet"
+                className="cs-card"
                 style={{
                     width: "100%",
                     maxWidth: "540px",
                     maxHeight: "90vh",
                     display: "flex",
                     flexDirection: "column",
-                    padding: "16px 20px",
+                    padding: "18px 22px",
                     position: "relative",
                     overflow: "hidden",
-                    borderRadius: "var(--border-radius)",
-                    border: "1px solid var(--card-border-gold)",
-                    boxShadow: "0 8px 32px rgba(0, 0, 0, 0.8), 0 0 24px rgba(124, 58, 237, 0.15)",
+                    borderRadius: "18px",
+                    background: "#1B1B22",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    boxShadow: "0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(227, 38, 54, 0.18)",
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -40,18 +41,18 @@ function Modal({ isOpen, onClose, title, children }) {
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "space-between",
-                        marginBottom: "12px",
-                        borderBottom: "1px solid var(--card-border)",
-                        paddingBottom: "10px",
+                        marginBottom: "14px",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+                        paddingBottom: "12px",
                         flexShrink: 0,
                     }}
                 >
                     <h3
                         style={{
                             margin: 0,
-                            fontSize: "14px",
+                            fontSize: "15px",
                             fontWeight: 700,
-                            color: "var(--text-primary)",
+                            color: "#F5F5F7",
                             letterSpacing: "-0.2px",
                         }}
                     >
@@ -61,14 +62,15 @@ function Modal({ isOpen, onClose, title, children }) {
                         type="button"
                         onClick={onClose}
                         style={{
-                            background: "#090a0f",
-                            border: "1px solid var(--card-border)",
-                            color: "var(--text-muted)",
+                            background: "#101115",
+                            border: "1px solid rgba(255, 255, 255, 0.08)",
+                            color: "var(--secondary-text)",
                             cursor: "pointer",
-                            padding: "4px",
+                            padding: "5px",
                             display: "flex",
                             alignItems: "center",
-                            borderRadius: "var(--radius-sm)",
+                            borderRadius: "8px",
+                            transition: "all 0.15s ease",
                         }}
                     >
                         <X size={15} />

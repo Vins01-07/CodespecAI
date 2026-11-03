@@ -115,11 +115,11 @@ const defaultEdges = [
 ];
 
 const categoryConfig = {
-    frontend: { color: "#8b5cf6", label: "Frontend", border: "#8b5cf6" },
-    service: { color: "#a78bfa", label: "Service", border: "#a78bfa" },
-    database: { color: "#38bdf8", label: "Database", border: "#38bdf8" },
-    cache: { color: "#f472b6", label: "Cache", border: "#f472b6" },
-    external: { color: "#34d399", label: "External", border: "#34d399" },
+    frontend: { color: "#FF5A6E", label: "Frontend", border: "#FF3548" },
+    service: { color: "#FF3548", label: "Service", border: "#E32636" },
+    database: { color: "#10B981", label: "Database", border: "#10B981" },
+    cache: { color: "#F59E0B", label: "Cache", border: "#F59E0B" },
+    external: { color: "#94A3B8", label: "External", border: "#94A3B8" },
 };
 
 function ArchitecturePreview({
@@ -137,18 +137,18 @@ function ArchitecturePreview({
     const NODE_HEIGHT = 48;
 
     return (
-        <Card className="arch-preview-card cs-card--violet">
+        <Card className="arch-preview-card">
             <div className="arch-header">
                 <div className="arch-header-left">
                     <div className="arch-title-group">
                         <div style={{ display: "flex", alignItems: "center", gap: "9px" }}>
-                            <div className="icon-accent icon-accent--violet">
+                            <div className="icon-accent">
                                 <Network size={16} strokeWidth={2.2} />
                             </div>
                             <span className="arch-title">Architecture Preview</span>
                         </div>
                         <Badge variant="primary" className="arch-badge font-mono">
-                            {displayNodeCount} NODES • {displayServiceCount} SERVICES
+                            {displayNodeCount} NODES â€¢ {displayServiceCount} SERVICES
                         </Badge>
                     </div>
                     <span className="arch-subtitle">
@@ -163,7 +163,7 @@ function ArchitecturePreview({
                     </button>
 
                     <Link to="/architecture" className="open-arch-btn">
-                        <span>Open Architecture</span>
+                        <span>Open in Workspace</span>
                         <ArrowUpRight size={13} />
                     </Link>
                 </div>
@@ -178,15 +178,15 @@ function ArchitecturePreview({
                     <defs>
                         <pattern
                             id="preview-grid"
-                            width="20"
-                            height="20"
+                            width="24"
+                            height="24"
                             patternUnits="userSpaceOnUse"
                         >
-                            <circle cx="10" cy="10" r="1" fill="rgba(139, 92, 246, 0.08)" />
+                            <circle cx="2" cy="2" r="1" fill="rgba(255, 255, 255, 0.05)" />
                         </pattern>
                         <linearGradient id="edge-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.9" />
-                            <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.9" />
+                            <stop offset="0%" stopColor="#FF3548" stopOpacity="0.9" />
+                            <stop offset="100%" stopColor="#E32636" stopOpacity="0.8" />
                         </linearGradient>
                         <marker
                             id="arrowhead"
@@ -196,12 +196,19 @@ function ArchitecturePreview({
                             refY="3"
                             orient="auto"
                         >
-                            <polygon points="0 0, 6 3, 0 6" fill="rgba(167, 139, 250, 0.6)" />
+                            <polygon points="0 0, 6 3, 0 6" fill="#FF3548" />
                         </marker>
+                        <filter id="node-red-glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feMerge>
+                                <feMergeNode in="blur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
                     </defs>
 
                     {/* Dark ethereal canvas background */}
-                    <rect width="100%" height="100%" fill="#08090e" />
+                    <rect width="100%" height="100%" fill="#090A0D" />
                     <rect width="100%" height="100%" fill="url(#preview-grid)" />
 
                     {/* Connectors / Edges */}
@@ -226,7 +233,7 @@ function ArchitecturePreview({
                                 <path
                                     d={pathData}
                                     fill="none"
-                                    stroke={isHighlighted ? "url(#edge-gradient)" : "rgba(255, 255, 255, 0.12)"}
+                                    stroke={isHighlighted ? "#FF3548" : "rgba(255, 255, 255, 0.12)"}
                                     strokeWidth={isHighlighted ? 2 : 1.2}
                                     strokeDasharray={edge.label?.includes("Trigger") ? "3 3" : "none"}
                                     markerEnd="url(#arrowhead)"
@@ -251,30 +258,33 @@ function ArchitecturePreview({
                                 onMouseEnter={() => setHoveredNode(node.id)}
                                 onMouseLeave={() => setHoveredNode(null)}
                                 style={{ cursor: "pointer" }}
+                                filter={isHovered ? "url(#node-red-glow)" : "none"}
                             >
-                                {/* Sharp Node Card Background */}
+                                {/* Node Card Background */}
                                 <rect
                                     width={NODE_WIDTH}
                                     height={NODE_HEIGHT}
-                                    rx="2"
-                                    fill={isHovered ? "#161824" : "#0d0e15"}
-                                    stroke={isHovered ? config.color : "rgba(255, 255, 255, 0.1)"}
+                                    rx="8"
+                                    fill={isHovered ? "#1B1B22" : "#15161B"}
+                                    stroke={isHovered ? "#FF3548" : "rgba(255, 255, 255, 0.08)"}
                                     strokeWidth={isHovered ? 1.5 : 1}
                                 />
 
                                 {/* Left Category Accent Line */}
                                 <rect
+                                    x="0"
+                                    y="4"
                                     width="3"
-                                    height={NODE_HEIGHT}
-                                    rx="1"
+                                    height={NODE_HEIGHT - 8}
+                                    rx="1.5"
                                     fill={config.color}
                                 />
 
                                 {/* Node Title */}
                                 <text
-                                    x="10"
+                                    x="12"
                                     y="19"
-                                    fill="#ffffff"
+                                    fill="#F5F5F7"
                                     fontSize="11"
                                     fontWeight="700"
                                     fontFamily="inherit"
@@ -284,10 +294,10 @@ function ArchitecturePreview({
 
                                 {/* Tech / Subtitle */}
                                 <text
-                                    x="10"
+                                    x="12"
                                     y="34"
-                                    fill="rgba(148, 163, 184, 0.6)"
-                                    fontSize="9"
+                                    fill="#A1A1AC"
+                                    fontSize="9.5"
                                     fontFamily="JetBrains Mono, monospace"
                                 >
                                     {node.tech}
@@ -295,18 +305,18 @@ function ArchitecturePreview({
 
                                 {/* Category Tag Pill */}
                                 <rect
-                                    x={NODE_WIDTH - 48}
+                                    x={NODE_WIDTH - 52}
                                     y="7"
-                                    width="42"
-                                    height="13"
-                                    rx="2"
-                                    fill="#090a0f"
-                                    stroke={config.color}
+                                    width="46"
+                                    height="14"
+                                    rx="4"
+                                    fill="rgba(255, 255, 255, 0.04)"
+                                    stroke="rgba(255, 255, 255, 0.08)"
                                     strokeWidth="0.8"
                                 />
                                 <text
-                                    x={NODE_WIDTH - 27}
-                                    y="16.5"
+                                    x={NODE_WIDTH - 29}
+                                    y="17"
                                     fill={config.color}
                                     fontSize="7.5"
                                     fontWeight="700"
@@ -342,7 +352,7 @@ function ArchitecturePreview({
 
             <style>{`
                 .arch-preview-card {
-                    padding: 14px 18px;
+                    padding: 16px 18px;
                     display: flex;
                     flex-direction: column;
                     gap: 12px;
@@ -351,69 +361,24 @@ function ArchitecturePreview({
                 }
                 .arch-header {
                     display: flex;
-                    align-items: center;
+                    align-items: flex-start;
                     justify-content: space-between;
                     flex-wrap: wrap;
-                    gap: 12px;
+                    gap: 10px;
+                }
+                .arch-header-left {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
                 }
                 .arch-header-right {
                     display: flex;
                     align-items: center;
                     gap: 8px;
                 }
-                .arch-title-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    flex-wrap: wrap;
-                }
-                .arch-title {
-                    font-size: 14px;
-                    font-weight: 800;
-                    color: #ffffff;
-                    letter-spacing: -0.2px;
-                }
-                .arch-badge {
-                    font-size: 10px;
-                    padding: 2px 6px;
-                }
-                .arch-subtitle {
-                    display: block;
-                    font-size: 11.5px;
-                    color: var(--text-muted);
-                    margin-top: 2px;
-                }
-                .open-arch-btn {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 5px;
-                    font-size: 11.5px;
-                    font-weight: 600;
-                    color: #c4b5fd;
-                    padding: 5px 11px;
-                    border-radius: var(--radius-sm);
-                    border: 1px solid rgba(139, 92, 246, 0.3);
-                    background: rgba(124, 58, 237, 0.12);
-                    transition: all 0.15s ease;
-                }
-                .open-arch-btn:hover {
-                    background: rgba(124, 58, 237, 0.25);
-                    border-color: rgba(139, 92, 246, 0.5);
-                    color: #ffffff;
-                }
-                .arch-canvas-container {
-                    position: relative;
-                    width: 100%;
-                    min-height: 270px;
-                    flex: 1;
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    overflow: hidden;
-                    background: #08090e;
-                }
                 .arch-svg-canvas {
                     width: 100%;
-                    height: 100%;
+                    height: auto;
                     display: block;
                 }
                 .arch-legend-row {
@@ -423,16 +388,18 @@ function ArchitecturePreview({
                     flex-wrap: wrap;
                     gap: 10px;
                     padding-top: 8px;
-                    border-top: 1px solid var(--card-border);
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
                     font-size: 11px;
                 }
                 .legend-label-wrap {
                     display: flex;
                     align-items: center;
                     gap: 5px;
-                    color: var(--text-muted);
+                    color: var(--secondary-text);
                     font-weight: 700;
-                    font-size: 10px;
+                }
+                .legend-icon {
+                    color: var(--secondary-text);
                 }
                 .legend-items {
                     display: flex;
@@ -446,14 +413,13 @@ function ArchitecturePreview({
                     gap: 5px;
                 }
                 .legend-color-dot {
-                    width: 7px;
-                    height: 7px;
-                    border-radius: 1px;
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
                 }
                 .legend-item-text {
-                    color: var(--text-secondary);
+                    color: var(--secondary-text);
                     font-size: 11px;
-                    font-weight: 500;
                 }
             `}</style>
         </Card>

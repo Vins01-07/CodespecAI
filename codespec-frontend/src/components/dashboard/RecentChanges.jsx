@@ -168,7 +168,7 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                                         <span className="change-file font-mono" title={item.file}>
                                             {item.file}
                                         </span>
-                                        <span className="change-author font-mono">• {item.author}</span>
+                                        <span className="change-author font-mono">â€¢ {item.author}</span>
                                     </div>
                                 </div>
                             </div>
@@ -284,7 +284,7 @@ function RecentChanges({ changes = defaultChanges, limit = 5, asTable = true }) 
                     border-radius: var(--radius-sm);
                     background: rgba(124, 58, 237, 0.15);
                     border: 1px solid rgba(139, 92, 246, 0.3);
-                    color: #c4b5fd;
+                    color: #FF3548;
                     flex-shrink: 0;
                 }
                 .change-title-text {

@@ -30,7 +30,7 @@ function UpdateSuggestion({ suggestion, onApply }) {
             <div className="sug-header">
                 <div className="sug-title-row">
                     <div className="sug-icon-badge">
-                        <Sparkles size={13} className="sug-sparkle" />
+                        <Sparkles size={14} className="sug-sparkle" />
                     </div>
                     <div className="sug-title-wrap">
                         <h4 className="sug-title">{suggestion.title}</h4>
@@ -44,7 +44,7 @@ function UpdateSuggestion({ suggestion, onApply }) {
                                 </Badge>
                             )}
                             {suggestion.confidence && (
-                                <span className="sug-confidence">
+                                <span className="sug-confidence font-mono">
                                     <Zap size={11} />
                                     {suggestion.confidence} match
                                 </span>
@@ -70,10 +70,10 @@ function UpdateSuggestion({ suggestion, onApply }) {
             {suggestion.suggestedDiff && (
                 <div className="sug-diff-container">
                     <div className="sug-diff-header">
-                        <span className="sug-diff-title">Suggested Specification / Docstring</span>
+                        <span className="sug-diff-title font-mono">Suggested Specification / Docstring</span>
                         <button
                             type="button"
-                            className="sug-copy-btn"
+                            className="sug-copy-btn font-mono"
                             onClick={handleCopy}
                             title="Copy code to clipboard"
                         >
@@ -100,7 +100,7 @@ function UpdateSuggestion({ suggestion, onApply }) {
                         {applied ? (
                             <>
                                 <Check size={12} />
-                                <span>Applied</span>
+                                <span>Applied to Spec</span>
                             </>
                         ) : (
                             <>
@@ -114,10 +114,14 @@ function UpdateSuggestion({ suggestion, onApply }) {
 
             <style>{`
                 .update-suggestion-card {
-                    padding: 12px 14px;
+                    padding: 14px 16px;
                     display: flex;
                     flex-direction: column;
-                    gap: 8px;
+                    gap: 10px;
+                    background: rgba(16, 17, 21, 0.85);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 12px;
+                    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
                 }
                 .sug-header {
                     display: flex;
@@ -129,33 +133,31 @@ function UpdateSuggestion({ suggestion, onApply }) {
                 .sug-title-row {
                     display: flex;
                     align-items: flex-start;
-                    gap: 8px;
+                    gap: 10px;
                     min-width: 0;
-                    flex: 1;
                 }
                 .sug-icon-badge {
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 9px;
-                    background: rgba(167, 139, 250, 0.15);
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 8px;
+                    background: rgba(22, 140, 163, 0.15);
+                    border: 1px solid rgba(22, 140, 163, 0.35);
+                    color: #00F2FE;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     flex-shrink: 0;
                 }
-                .sug-sparkle {
-                    color: var(--primary);
-                }
                 .sug-title-wrap {
                     display: flex;
                     flex-direction: column;
-                    gap: 3px;
+                    gap: 4px;
                 }
                 .sug-title {
                     margin: 0;
-                    font-size: 13px;
-                    font-weight: 600;
-                    color: var(--text-primary);
+                    font-size: 13.5px;
+                    font-weight: 700;
+                    color: #F5F5F7;
                 }
                 .sug-tags-row {
                     display: flex;
@@ -168,68 +170,68 @@ function UpdateSuggestion({ suggestion, onApply }) {
                     align-items: center;
                     gap: 3px;
                     font-size: 10.5px;
-                    font-weight: 500;
-                    color: var(--primary);
+                    font-weight: 600;
+                    color: #10B981;
                 }
                 .sug-target-badge {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
                     font-size: 10.5px;
-                    padding: 2px 6px;
-                    background: var(--card-background-hover);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    color: var(--primary);
+                    padding: 3px 8px;
+                    background: #14151B;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 6px;
+                    color: #168CA3;
                 }
                 .sug-reason {
                     margin: 0;
-                    font-size: 11.5px;
-                    color: var(--text-secondary);
-                    line-height: 1.4;
+                    font-size: 12px;
+                    color: #A1A1AC;
+                    line-height: 1.45;
                 }
                 .sug-diff-container {
-                    background: var(--app-background);
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
+                    background: #090A0D;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 8px;
                     overflow: hidden;
                 }
                 .sug-diff-header {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    padding: 5px 8px;
-                    background: var(--card-background-hover);
-                    border-bottom: 1px solid var(--card-border);
+                    padding: 6px 10px;
+                    background: #101116;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
                 }
                 .sug-diff-title {
                     font-size: 10.5px;
                     font-weight: 600;
-                    color: var(--text-secondary);
+                    color: var(--secondary-text);
                 }
                 .sug-copy-btn {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
                     background: transparent;
-                    border: 1px solid var(--card-border);
-                    border-radius: 3px;
-                    color: var(--text-secondary);
-                    padding: 2px 6px;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 4px;
+                    color: var(--secondary-text);
+                    padding: 2px 7px;
                     font-size: 10px;
                     cursor: pointer;
-                    transition: all 0.12s ease;
+                    transition: all var(--duration-fast) ease;
                 }
                 .sug-copy-btn:hover {
-                    color: var(--text-primary);
-                    border-color: var(--primary);
+                    color: #FFFFFF;
+                    border-color: rgba(22, 140, 163, 0.4);
                 }
                 .sug-diff-code {
                     margin: 0;
-                    padding: 8px 10px;
-                    font-size: 11px;
+                    padding: 10px 12px;
+                    font-size: 11.5px;
                     line-height: 1.5;
-                    color: var(--text-primary);
+                    color: #F5F5F7;
                     overflow-x: auto;
                     white-space: pre;
                 }
@@ -239,37 +241,42 @@ function UpdateSuggestion({ suggestion, onApply }) {
                     justify-content: space-between;
                     gap: 8px;
                     padding-top: 4px;
-                    border-top: 1px solid var(--card-border);
+                    border-top: 1px solid rgba(255, 255, 255, 0.06);
                     flex-wrap: wrap;
                 }
                 .sug-hint {
                     display: flex;
                     align-items: center;
                     gap: 5px;
-                    font-size: 10.5px;
-                    color: var(--text-muted);
+                    font-size: 11px;
+                    color: var(--muted-text);
                 }
                 .sug-apply-btn {
                     display: inline-flex;
                     align-items: center;
-                    gap: 4px;
-                    padding: 4px 10px;
-                    font-size: 11px;
-                    font-weight: 500;
-                    background: var(--primary);
-                    color: #121312;
-                    border: none;
-                    border-radius: var(--radius-sm);
+                    gap: 5px;
+                    padding: 5px 12px;
+                    font-size: 11.5px;
+                    font-weight: 700;
+                    background: linear-gradient(135deg, #168CA3 0%, #254D9C 100%);
+                    color: #FFFFFF;
+                    border: 1px solid rgba(255, 255, 255, 0.18);
+                    border-radius: 8px;
                     cursor: pointer;
-                    transition: background 0.15s ease;
+                    box-shadow: 0 2px 10px rgba(22, 140, 163, 0.35);
+                    transition: all var(--duration-fast) ease;
                 }
                 .sug-apply-btn:hover:not(:disabled) {
-                    background: var(--primary-hover);
+                    box-shadow: 0 4px 14px rgba(22, 140, 163, 0.55);
+                    transform: translateY(-1px);
                 }
                 .sug-apply-btn.applied {
-                    background: var(--card-background-hover);
-                    color: var(--primary);
+                    background: #14151B;
+                    border-color: rgba(16, 185, 129, 0.3);
+                    color: #10B981;
+                    box-shadow: none;
                     cursor: default;
+                    transform: none;
                 }
             `}</style>
         </div>
