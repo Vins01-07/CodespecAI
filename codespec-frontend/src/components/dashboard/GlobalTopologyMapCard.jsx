@@ -38,18 +38,18 @@ export default function GlobalTopologyMapCard() {
                 <svg className="world-map-svg" viewBox="0 0 540 260">
                     <defs>
                         <radialGradient id="mapGlowPoint" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.8" />
-                            <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+                            <stop offset="0%" stopColor="#FF3548" stopOpacity="0.8" />
+                            <stop offset="100%" stopColor="#E32636" stopOpacity="0" />
                         </radialGradient>
                         <linearGradient id="arcFlightGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.9" />
-                            <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.4" />
-                            <stop offset="100%" stopColor="#c4b5fd" stopOpacity="0.9" />
+                            <stop offset="0%" stopColor="#FF3548" stopOpacity="0.9" />
+                            <stop offset="50%" stopColor="#E32636" stopOpacity="0.4" />
+                            <stop offset="100%" stopColor="#FF3548" stopOpacity="0.9" />
                         </linearGradient>
                     </defs>
 
                     {/* Dotted Continents Pattern */}
-                    <g className="map-continents" fill="#8b5cf6" opacity="0.35">
+                    <g className="map-continents" fill="#E32636" opacity="0.35">
                         {/* North America Dotted Cluster */}
                         <circle cx="80" cy="65" r="2.2" /><circle cx="95" cy="60" r="2.2" /><circle cx="110" cy="55" r="2.2" /><circle cx="125" cy="50" r="2.2" />
                         <circle cx="75" cy="80" r="2.2" /><circle cx="90" cy="75" r="2.2" /><circle cx="105" cy="70" r="2.2" /><circle cx="120" cy="68" r="2.2" /><circle cx="135" cy="65" r="2.2" />
@@ -114,25 +114,25 @@ export default function GlobalTopologyMapCard() {
 
                     {/* Primary Server Node: US East */}
                     <g className="map-node node-us">
-                        <circle cx="120" cy="70" r="4.5" fill="#c4b5fd" />
-                        <circle cx="120" cy="70" r="10" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.6" className="map-pulse" />
+                        <circle cx="120" cy="70" r="4.5" fill="#FF3548" />
+                        <circle cx="120" cy="70" r="10" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.6" className="map-pulse" />
                     </g>
 
                     {/* Primary Server Node: EU Central */}
                     <g className="map-node node-eu">
-                        <circle cx="270" cy="72" r="4.5" fill="#c4b5fd" />
-                        <circle cx="270" cy="72" r="10" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.6" className="map-pulse" />
+                        <circle cx="270" cy="72" r="4.5" fill="#FF3548" />
+                        <circle cx="270" cy="72" r="10" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.6" className="map-pulse" />
                     </g>
 
                     {/* Primary Server Node: Asia Pacific */}
                     <g className="map-node node-ap">
-                        <circle cx="375" cy="82" r="4.5" fill="#c4b5fd" />
-                        <circle cx="375" cy="82" r="10" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.6" className="map-pulse" />
+                        <circle cx="375" cy="82" r="4.5" fill="#FF3548" />
+                        <circle cx="375" cy="82" r="10" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.6" className="map-pulse" />
                     </g>
 
                     {/* Primary Server Node: Sydney */}
                     <g className="map-node node-oc">
-                        <circle cx="435" cy="178" r="4" fill="#a78bfa" />
+                        <circle cx="435" cy="178" r="4" fill="#d99ba5" />
                     </g>
                 </svg>
 
@@ -175,7 +175,7 @@ export default function GlobalTopologyMapCard() {
                     width: 7px;
                     height: 7px;
                     border-radius: 50%;
-                    background: #c4b5fd;
+                    background: #FF3548;
                     box-shadow: 0 0 8px rgba(196, 181, 253, 0.6);
                 }
 
@@ -212,7 +212,7 @@ export default function GlobalTopologyMapCard() {
                 }
 
                 .map-pill-btn.active {
-                    background: #8b5cf6;
+                    background: #E32636;
                     color: #ffffff;
                     font-weight: 700;
                 }
@@ -261,7 +261,7 @@ export default function GlobalTopologyMapCard() {
                 .hud-val {
                     font-size: 12px;
                     font-weight: 800;
-                    color: #c4b5fd;
+                    color: #FF3548;
                     line-height: 1;
                 }
 

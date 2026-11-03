@@ -18,14 +18,14 @@ export default function NetworkRouteCard() {
                 <svg className="route-svg" viewBox="0 0 360 110" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="routeLineGold" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.8" />
-                            <stop offset="50%" stopColor="#c4b5fd" stopOpacity="1" />
-                            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.8" />
+                            <stop offset="0%" stopColor="#E32636" stopOpacity="0.8" />
+                            <stop offset="50%" stopColor="#FF3548" stopOpacity="1" />
+                            <stop offset="100%" stopColor="#9a4c61" stopOpacity="0.8" />
                         </linearGradient>
                     </defs>
 
                     {/* Background Dotted Terrain */}
-                    <g fill="#8b5cf6" opacity="0.25">
+                    <g fill="#E32636" opacity="0.25">
                         <circle cx="30" cy="40" r="1.8" /><circle cx="50" cy="35" r="1.8" /><circle cx="70" cy="45" r="1.8" />
                         <circle cx="40" cy="65" r="1.8" /><circle cx="65" cy="70" r="1.8" /><circle cx="90" cy="60" r="1.8" />
                         <circle cx="160" cy="30" r="1.8" /><circle cx="180" cy="38" r="1.8" /><circle cx="210" cy="35" r="1.8" />
@@ -44,18 +44,18 @@ export default function NetworkRouteCard() {
 
                     {/* Route Waypoint Hubs */}
                     <g className="waypoint-hub">
-                        <circle cx="30" cy="55" r="4.5" fill="#c4b5fd" />
-                        <circle cx="30" cy="55" r="9" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.4" />
+                        <circle cx="30" cy="55" r="4.5" fill="#FF3548" />
+                        <circle cx="30" cy="55" r="9" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.4" />
                     </g>
 
                     <g className="waypoint-hub">
-                        <circle cx="185" cy="55" r="5" fill="#c4b5fd" />
-                        <circle cx="185" cy="55" r="11" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.5" />
+                        <circle cx="185" cy="55" r="5" fill="#FF3548" />
+                        <circle cx="185" cy="55" r="11" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.5" />
                     </g>
 
                     <g className="waypoint-hub">
-                        <circle cx="330" cy="60" r="4.5" fill="#c4b5fd" />
-                        <circle cx="330" cy="60" r="9" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.4" />
+                        <circle cx="330" cy="60" r="4.5" fill="#FF3548" />
+                        <circle cx="330" cy="60" r="9" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.4" />
                     </g>
 
                     {/* Animated Packet Stream (Moving Circle) */}
@@ -113,7 +113,7 @@ export default function NetworkRouteCard() {
                     width: 7px;
                     height: 7px;
                     border-radius: 50%;
-                    background: #c4b5fd;
+                    background: #FF3548;
                 }
 
                 .route-title {
@@ -127,7 +127,7 @@ export default function NetworkRouteCard() {
                     border-radius: 9999px;
                     background: rgba(139, 92, 246, 0.12);
                     border: 1px solid rgba(139, 92, 246, 0.25);
-                    color: #c4b5fd;
+                    color: #FF3548;
                     font-size: 10px;
                     font-weight: 700;
                 }
@@ -162,7 +162,7 @@ export default function NetworkRouteCard() {
                 }
 
                 .node-lbl.center {
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .route-footer {

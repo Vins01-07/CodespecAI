@@ -76,7 +76,7 @@ function ArchitectureNode({ id, data, selected }) {
                 type="target"
                 position={Position.Left}
                 style={{
-                    background: "#09090b",
+                    background: "var(--card-background)",
                     border: `2px solid ${config.color}`,
                     width: 7,
                     height: 7,
@@ -175,7 +175,7 @@ function ArchitectureNode({ id, data, selected }) {
                 type="source"
                 position={Position.Right}
                 style={{
-                    background: "#09090b",
+                    background: "var(--card-background)",
                     border: `2px solid ${config.color}`,
                     width: 7,
                     height: 7,
@@ -324,7 +324,7 @@ function buildEdges(rawEdges, selectedNodeId) {
                 fontFamily: "monospace",
             },
             labelBgStyle: {
-                fill: "#09090b",
+                fill: "var(--card-background)",
                 stroke: isConnected ? "var(--primary)" : "#27272a",
                 strokeWidth: 0.8,
                 rx: 2,
@@ -568,7 +568,7 @@ function ArchitectureGraphInner({
                 minZoom={0.2}
                 maxZoom={2}
                 proOptions={{ hideAttribution: true }}
-                style={{ background: "#000000" }}
+                style={{ background: "var(--graph-background)" }}
             >
                 <Background color="#1e1e24" gap={20} size={1} />
 
@@ -577,12 +577,12 @@ function ArchitectureGraphInner({
                         position="bottom-left"
                         nodeColor={(n) => {
                             const config = CATEGORY_CONFIG[n.data?.type];
-                            return config ? config.color : "#8b5cf6";
+                            return config ? config.color : "#FF3548";
                         }}
                         nodeStrokeColor="#27272a"
                         maskColor="rgba(0, 0, 0, 0.75)"
                         style={{
-                            background: "#09090b",
+                            background: "var(--card-background)",
                             border: "1px solid var(--card-border)",
                             borderRadius: "var(--radius-sm)",
                             marginBottom: "12px",

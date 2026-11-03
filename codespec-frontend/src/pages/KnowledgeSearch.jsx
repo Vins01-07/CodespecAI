@@ -4,6 +4,7 @@ import useRepositoryStore from "../store/repositoryStore";
 import searchApi from "../services/searchApi";
 import SearchBar from "../components/search/SearchBar";
 import SearchResults from "../components/search/SearchResults";
+import ArchitecturalResultsPanel from "../components/search/ImpactGraph";
 import Loading from "../components/common/Loading";
 import EmptyState from "../components/common/EmptyState";
 import Button from "../components/common/Button";
@@ -57,190 +58,111 @@ function KnowledgeSearch() {
     };
 
     return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px",
-                width: "100%",
-                maxWidth: "1600px",
-                margin: "0 auto",
-            }}
-        >
-            {/* Header */}
-            <div
-                style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    justifyContent: "space-between",
-                    flexWrap: "wrap",
-                    gap: "12px",
-                    borderBottom: "1px solid var(--card-border)",
-                    paddingBottom: "14px",
-                }}
-            >
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <div className="icon-accent icon-accent--cyan" style={{ width: "42px", height: "42px", borderRadius: "14px" }}>
-                        <Search size={18} strokeWidth={2} />
-                    </div>
-                    <div>
-                        <h1
-                            style={{
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                color: "var(--text-primary)",
-                                margin: 0,
-                                letterSpacing: "-0.3px",
-                            }}
-                        >
-                            Knowledge Search
-                        </h1>
-                        <p
-                            style={{
-                                fontSize: "13px",
-                                color: "var(--text-secondary)",
-                                margin: "3px 0 0 0",
-                            }}
-                        >
-                            Query indexed AST symbols, functions, classes, and code context across your analyzed repositories.
-                        </p>
-                    </div>
+        <div className="search-page-container">
+            {/* Header matching reference "Codebase Search" */}
+            <div className="search-page-header">
+                <div>
+                    <h1 className="page-header-title">Codebase Search</h1>
+                    <p className="page-header-subtitle">
+                        Codebase health, architectural topology & continuous insights
+                    </p>
                 </div>
 
                 {currentRepo && (
-                    <div
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            background: "var(--card-background)",
-                            padding: "6px 12px",
-                            borderRadius: "var(--border-radius)",
-                            border: "1px solid var(--card-border)",
-                            fontSize: "12px",
-                        }}
-                    >
-                        <FolderGit2 size={14} color="var(--secondary)" />
-                        <span style={{ color: "var(--text-muted)" }}>Target Workspace:</span>
-                        <strong style={{ color: "var(--text-primary)" }}>{currentRepo.name}</strong>
-                        <Badge variant="success">{currentRepo.branch || "main"}</Badge>
+                    <div className="active-repo-pill font-mono">
+                        <FolderGit2 size={13} style={{ color: "var(--bright-red)" }} />
+                        <span>{currentRepo.name}</span>
+                        <Badge variant="primary">{currentRepo.branch || "main"}</Badge>
                     </div>
                 )}
             </div>
 
-            {/* Search Input Area */}
+            {/* Search Input Bar */}
             <SearchBar
                 query={query}
                 onSearch={handleSearch}
                 isLoading={isLoading}
-                placeholder="Search codebase (e.g. authenticateUser, UserService, database connection, cyclomatic)..."
-                suggestions={[
-                    "authenticateUser",
-                    "UserService",
-                    "connectDatabase",
-                    "calculateComplexityScore",
-                    "token_manager",
-                    "ProcessPayment",
-                ]}
+                placeholder="Search anything in your codebase (e.g. authenticateUser, UserService, JWT)..."
             />
 
-            {/* Content Display Area */}
+            {/* Loading Indicator */}
             {isLoading && (
-                <Card className="cs-card--violet" style={{ padding: "40px" }}>
-                    <Loading text="Searching codebase knowledge index..." />
-                </Card>
+                <div className="search-loading-card cs-card">
+                    <Loading text={`Searching AST & symbols for "${query}"...`} size={24} />
+                </div>
             )}
 
-            {error && !isLoading && (
-                <Card
-                    className="cs-card--rose"
-                    style={{
-                        padding: "18px 20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "14px",
-                    }}
-                >
+            {/* Error Message */}
+            {!isLoading && error && (
+                <div className="search-error-card cs-card">
                     <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        <AlertCircle size={18} color="var(--danger)" />
-                        <span style={{ color: "var(--text-primary)", fontSize: "13px" }}>
-                            {error}
-                        </span>
+                        <AlertCircle size={18} style={{ color: "var(--bright-red)" }} />
+                        <span>{error}</span>
                     </div>
                     <Button variant="default" size="sm" onClick={handleRetry} icon={RefreshCw}>
-                        Retry
+                        Retry Search
                     </Button>
-                </Card>
+                </div>
             )}
 
-            {!isLoading && !error && hasSearched && results.length > 0 && (
-                <SearchResults
-                    results={results}
-                    query={query}
-                    activeFilter={activeFilter}
-                    onFilterChange={setActiveFilter}
-                />
-            )}
-
-            {!isLoading && !error && hasSearched && results.length === 0 && (
-                <Card style={{ padding: "30px" }}>
-                    <EmptyState
-                        icon={Search}
-                        title="No results found"
-                        description={`No matching code symbols, functions, or files found for "${query}". Try searching for broader terms or alternative symbol names.`}
-                        action={
-                            <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
-                                <Button
-                                    variant="default"
-                                    size="sm"
-                                    onClick={() => handleSearch("authenticateUser")}
-                                >
-                                    Try "authenticateUser"
-                                </Button>
-                                <Button
-                                    variant="default"
-                                    size="sm"
-                                    onClick={() => handleSearch("UserService")}
-                                >
-                                    Try "UserService"
-                                </Button>
-                            </div>
-                        }
-                    />
-                </Card>
-            )}
-
-            {!isLoading && !error && !hasSearched && (
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "14px" }}>
-                    <Card className="cs-card--cyan" style={{ padding: "18px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                            <div className="icon-accent icon-accent--cyan">
-                                <Terminal size={16} />
-                            </div>
-                            <h3 style={{ fontSize: "13px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
-                                Symbol & Function Search
-                            </h3>
+            {/* Search Results & Architectural Results Diagram */}
+            {!isLoading && !error && hasSearched && (
+                <div className="search-results-wrapper">
+                    {results.length > 0 ? (
+                        <>
+                            <SearchResults
+                                results={results}
+                                query={query}
+                                activeFilter={activeFilter}
+                                onFilterChange={setActiveFilter}
+                            />
+                            {/* Architectural Results Flow Panel matching screenshot */}
+                            <ArchitecturalResultsPanel query={query} />
+                        </>
+                    ) : (
+                        <div className="search-empty-card cs-card">
+                            <EmptyState
+                                icon={Search}
+                                title="No symbols or context found"
+                                description={`No indexed AST symbols, functions, or files matched "${query}".`}
+                                action={
+                                    <Button
+                                        variant="default"
+                                        size="sm"
+                                        onClick={() => {
+                                            setQuery("");
+                                            setHasSearched(false);
+                                        }}
+                                    >
+                                        Clear Search
+                                    </Button>
+                                }
+                            />
                         </div>
-                        <p style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5, margin: "0 0 10px 0" }}>
-                            Quickly locate function declarations, class definitions, and method signatures across all parsed modules.
+                    )}
+                </div>
+            )}
+
+            {/* Quick Explore / Starter Queries */}
+            {!hasSearched && !isLoading && (
+                <div className="search-starters-grid">
+                    <Card className="starter-card">
+                        <div className="starter-header">
+                            <div className="icon-accent">
+                                <Terminal size={15} />
+                            </div>
+                            <span className="starter-title">Common Symbols</span>
+                        </div>
+                        <p className="starter-desc">
+                            Quickly search core functions, decorators, and authentication handlers.
                         </p>
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                            {["authenticateUser", "connectDatabase"].map((term) => (
+                        <div className="starter-pills">
+                            {["authenticateUser", "create_jwt", "validate_token"].map((term) => (
                                 <button
                                     key={term}
                                     type="button"
                                     onClick={() => handleSearch(term)}
-                                    style={{
-                                        background: "var(--app-background)",
-                                        border: "1px solid var(--card-border)",
-                                        borderRadius: "4px",
-                                        padding: "3px 8px",
-                                        color: "var(--secondary)",
-                                        fontSize: "11px",
-                                        fontFamily: "monospace",
-                                        cursor: "pointer",
-                                    }}
+                                    className="starter-pill font-mono"
                                 >
                                     {term}
                                 </button>
@@ -248,34 +170,23 @@ function KnowledgeSearch() {
                         </div>
                     </Card>
 
-                    <Card className="cs-card--blue" style={{ padding: "18px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                            <div className="icon-accent icon-accent--blue">
-                                <BookOpen size={16} />
+                    <Card className="starter-card">
+                        <div className="starter-header">
+                            <div className="icon-accent">
+                                <BookOpen size={15} />
                             </div>
-                            <h3 style={{ fontSize: "13px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
-                                Architectural Domains
-                            </h3>
+                            <span className="starter-title">Architectural Domains</span>
                         </div>
-                        <p style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5, margin: "0 0 10px 0" }}>
+                        <p className="starter-desc">
                             Explore specific domain services, authentication managers, and payment pipelines.
                         </p>
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-                            {["UserService", "ProcessPayment"].map((term) => (
+                        <div className="starter-pills">
+                            {["UserService", "ProcessPayment", "GraphParser"].map((term) => (
                                 <button
                                     key={term}
                                     type="button"
                                     onClick={() => handleSearch(term)}
-                                    style={{
-                                        background: "var(--app-background)",
-                                        border: "1px solid var(--card-border)",
-                                        borderRadius: "4px",
-                                        padding: "3px 8px",
-                                        color: "var(--secondary)",
-                                        fontSize: "11px",
-                                        fontFamily: "monospace",
-                                        cursor: "pointer",
-                                    }}
+                                    className="starter-pill font-mono"
                                 >
                                     {term}
                                 </button>
@@ -283,34 +194,23 @@ function KnowledgeSearch() {
                         </div>
                     </Card>
 
-                    <Card className="cs-card--green" style={{ padding: "18px" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "10px" }}>
-                            <div className="icon-accent icon-accent--green">
-                                <Compass size={16} />
+                    <Card className="starter-card">
+                        <div className="starter-header">
+                            <div className="icon-accent">
+                                <Compass size={15} />
                             </div>
-                            <h3 style={{ fontSize: "13px", fontWeight: 600, margin: 0, color: "var(--text-primary)" }}>
-                                Natural Queries
-                            </h3>
+                            <span className="starter-title">Natural Queries</span>
                         </div>
-                        <p style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5, margin: "0 0 10px 0" }}>
-                            Search using natural language expressions or concept keywords like cyclomatic metrics.
+                        <p className="starter-desc">
+                            Search using natural language expressions or concept keywords like AST metrics.
                         </p>
-                        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                        <div className="starter-pills">
                             {["calculateComplexityScore", "token_manager"].map((term) => (
                                 <button
                                     key={term}
                                     type="button"
                                     onClick={() => handleSearch(term)}
-                                    style={{
-                                        background: "var(--app-background)",
-                                        border: "1px solid var(--card-border)",
-                                        borderRadius: "4px",
-                                        padding: "3px 8px",
-                                        color: "var(--secondary)",
-                                        fontSize: "11px",
-                                        fontFamily: "monospace",
-                                        cursor: "pointer",
-                                    }}
+                                    className="starter-pill font-mono"
                                 >
                                     {term}
                                 </button>
@@ -319,6 +219,100 @@ function KnowledgeSearch() {
                     </Card>
                 </div>
             )}
+
+            <style>{`
+                .search-page-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                    width: 100%;
+                    max-width: 1600px;
+                    margin: 0 auto;
+                }
+                .search-page-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                }
+                .active-repo-pill {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: #101115;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 9999px;
+                    padding: 4px 12px;
+                    font-size: 11.5px;
+                    color: #F5F5F7;
+                }
+                .search-loading-card {
+                    padding: 30px;
+                }
+                .search-error-card {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 14px 18px;
+                }
+                .search-empty-card {
+                    padding: 36px;
+                }
+                .search-starters-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 14px;
+                    margin-top: 10px;
+                }
+                @media (max-width: 900px) {
+                    .search-starters-grid {
+                        grid-template-columns: 1fr;
+                    }
+                }
+                .starter-card {
+                    padding: 16px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                }
+                .starter-header {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .starter-title {
+                    font-size: 13.5px;
+                    font-weight: 700;
+                    color: #F5F5F7;
+                }
+                .starter-desc {
+                    font-size: 11.5px;
+                    color: var(--secondary-text);
+                    margin: 0;
+                    line-height: 1.4;
+                }
+                .starter-pills {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    flex-wrap: wrap;
+                }
+                .starter-pill {
+                    background: #101115;
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 6px;
+                    padding: 3px 8px;
+                    color: var(--bright-red);
+                    font-size: 10.5px;
+                    cursor: pointer;
+                    transition: all var(--duration-fast) ease;
+                }
+                .starter-pill:hover {
+                    border-color: rgba(227, 38, 54, 0.4);
+                    background: rgba(227, 38, 54, 0.12);
+                }
+            `}</style>
         </div>
     );
 }

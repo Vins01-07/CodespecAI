@@ -51,9 +51,9 @@ export default function SpeedometerGaugeCard() {
                     <svg className="speedometer-svg" viewBox="0 0 200 200">
                         <defs>
                             <linearGradient id="goldSpeedArc" x1="0%" y1="100%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#7c3aed" />
-                                <stop offset="60%" stopColor="#8b5cf6" />
-                                <stop offset="100%" stopColor="#c4b5fd" />
+                                <stop offset="0%" stopColor="#9a4c61" />
+                                <stop offset="60%" stopColor="#E32636" />
+                                <stop offset="100%" stopColor="#FF3548" />
                             </linearGradient>
                             <radialGradient id="arcCenterGlow" cx="50%" cy="50%" r="50%">
                                 <stop offset="0%" stopColor="rgba(139, 92, 246, 0.18)" />
@@ -104,8 +104,8 @@ export default function SpeedometerGaugeCard() {
                         />
 
                         {/* Pointer indicator bead */}
-                        <circle cx="155" cy="140" r="4.5" fill="#c4b5fd" />
-                        <circle cx="155" cy="140" r="8" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.5" />
+                        <circle cx="155" cy="140" r="4.5" fill="#FF3548" />
+                        <circle cx="155" cy="140" r="8" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.5" />
                     </svg>
 
                     {/* Central Value Readout (Matches "3,312.00" from screenshot) */}
@@ -153,7 +153,7 @@ export default function SpeedometerGaugeCard() {
                     width: 7px;
                     height: 7px;
                     border-radius: 50%;
-                    background: #c4b5fd;
+                    background: #FF3548;
                 }
 
                 .speedometer-title {
@@ -172,7 +172,7 @@ export default function SpeedometerGaugeCard() {
                     border-radius: 9999px;
                     font-size: 10px;
                     font-weight: 700;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .speedometer-body {
@@ -212,14 +212,14 @@ export default function SpeedometerGaugeCard() {
                 }
 
                 .diag-bar-pill.active {
-                    background: linear-gradient(180deg, #c4b5fd 0%, #7c3aed 100%);
+                    background: linear-gradient(180deg, #FF3548 0%, #9a4c61 100%);
                     box-shadow: 0 0 6px rgba(139, 92, 246, 0.4);
                 }
 
                 .speed-bars-footer {
                     font-size: 9.5px;
                     font-weight: 700;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .speedometer-arc-wrap {
@@ -291,7 +291,7 @@ export default function SpeedometerGaugeCard() {
                 }
 
                 .foot-val.gold {
-                    color: #c4b5fd;
+                    color: #FF3548;
                     font-weight: 700;
                 }
             `}</style>

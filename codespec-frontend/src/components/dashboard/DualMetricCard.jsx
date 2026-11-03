@@ -23,9 +23,9 @@ export default function DualMetricCard({
                 <svg className="circuit-svg" viewBox="0 0 380 40" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="circuitGoldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.8" />
-                            <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.2" />
-                            <stop offset="100%" stopColor="#c4b5fd" stopOpacity="0.8" />
+                            <stop offset="0%" stopColor="#FF3548" stopOpacity="0.8" />
+                            <stop offset="50%" stopColor="#E32636" stopOpacity="0.2" />
+                            <stop offset="100%" stopColor="#FF3548" stopOpacity="0.8" />
                         </linearGradient>
                     </defs>
 
@@ -39,12 +39,12 @@ export default function DualMetricCard({
                     />
 
                     {/* Left Node */}
-                    <circle cx="40" cy="20" r="4" fill="#c4b5fd" />
+                    <circle cx="40" cy="20" r="4" fill="#FF3548" />
                     {/* Center Interconnect Pulse Node */}
-                    <circle cx="190" cy="10" r="5" fill="#c4b5fd" className="circuit-pulse" />
-                    <circle cx="190" cy="10" r="10" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.4" />
+                    <circle cx="190" cy="10" r="5" fill="#FF3548" className="circuit-pulse" />
+                    <circle cx="190" cy="10" r="10" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.4" />
                     {/* Right Node */}
-                    <circle cx="340" cy="20" r="4" fill="#c4b5fd" />
+                    <circle cx="340" cy="20" r="4" fill="#FF3548" />
                 </svg>
             </div>
 
@@ -114,7 +114,7 @@ export default function DualMetricCard({
                     width: 8px;
                     height: 8px;
                     border-radius: 50%;
-                    background: #c4b5fd;
+                    background: #FF3548;
                     box-shadow: 0 0 10px rgba(196, 181, 253, 0.7);
                 }
 
@@ -134,7 +134,7 @@ export default function DualMetricCard({
                     border-radius: 9999px;
                     font-size: 10.5px;
                     font-weight: 700;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .dual-circuit-connector {
@@ -187,7 +187,7 @@ export default function DualMetricCard({
                 }
 
                 .metric-arrow {
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .dual-value-display {
@@ -203,7 +203,7 @@ export default function DualMetricCard({
                 .dual-label-text {
                     font-size: 13px;
                     font-weight: 600;
-                    color: #c4b5fd;
+                    color: #FF3548;
                     margin-top: 2px;
                 }
 

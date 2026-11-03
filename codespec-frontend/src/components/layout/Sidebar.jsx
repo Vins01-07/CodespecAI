@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import useUiStore from "../../store/uiStore";
 import {
     LayoutDashboard,
     FolderGit2,
@@ -9,10 +10,49 @@ import {
     MessageSquare,
     GitCompare,
     FileText,
-    Boxes,
     Sparkles,
     ArrowRight,
 } from "lucide-react";
+
+// Red Hexagonal Brand Mark Icon matching the reference screenshot
+function BrandHexIcon({ size = 20 }) {
+    return (
+        <svg
+            width={size}
+            height={size}
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="brand-hex-svg"
+        >
+            <defs>
+                <linearGradient id="brandHexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#FF3548" />
+                    <stop offset="100%" stopColor="#E32636" />
+                </linearGradient>
+                <filter id="hexGlow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="2" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+            {/* Outer Hexagon */}
+            <path
+                d="M12 2L20.66 7V17L12 22L3.34 17V7L12 2Z"
+                fill="url(#brandHexGrad)"
+                filter="url(#hexGlow)"
+            />
+            {/* Inner Core */}
+            <path
+                d="M12 6L17.2 9V15L12 18L6.8 15V9L12 6Z"
+                fill="#101115"
+            />
+            <circle cx="12" cy="12" r="2.5" fill="#FF3548" />
+        </svg>
+    );
+}
 
 const navigation = [
     {
@@ -63,17 +103,32 @@ const navigation = [
 ];
 
 function Sidebar({ isOpen = false, onClose }) {
+    const sidebarCollapsed = useUiStore((state) => state.sidebarCollapsed);
+    const toggleSidebar = useUiStore((state) => state.toggleSidebar);
+
     return (
-        <aside className={`sidebar ${isOpen ? "open" : ""}`}>
+        <aside className={`sidebar ${isOpen ? "open" : ""} ${sidebarCollapsed ? "collapsed" : ""}`}>
             {/* Brand Header */}
             <div className="sidebar-brand">
                 <div className="brand-mark">
-                    <Boxes size={18} strokeWidth={2.2} />
+                    <BrandHexIcon size={20} />
                 </div>
                 <div className="brand-text">
                     <span className="brand-name">CodeSpec</span>
                     <span className="brand-accent font-mono">AI</span>
                 </div>
+                <button
+                    className="sidebar-toggle"
+                    type="button"
+                    onClick={toggleSidebar}
+                    aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                    title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                >
+                    <i
+                        className={`ri-${sidebarCollapsed ? "arrow-right-double" : "arrow-left-double"}-line`}
+                        aria-hidden="true"
+                    />
+                </button>
             </div>
 
             {/* Navigation List */}
@@ -88,7 +143,7 @@ function Sidebar({ isOpen = false, onClose }) {
                             `sidebar-link ${isActive ? "active" : ""}`
                         }
                     >
-                        <Icon size={17} strokeWidth={1.9} className="nav-icon" />
+                        <Icon size={16} strokeWidth={2} className="nav-icon" />
                         <span className="nav-label">{label}</span>
                     </NavLink>
                 ))}
@@ -99,7 +154,7 @@ function Sidebar({ isOpen = false, onClose }) {
                 <div className="pro-card">
                     <div className="pro-header">
                         <div className="pro-icon-wrap">
-                            <Sparkles size={13} />
+                            <Sparkles size={12} />
                         </div>
                         <div className="pro-title-row">
                             <span className="pro-title">CodeSpec AI</span>
@@ -108,7 +163,7 @@ function Sidebar({ isOpen = false, onClose }) {
                     </div>
 
                     <p className="pro-desc">
-                        Turn your codebase into actionable intelligence.
+                        Unlock advanced codebase insights with premium features.
                     </p>
 
                     <button className="upgrade-button font-mono" type="button">
@@ -119,151 +174,42 @@ function Sidebar({ isOpen = false, onClose }) {
             </div>
 
             <style>{`
-                .sidebar-brand {
-                    height: 64px;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    padding: 0 16px;
-                    border-bottom: 1px solid var(--card-border);
-                    flex-shrink: 0;
+                .sidebar.collapsed {
+                    width: var(--sidebar-dock-width) !important;
                 }
-                .brand-mark {
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    align-items: center;
+                .sidebar.collapsed .sidebar-brand {
                     justify-content: center;
-                    background: #191428;
-                    border: 1px solid #3b2866;
-                    border-radius: var(--radius-sm);
-                    color: #c4b5fd;
-                    flex-shrink: 0;
+                    padding: 0;
                 }
-                .brand-text {
-                    display: flex;
-                    align-items: baseline;
-                    gap: 3px;
+                .sidebar.collapsed .brand-text,
+                .sidebar.collapsed .nav-label,
+                .sidebar.collapsed .sidebar-footer {
+                    display: none;
                 }
-                .brand-name {
-                    font-size: 16px;
-                    font-weight: 800;
-                    letter-spacing: -0.3px;
-                    color: #ffffff;
+                .sidebar.collapsed .sidebar-toggle {
+                    display: none;
                 }
-                .brand-accent {
-                    font-size: 11px;
-                    font-weight: 800;
-                    color: #8b5cf6;
-                }
-                .sidebar-nav {
-                    display: flex;
-                    flex-direction: column;
-                    padding: 10px 8px;
-                    gap: 2px;
-                    overflow-y: auto;
-                    flex: 1;
-                }
-                .sidebar-link {
-                    height: 38px;
-                    display: flex;
-                    align-items: center;
-                    gap: 11px;
-                    padding: 0 12px;
-                    border: 1px solid transparent;
-                    border-radius: var(--radius-sm);
-                    color: #8e8e98;
-                    font-size: 13px;
-                    font-weight: 500;
-                    text-decoration: none;
-                    transition: all var(--duration-fast) ease;
-                }
-                .sidebar-link:hover {
-                    background: #0f0f13;
-                    color: #ffffff;
-                    border-color: #1e1e24;
-                }
-                .sidebar-link.active {
-                    background: #191428;
-                    color: #ffffff;
-                    border-color: #3b2866;
-                    font-weight: 600;
-                }
-                .sidebar-link.active .nav-icon {
-                    color: #8b5cf6;
-                }
-                .sidebar-footer {
-                    padding: 10px;
-                    border-top: 1px solid var(--card-border);
-                    flex-shrink: 0;
-                }
-                .pro-card {
-                    background: #08080a;
-                    border: 1px solid var(--card-border);
-                    border-radius: var(--radius-sm);
-                    padding: 12px;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 6px;
-                }
-                .pro-header {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                }
-                .pro-icon-wrap {
-                    width: 22px;
-                    height: 22px;
-                    display: flex;
-                    align-items: center;
+                .sidebar.collapsed .sidebar-link {
                     justify-content: center;
-                    background: #191428;
-                    border: 1px solid #3b2866;
-                    border-radius: var(--radius-sm);
-                    color: #8b5cf6;
-                    flex-shrink: 0;
+                    padding: 0;
+                    width: 44px;
+                    height: 44px;
+                    margin: 0 auto;
                 }
-                .pro-title-row {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-                .pro-title {
-                    font-size: 12px;
-                    font-weight: 700;
-                    color: #ffffff;
-                }
-                .pro-badge {
-                    padding: 1px 4px;
-                    background: #191428;
-                    border: 1px solid #3b2866;
-                    border-radius: 2px;
-                    color: #8b5cf6;
-                    font-size: 9px;
-                    font-weight: 800;
-                    letter-spacing: 0.05em;
-                }
-                .pro-desc {
-                    margin: 0;
-                    font-size: 10.5px;
-                    color: var(--text-muted);
-                    line-height: 1.35;
-                }
-                .upgrade-button {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 4px;
-                    background: transparent;
-                    border: none;
-                    color: #8b5cf6;
-                    font-size: 11px;
-                    font-weight: 600;
-                    cursor: pointer;
-                    padding: 2px 0 0;
-                    transition: color var(--duration-fast) ease;
-                }
-                .upgrade-button:hover {
-                    color: #a78bfa;
+                @media (max-width: 860px) {
+                    .sidebar {
+                        transform: translateX(-110%);
+                    }
+                    .sidebar.open {
+                        transform: translateX(0);
+                        display: flex;
+                        position: fixed;
+                        top: 14px;
+                        left: 14px;
+                        bottom: 14px;
+                        width: 250px !important;
+                        z-index: 100;
+                    }
                 }
             `}</style>
         </aside>

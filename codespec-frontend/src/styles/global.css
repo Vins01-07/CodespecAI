@@ -36,7 +36,7 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #8b5cf6;
+    background: var(--primary-crimson);
 }
 
 input, select, textarea, button {
@@ -80,22 +80,22 @@ input, select, textarea, button {
     position: relative;
 }
 
-/* Floating Dock Sidebar (Layout format from old screenshot + Neo-Brutalist Theme) */
+/* Rounded studio shell inspired by the supplied reference */
 .sidebar {
     position: fixed;
-    top: 12px;
-    left: 12px;
-    bottom: 12px;
+    top: 18px;
+    left: 18px;
+    bottom: 18px;
     width: var(--sidebar-width);
     display: flex;
     flex-direction: column;
-    background: #08080a;
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius);
+    background: linear-gradient(180deg, #101115, #101115);
+    border: 1px solid rgba(255, 224, 228, 0.12);
+    border-radius: var(--radius-xl);
     z-index: 100;
     transition: transform var(--duration-normal) var(--ease-out-expo), width var(--duration-normal) var(--ease-out-expo);
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 24px 55px rgba(0, 0, 0, 0.6);
 }
 
 .sidebar-brand {
@@ -140,30 +140,35 @@ input, select, textarea, button {
 
 /* Sharp Purple Active Navigation State */
 .sidebar-link.active {
-    background: #191428;
+    background: rgba(227, 38, 54, 0.14);
     color: #ffffff;
-    border-color: #3b2866;
+    border-color: rgba(227, 38, 54, 0.25);
     font-weight: 600;
 }
 
 .sidebar-link.active .nav-icon {
-    color: #8b5cf6;
+    color: var(--primary-crimson);
 }
 
 /* ==========================================================================
    MAIN SHELL & TOPBAR
    ========================================================================== */
 
-.main-shell {
-    width: calc(100% - (var(--sidebar-width) + 24px));
+ .main-shell {
+    width: calc(100% - (var(--sidebar-width) + 36px));
     min-height: 100vh;
-    margin-left: calc(var(--sidebar-width) + 24px);
+    margin-left: calc(var(--sidebar-width) + 36px);
     display: flex;
     flex-direction: column;
     min-width: 0;
     position: relative;
     z-index: 1;
     transition: margin-left var(--duration-normal) var(--ease-out-expo), width var(--duration-normal) var(--ease-out-expo);
+}
+
+.app-shell.sidebar-collapsed .main-shell {
+    width: calc(100% - (var(--sidebar-dock-width) + 36px));
+    margin-left: calc(var(--sidebar-dock-width) + 36px);
 }
 
 .topbar {
@@ -251,21 +256,35 @@ input, select, textarea, button {
 }
 
 /* ==========================================================================
-   SHARP NEO-BRUTALIST CARDS & PANELS
+   BURGUNDY CARDS & PANELS
    ========================================================================== */
 
 .cs-card {
-    background: #08080a;
-    border: 1px solid var(--card-border);
-    border-radius: var(--border-radius);
+    background: linear-gradient(145deg, rgba(111, 35, 54, 0.98), rgba(76, 21, 36, 0.98));
+    border: 1px solid rgba(255, 219, 223, 0.09);
+    border-radius: var(--radius-lg);
     box-shadow: var(--card-shadow);
-    transition: border-color var(--duration-fast) ease;
+    transition: transform var(--duration-normal) var(--ease-out-expo), border-color var(--duration-normal) ease, box-shadow var(--duration-normal) ease;
     position: relative;
     overflow: hidden;
 }
 
+.cs-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(120deg, rgba(255,255,255,0.035), transparent 36%);
+}
+
 .cs-card:hover {
-    border-color: #27272a;
+    transform: translateY(-2px);
+    border-color: rgba(255, 219, 223, 0.18);
+    box-shadow: 0 22px 48px rgba(74, 20, 34, 0.24);
+}
+
+.arch-canvas-container, .arch-svg-canvas, .gauge-svg {
+    color: var(--text-primary);
 }
 
 /* Accent Card Varieties */
@@ -288,10 +307,10 @@ input, select, textarea, button {
     flex-shrink: 0;
 }
 
-.icon-accent--gold   { background: #191428; color: #c4b5fd; border: 1px solid #3b2866; }
-.icon-accent--violet { background: #191428; color: #c4b5fd; border: 1px solid #3b2866; }
+.icon-accent--gold   { background: rgba(227, 38, 54, 0.14); color: var(--bright-red); border: 1px solid rgba(227, 38, 54, 0.25); }
+.icon-accent--violet { background: rgba(227, 38, 54, 0.14); color: var(--bright-red); border: 1px solid rgba(227, 38, 54, 0.25); }
 .icon-accent--blue   { background: #0c1c38; color: #93c5fd; border: 1px solid #1e3a8a; }
-.icon-accent--indigo { background: #191428; color: #a5b4fc; border: 1px solid #3b2866; }
+.icon-accent--indigo { background: rgba(227, 38, 54, 0.14); color: #a5b4fc; border: 1px solid rgba(227, 38, 54, 0.25); }
 .icon-accent--teal   { background: #082824; color: #5eead4; border: 1px solid #0d9488; }
 .icon-accent--green  { background: #092815; color: #86efac; border: 1px solid #15803d; }
 .icon-accent--amber  { background: #281a06; color: #fde68a; border: 1px solid #b45309; }
@@ -346,9 +365,9 @@ input, select, textarea, button {
 }
 
 .cs-badge-primary {
-    background: #191428;
-    color: #c4b5fd;
-    border-color: #3b2866;
+    background: rgba(227, 38, 54, 0.14);
+    color: var(--bright-red);
+    border-color: rgba(227, 38, 54, 0.25);
     font-weight: 700;
 }
 
@@ -376,15 +395,15 @@ input, select, textarea, button {
 }
 
 .cs-btn-primary {
-    background: #8b5cf6;
+    background: var(--primary-crimson);
     color: #000000;
-    border: 1px solid #8b5cf6;
+    border: 1px solid var(--primary-crimson);
     font-weight: 700;
 }
 
 .cs-btn-primary:hover {
-    background: #a78bfa;
-    border-color: #a78bfa;
+    background: #d99ba5;
+    border-color: #d99ba5;
 }
 
 .filter-pill-btn {
@@ -478,7 +497,7 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-    border-color: #8b5cf6;
+    border-color: var(--primary-crimson);
 }
 
 /* ==========================================================================
@@ -594,4 +613,576 @@ textarea:focus {
     .page-content {
         padding: 14px;
     }
+}
+
+/* Final visual system overrides for the burgundy SaaS shell */
+.app-shell { background: transparent; }
+.sidebar .sidebar-brand, .sidebar-brand { border-bottom-color: rgba(255,255,255,.08); }
+.brand-mark { background: rgba(255,255,255,.08) !important; border-color: rgba(255,255,255,.12) !important; color: #fff !important; }
+.brand-name, .brand-accent { color: #fff !important; }
+.sidebar-link { color: rgba(255,255,255,.62) !important; border-radius: 13px !important; }
+.sidebar-link:hover { background: rgba(255,255,255,.07) !important; color: #fff !important; border-color: transparent !important; }
+.sidebar-link.active { background: linear-gradient(90deg, rgba(238,176,184,.25), rgba(238,176,184,.11)) !important; border-color: rgba(255,255,255,.18) !important; color: #fff !important; box-shadow: inset 3px 0 #f0b3ba; }
+.sidebar-link.active .nav-icon { color: #ffd5da !important; }
+.sidebar-footer { border-top-color: rgba(255,255,255,.08) !important; }
+.pro-card { background: rgba(255,255,255,.055) !important; border-color: rgba(255,255,255,.09) !important; border-radius: 16px !important; }
+
+.main-shell { padding-right: 18px; }
+.topbar { height: 76px; padding-top: 18px; }
+.search-box { height: 42px !important; max-width: 520px; border-radius: var(--radius-full) !important; background: transparent !important; border: 1px solid rgba(91, 32, 44, 0.72) !important; box-shadow: none !important; color: #5e2530 !important; backdrop-filter: none; padding: 0 14px !important; }
+.search-box:focus-within { border-color: #6d2938 !important; }
+.search-box input { color: #fff !important; }
+.search-box input::placeholder { color: rgba(255,255,255,.58) !important; }
+.topbar-icon, .profile { background: transparent !important; border: 0 !important; border-radius: 14px !important; color: #5e2530 !important; box-shadow: none !important; }
+.profile-avatar { background: #8e4657 !important; border-color: rgba(255,255,255,.2) !important; border-radius: 50% !important; color: #fff !important; }
+.profile-name { color: #5e2530 !important; }
+.profile-role { color: rgba(94,37,48,.62) !important; }
+.topbar-icon svg, .profile-chevron { color: #6e2f3d !important; }
+
+.page-content { padding-top: 10px; }
+.page-header-title { font-size: 32px !important; letter-spacing: -1.2px; }
+.page-header-subtitle { color: #86656b !important; }
+.filter-pill-btn { background: rgba(255,255,255,.30) !important; border-color: rgba(255,255,255,.35) !important; border-radius: var(--radius-full) !important; color: #70414a !important; }
+.dashboard-container { gap: 16px; }
+.repo-header-card, .arch-preview-card, .efficiency-card, .doc-alerts-card, .metric-card, .recent-changes-card, .key-metrics-card {
+    border-radius: 22px !important;
+    background: linear-gradient(145deg, rgba(112,34,52,.97), rgba(76,20,34,.98)) !important;
+    border: 1px solid rgba(255,225,228,.09) !important;
+}
+.metric-card { min-height: 118px !important; }
+.icon-accent, .repo-icon-wrap { border-radius: 12px !important; }
+.repo-header-meta { background: rgba(255,255,255,.045) !important; border-color: rgba(255,255,255,.08) !important; border-radius: 14px !important; }
+.arch-canvas-container { background: rgba(63,16,29,.55) !important; border-radius: 16px !important; }
+.arch-svg-canvas { border-radius: inherit; }
+.arch-svg-canvas rect:first-child { fill: #45121f; }
+
+@media (max-width: 1024px) {
+    .main-shell { padding-right: 0; }
+}
+@media (max-width: 860px) {
+    .main-shell { margin-left: 76px; width: calc(100% - 76px); }
+}
+@media (max-width: 640px) {
+    .main-shell { margin-left: 0; width: 100%; padding: 0; }
+    .topbar { height: 68px; padding-right: 14px; }
+    .topbar-left { flex: 1; }
+    .search-box { max-width: none; }
+    .topbar-right { gap: 4px; }
+    .topbar-icon:nth-of-type(1), .topbar-icon:nth-of-type(3) { display: none; }
+    .page-header-title { font-size: 28px !important; }
+    .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Cross-page theme unification. These overrides cover legacy component-local colors
+   so Repository, Ingestion, Search, Architecture, QA and Documentation share the shell. */
+html, body, #root { background: var(--app-background) !important; }
+body { color: #fff7f8 !important; }
+
+.page-header-row .page-header-title { color: #4f1723 !important; text-shadow: 0 1px rgba(255,255,255,.18); }
+.page-header-row .page-header-subtitle { color: #62444a !important; opacity: 1 !important; font-weight: 500 !important; }
+ .search-box input::placeholder { color: rgba(94, 37, 48, 0.58) !important; }
+.search-box input { color: #5e2530 !important; }
+
+.cs-card,
+.repo-header-card,
+.stat-pill-card,
+.arch-preview-card,
+.efficiency-card,
+.doc-alerts-card,
+.metric-card,
+.recent-changes-card,
+.key-metrics-card,
+.ing-repo-card,
+.ing-pipeline-card,
+.ing-detail-card,
+.ing-completed-card,
+.ing-pending-card,
+.global-map-card,
+.dual-metric-card,
+.network-route-card,
+.nodes-table-card,
+.radar-scanner-card,
+.speedometer-card,
+.telemetry-mini-card,
+.trend-area-card,
+.workload-bar-chart-card {
+    background: linear-gradient(145deg, rgba(119, 43, 61, 0.98), rgba(79, 22, 37, 0.98)) !important;
+    border: 1px solid rgba(255, 225, 228, 0.11) !important;
+    color: #fff8f8 !important;
+    box-shadow: 0 16px 38px rgba(87, 30, 41, 0.16), inset 0 1px rgba(255,255,255,.025) !important;
+}
+
+input[type="text"]:not(.search-box input), input[type="search"]:not(.search-box input), input[type="password"]:not(.search-box input), input[type="email"]:not(.search-box input), input[type="number"]:not(.search-box input), select, textarea,
+.filter-pill-btn, .cs-btn, .icon-tiny-btn, .topbar-icon {
+    background: rgba(95, 31, 46, 0.20) !important;
+    border-color: rgba(255, 231, 233, 0.14) !important;
+    color: #fff8f8 !important;
+}
+
+input[type="text"]:not(.search-box input), input[type="search"]:not(.search-box input), input[type="password"]:not(.search-box input), input[type="email"]:not(.search-box input), input[type="number"]:not(.search-box input), select, textarea {
+    background-color: rgba(70, 17, 29, 0.90) !important;
+}
+.search-box input {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.cs-btn-primary, .upgrade-button, .open-arch-btn {
+    background: linear-gradient(135deg, #b86676, #8d3549) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    color: white !important;
+}
+
+.search-shortcut {
+    background: transparent !important;
+    border: 0 !important;
+    color: rgba(94, 37, 48, 0.62) !important;
+}
+.sublabel-pill, .alert-item, .repo-header-meta, .metric-context, [class*="-panel"] {
+    background: rgba(255,255,255,.045) !important;
+    border-color: rgba(255,255,255,.08) !important;
+}
+
+.meta-label, .metric-label, .context-text, .doc-alerts-subtitle, .efficiency-tag, .repo-desc-sub, .arch-subtitle,
+[class$="-subtitle"], [class$="-label"] { color: #dec2c6 !important; }
+
+.metric-value, .stat-number, .repo-title-name, .arch-title, .efficiency-title, .doc-alerts-title,
+[class$="-title"] { color: #fff9f9 !important; }
+
+.arch-svg-canvas rect:first-child { fill: #481421 !important; }
+.arch-svg-canvas rect:nth-child(2) { fill: rgba(255,255,255,.025) !important; }
+
+[class*="table"], table { background: transparent !important; color: #fff8f8 !important; }
+th, td, tr { border-color: rgba(255,255,255,.08) !important; }
+th { background: rgba(255,255,255,.035) !important; color: #d9bdc1 !important; }
+tr:hover { background: rgba(255,255,255,.035) !important; }
+
+[class*="modal"], [role="dialog"] { background: linear-gradient(145deg, #74283b, #511722) !important; border-color: rgba(255,255,255,.12) !important; }
+
+/* Consistent page-heading system across every route. */
+main h1 {
+    color: #571b27 !important;
+    font-size: 32px !important;
+    line-height: 1.08 !important;
+    letter-spacing: -1.1px !important;
+    font-weight: 800 !important;
+}
+
+main > div > header:not(.repo-page-header):not(.ing-page-header),
+main > div > div:first-child:has(> div > h1) {
+    border-radius: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+main h1 + p,
+main h1 + div > p {
+    color: #62444a !important;
+}
+.repo-page-header,
+.ing-page-header,
+.doc-page-header,
+.page-header-row {
+    min-height: 0;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+}
+
+.repo-page-header .header-title,
+.ing-page-header .header-title,
+.doc-page-title,
+.page-header-title,
+.header-info .header-title {
+    color: #571b27 !important;
+    font-size: 32px !important;
+    line-height: 1.08;
+    letter-spacing: -1.1px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.repo-page-header .header-desc,
+.ing-page-header .header-desc,
+.doc-page-subtitle,
+.page-header-subtitle,
+.header-info .header-desc {
+    color: #62444a !important;
+    font-size: 14px !important;
+    margin: 8px 0 0;
+}
+
+.repo-page-header .title-row,
+.ing-page-header .title-row,
+.doc-title-row {
+    align-items: center;
+}
+
+.doc-page-header .icon-accent,
+.repo-page-header .icon-accent,
+.ing-page-header .icon-accent {
+    background: rgba(99, 39, 52, 0.10) !important;
+    border-color: rgba(99, 39, 52, 0.12) !important;
+    color: #712b39 !important;
+}
+
+/* Legacy purple/indigo cleanup for badges, graph nodes, and status surfaces. */
+.cs-badge-primary,
+.icon-accent--violet,
+.icon-accent--indigo,
+.icon-accent--gold {
+    background: rgba(227, 38, 54, 0.14) !important;
+    border-color: rgba(227, 38, 54, 0.25) !important;
+    color: #ffd0d5 !important;
+}
+
+.cs-card--violet:hover,
+.cs-card--indigo:hover,
+.cs-card--gold:hover {
+    border-color: rgba(240, 176, 183, 0.34) !important;
+}
+
+/* Icon normalization: Lucide and custom icons inherit the burgundy design palette. */
+svg {
+    color: inherit;
+}
+
+svg.lucide {
+    color: #ffd4d9;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    filter: drop-shadow(0 0 1px rgba(255, 212, 217, 0.18));
+}
+
+.icon-accent,
+.icon-accent svg,
+.meta-icon,
+.nav-icon,
+.topbar-icon svg,
+.search-icon,
+.menu-button svg,
+.profile-chevron,
+button svg,
+a svg {
+    color: #ffd4d9 !important;
+    stroke: currentColor;
+}
+
+.icon-accent {
+    background: rgba(235, 164, 174, 0.13) !important;
+    border-color: rgba(227, 38, 54, 0.2) !important;
+}
+
+.sidebar-link.active .nav-icon,
+.sidebar-link:hover .nav-icon,
+.brand-mark svg,
+.cs-btn-primary svg,
+.upgrade-button svg,
+.open-arch-btn svg {
+    color: #ffd4d9 !important;
+}
+
+.cs-badge-success svg,
+.success svg,
+[class*="success"] svg { color: #a6d9bd !important; }
+.cs-badge-warning svg,
+.warning svg,
+[class*="warning"] svg { color: #e9c58a !important; }
+.cs-badge-danger svg,
+.danger svg,
+[class*="danger"] svg { color: #f2a0a9 !important; }
+
+/* Prevent colorful legacy icon fills from escaping the theme on graph surfaces. */
+.react-flow svg,
+.arch-svg-canvas svg {
+    color: var(--bright-red);
+}
+.react-flow__node svg,
+.arch-svg-canvas [class*="node"] svg {
+    color: #ffd0d5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* --------------------------------------------------------------------------
+   Dark glass studio redesign (shared by every route)
+   -------------------------------------------------------------------------- */
+html, body, #root {
+    background:
+        radial-gradient(circle at 78% 12%, rgba(126, 54, 62, 0.34), transparent 28%),
+        radial-gradient(circle at 18% 78%, rgba(89, 25, 36, 0.30), transparent 32%),
+        linear-gradient(145deg, #230b10 0%, #16080b 58%, #0f0708 100%) !important;
+}
+
+.app-shell::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.22;
+    background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size: 100% 4px;
+    mix-blend-mode: overlay;
+}
+
+.sidebar {
+    top: 12px;
+    left: 12px;
+    bottom: 12px;
+    border-radius: 20px;
+    border-color: rgba(255, 210, 214, 0.10);
+    background: linear-gradient(180deg, rgba(87, 30, 40, 0.94), rgba(43, 13, 20, 0.96)) !important;
+    box-shadow: 18px 10px 38px rgba(3, 0, 1, 0.28);
+    backdrop-filter: blur(18px);
+}
+
+.sidebar-brand {
+    border-bottom-color: rgba(255,255,255,.07);
+}
+
+.sidebar-link {
+    height: 44px;
+    margin-bottom: 3px;
+    border-radius: 13px;
+    color: rgba(255, 226, 229, 0.68) !important;
+}
+
+.sidebar-link:hover {
+    background: rgba(255,255,255,.065) !important;
+    border-color: rgba(255,255,255,.07);
+}
+
+.sidebar-link.active {
+    background: linear-gradient(90deg, rgba(255,255,255,.16), rgba(255,255,255,.075)) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    box-shadow: inset 0 1px rgba(255,255,255,.05), 0 8px 20px rgba(30,4,10,.18);
+}
+
+.nav-icon { filter: drop-shadow(0 1px 6px rgba(255, 182, 191, .12)); }
+
+.sidebar.collapsed {
+    border-radius: 18px;
+}
+.sidebar.collapsed .sidebar-nav { gap: 7px !important; }
+.sidebar.collapsed .sidebar-link { height: 46px !important; border-radius: 13px; }
+
+.sidebar-footer { border-top-color: rgba(255,255,255,.07); }
+.pro-card {
+    border-radius: 14px !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.07), rgba(255,255,255,.025)) !important;
+    border-color: rgba(255,255,255,.10) !important;
+}
+
+.topbar {
+    height: 72px;
+    padding-top: 10px;
+}
+
+.search-box {
+    height: 38px !important;
+    padding: 0 14px !important;
+    border-radius: 12px !important;
+    border: 1px solid rgba(255,255,255,.08) !important;
+    background: rgba(255,255,255,.035) !important;
+}
+.search-box:focus-within { background: rgba(255,255,255,.055) !important; }
+.search-box input { color: #fff5f6 !important; }
+.search-box input::placeholder { color: rgba(221,192,196,.72) !important; }
+
+.topbar-icon {
+    border-radius: 12px !important;
+    background: rgba(255,255,255,.025) !important;
+    border: 1px solid rgba(255,255,255,.055) !important;
+}
+.profile { padding: 5px 7px !important; border: 1px solid transparent; }
+.profile:hover { border-color: rgba(255,255,255,.07); border-radius: 12px !important; }
+.profile-avatar { border-radius: 50% !important; }
+
+.page-content { padding-top: 12px; }
+.page-header-row { margin-bottom: 20px !important; }
+main h1,
+.repo-page-header .header-title,
+.ing-page-header .header-title,
+.doc-page-title,
+.page-header-title,
+.header-info .header-title {
+    color: #fff7f8 !important;
+    text-shadow: none !important;
+}
+main h1 + p,
+main h1 + div > p,
+.repo-page-header .header-desc,
+.ing-page-header .header-desc,
+.doc-page-subtitle,
+.page-header-subtitle,
+.header-info .header-desc,
+.page-header-row .page-header-subtitle {
+    color: #bea8ab !important;
+}
+
+.cs-card,
+.repo-header-card,
+.stat-pill-card,
+.arch-preview-card,
+.efficiency-card,
+.doc-alerts-card,
+.metric-card,
+.recent-changes-card,
+.key-metrics-card,
+.ing-repo-card,
+.ing-pipeline-card,
+.ing-detail-card,
+.ing-completed-card,
+.ing-pending-card,
+.global-map-card,
+.dual-metric-card,
+.network-route-card,
+.nodes-table-card,
+.radar-scanner-card,
+.speedometer-card,
+.telemetry-mini-card,
+.trend-area-card,
+.workload-bar-chart-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px !important;
+    border: 1px solid rgba(255, 224, 227, 0.105) !important;
+    background:
+        linear-gradient(145deg, rgba(126, 45, 58, 0.93), rgba(67, 20, 31, 0.96)) !important;
+    box-shadow: 0 18px 42px rgba(4, 0, 1, 0.20), inset 0 1px rgba(255,255,255,.035) !important;
+    backdrop-filter: blur(16px);
+}
+
+.cs-card::after,
+.repo-header-card::after,
+.metric-card::after,
+.ing-repo-card::after {
+    content: "";
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    top: -95px;
+    right: -55px;
+    border-radius: 50%;
+    background: rgba(255, 201, 207, 0.08);
+    pointer-events: none;
+}
+
+.metric-card {
+    min-height: 112px !important;
+    border-radius: 18px !important;
+}
+.metrics-grid, .dashboard-main-grid, .dashboard-left-subgrid { gap: 14px !important; }
+
+input[type="text"]:not(.search-box input),
+input[type="search"]:not(.search-box input),
+input[type="password"]:not(.search-box input),
+input[type="email"]:not(.search-box input),
+input[type="number"]:not(.search-box input), select, textarea {
+    border-radius: 12px !important;
+    border: 1px solid rgba(255,255,255,.09) !important;
+    background: rgba(37, 12, 18, 0.82) !important;
+    color: #fff7f8 !important;
+}
+
+.filter-pill-btn, .cs-btn, .icon-tiny-btn {
+    border-radius: 12px !important;
+    border-color: rgba(255,255,255,.09) !important;
+    background: rgba(255,255,255,.055) !important;
+}
+
+.cs-btn-primary, .upgrade-button, .open-arch-btn {
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #c87582, #8d3547) !important;
+    box-shadow: 0 8px 18px rgba(34, 7, 13, .22);
+}
+
+[class*="-panel"], .sublabel-pill, .alert-item, .repo-header-meta, .metric-context {
+    border-radius: 12px !important;
+    border-color: rgba(255,255,255,.065) !important;
+    background: rgba(255,255,255,.042) !important;
+}
+
+[class*="modal"], [role="dialog"] {
+    border-radius: 22px !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    background: linear-gradient(145deg, rgba(103,39,52,.98), rgba(55,17,27,.98)) !important;
+    box-shadow: 0 30px 90px rgba(0,0,0,.48);
+}
+
+th { background: rgba(255,255,255,.035) !important; }
+tr:hover { background: rgba(255,255,255,.045) !important; }
+
+@media (max-width: 860px) {
+    .sidebar { left: 8px; top: 8px; bottom: 8px; }
+    .main-shell { margin-left: 84px; width: calc(100% - 84px); }
+}
+
+@media (max-width: 640px) {
+    .sidebar { border-radius: 16px; }
+    .main-shell { margin-left: 0; width: 100%; }
+    .page-content { padding: 8px 14px 28px; }
+    .profile-meta { display: none; }
+}
+
+/* Shared visual language for every page and component. */
+[class$="-card"], [class*="card-"], [class*="-panel"], [class*="panel-"],
+[class*="section"], [class*="list-item"], [class*="result-item"] {
+    border-radius: 18px !important;
+    border-color: rgba(255, 225, 228, 0.105) !important;
+}
+
+[class$="-card"], [class*="card-"], [class*="-panel"] {
+    background: linear-gradient(145deg, rgba(112, 39, 53, 0.96), rgba(64, 18, 29, 0.96)) !important;
+    box-shadow: 0 16px 38px rgba(8, 2, 3, 0.18), inset 0 1px rgba(255,255,255,.025) !important;
+}
+
+[class$="-title"], [class$="__title"],
+.card-title, .metric-value, .stat-number, .repo-title-name {
+    color: #fff8f8 !important;
+}
+
+[class$="-subtitle"], [class$="__subtitle"], [class$="-description"],
+[class$="__description"], [class$="-desc"], [class$="__desc"],
+[class$="-label"], [class$="__label"], [class*="muted"] {
+    color: #cbb1b5 !important;
+}
+
+[class$="-icon-wrap"], [class$="-icon"], [class*="icon-box"],
+.icon-accent, .meta-icon, .brand-mark, .pro-icon-wrap {
+    border-radius: 12px !important;
+    border-color: rgba(255,255,255,.105) !important;
+    background: rgba(255,255,255,.065) !important;
+}
+
+button:not(.sidebar-toggle), [role="button"] {
+    transition: background var(--duration-fast) ease, border-color var(--duration-fast) ease, transform var(--duration-fast) ease;
+}
+button:not(.sidebar-toggle):hover, [role="button"]:hover {
+    border-color: rgba(255, 225, 228, 0.20);
+}
+
+input, textarea, select {
+    caret-color: #ffd4d9;
+}
+
+::selection {
+    background: rgba(226, 138, 151, 0.36);
+    color: #fff;
+}
+
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(211, 145, 154, 0.38); }
+::-webkit-scrollbar-thumb:hover { background: rgba(226, 157, 166, 0.62); }
+
+.notifications-list, .activity-list, .changes-list,
+.repository-list, .documentation-list, .search-results, .result-list {
+    gap: 12px !important;
 }

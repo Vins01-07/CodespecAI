@@ -27,7 +27,7 @@ import Loading from "../components/common/Loading";
 import EmptyState from "../components/common/EmptyState";
 import useRepositoryStore from "../store/repositoryStore";
 
-// ─── Pipeline stage definitions ───────────────────────────────────────────
+// â”€â”€â”€ Pipeline stage definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PIPELINE_STAGES = [
     {
         id: "ingestion",
@@ -67,7 +67,7 @@ const PIPELINE_STAGES = [
     },
 ];
 
-// ─── Map repository status to a pipeline stage index ──────────────────────
+// â”€â”€â”€ Map repository status to a pipeline stage index â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function resolveStageIndex(repo) {
     if (!repo) return -1;
     const status = (repo.status || "").toLowerCase();
@@ -105,7 +105,7 @@ function getOverallStatus(repo) {
     return "none";
 }
 
-// ─── Page Component ───────────────────────────────────────────────────────
+// â”€â”€â”€ Page Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function Ingestion() {
     const navigate = useNavigate();
     const { repositories, activeRepository } = useRepositoryStore();
@@ -130,7 +130,7 @@ function Ingestion() {
     const overallStatus = getOverallStatus(displayRepo);
     const activeStageIndex = resolveStageIndex(displayRepo);
 
-    // ─── Status badge helper ──────────────────────────────────────────────
+    // â”€â”€â”€ Status badge helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const getStatusBadge = (status) => {
         const s = (status || "").toLowerCase();
         if (s === "ready" || s === "analyzed" || s === "completed")
@@ -147,7 +147,7 @@ function Ingestion() {
     const statusBadge = getStatusBadge(displayRepo?.status);
     const StatusBadgeIcon = statusBadge.icon;
 
-    // ─── Loading state (initial) ──────────────────────────────────────────
+    // â”€â”€â”€ Loading state (initial) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const [isInitLoading, setIsInitLoading] = useState(true);
     useEffect(() => {
         const t = setTimeout(() => setIsInitLoading(false), 400);
@@ -164,7 +164,7 @@ function Ingestion() {
         );
     }
 
-    // ─── No processing target ─────────────────────────────────────────────
+    // â”€â”€â”€ No processing target â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (!displayRepo) {
         return (
             <div className="ingestion-page-container">
@@ -175,7 +175,7 @@ function Ingestion() {
                             <h1 className="header-title">Ingestion & Processing</h1>
                         </div>
                         <p className="header-desc">
-                            Monitor repository analysis pipeline — from ingestion to knowledge graph construction.
+                            Monitor repository analysis pipeline â€” from ingestion to knowledge graph construction.
                         </p>
                     </div>
                 </header>
@@ -207,7 +207,7 @@ function Ingestion() {
 
     return (
         <div className="ingestion-page-container">
-            {/* ─── Header ────────────────────────────────────────────────── */}
+            {/* â”€â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <header className="ing-page-header">
                 <div className="header-info">
                     <div className="title-row">
@@ -215,7 +215,7 @@ function Ingestion() {
                         <h1 className="header-title">Ingestion & Processing</h1>
                     </div>
                     <p className="header-desc">
-                        Monitor repository analysis pipeline — from ingestion to knowledge graph construction.
+                        Monitor repository analysis pipeline â€” from ingestion to knowledge graph construction.
                     </p>
                 </div>
 
@@ -229,7 +229,7 @@ function Ingestion() {
                         >
                             {processingRepos.map((r) => (
                                 <option key={r.id} value={r.id}>
-                                    {r.name} — {r.status}
+                                    {r.name} â€” {r.status}
                                 </option>
                             ))}
                         </select>
@@ -237,7 +237,7 @@ function Ingestion() {
                 )}
             </header>
 
-            {/* ─── Current Repository Card ────────────────────────────────── */}
+            {/* â”€â”€â”€ Current Repository Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <Card className="ing-repo-card cs-card--teal">
                 <div className="ing-repo-top">
                     <div className="ing-repo-identity">
@@ -296,14 +296,14 @@ function Ingestion() {
                 </div>
             </Card>
 
-            {/* ─── Processing Pipeline ────────────────────────────────────── */}
+            {/* â”€â”€â”€ Processing Pipeline â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <Card className="ing-pipeline-card cs-card--violet">
                 <div className="ing-pipeline-header">
                     <h2 className="ing-pipeline-title">Processing Pipeline</h2>
                     <span className="ing-pipeline-sub">
                         {overallStatus === "completed" && "All stages completed successfully"}
                         {overallStatus === "processing" && "Analysis in progress..."}
-                        {overallStatus === "pending" && "Queued — waiting to begin"}
+                        {overallStatus === "pending" && "Queued â€” waiting to begin"}
                         {overallStatus === "failed" && "Pipeline encountered an error"}
                     </span>
                 </div>
@@ -365,7 +365,7 @@ function Ingestion() {
                 </div>
             </Card>
 
-            {/* ─── Status Detail / Processing Information ─────────────────── */}
+            {/* â”€â”€â”€ Status Detail / Processing Information â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <Card className="ing-detail-card cs-card--blue">
                 <div className="ing-detail-header">
                     <h2 className="ing-detail-title">Processing Information</h2>
@@ -383,7 +383,7 @@ function Ingestion() {
                         <span className="ing-detail-value">
                             {activeStageIndex >= 0 && activeStageIndex < PIPELINE_STAGES.length
                                 ? PIPELINE_STAGES[activeStageIndex].label
-                                : "—"}
+                                : "â€”"}
                         </span>
                     </div>
                     {displayRepo.metrics?.files > 0 && (
@@ -412,7 +412,7 @@ function Ingestion() {
                     )}
                 </div>
 
-                {/* ─── Error detail for failed state ──────────────────────── */}
+                {/* â”€â”€â”€ Error detail for failed state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
                 {overallStatus === "failed" && (
                     <div className="ing-error-box">
                         <AlertTriangle size={16} />
@@ -426,7 +426,7 @@ function Ingestion() {
                 )}
             </Card>
 
-            {/* ─── Completed / Next Action ────────────────────────────────── */}
+            {/* â”€â”€â”€ Completed / Next Action â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {overallStatus === "completed" && (
                 <Card className="ing-completed-card cs-card--green">
                     <div className="ing-completed-inner">
@@ -459,7 +459,7 @@ function Ingestion() {
                 </Card>
             )}
 
-            {/* ─── Pending — navigate to repo ────────────────────────────── */}
+            {/* â”€â”€â”€ Pending â€” navigate to repo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {overallStatus === "pending" && (
                 <Card className="ing-pending-card cs-card--amber">
                     <div className="ing-pending-inner">
@@ -479,7 +479,7 @@ function Ingestion() {
     );
 }
 
-// ─── Styles (scoped via JSX <style>) ──────────────────────────────────────
+// â”€â”€â”€ Styles (scoped via JSX <style>) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const ingestionStyles = `
     .ingestion-page-container {
         display: flex;
@@ -706,7 +706,7 @@ const ingestionStyles = `
         border-radius: 50%;
         flex-shrink: 0;
         border: 1.5px solid var(--card-border);
-        background: rgba(20, 16, 32, 0.7);
+        background: #101115;
     }
     .ing-indicator-completed {
         border-color: rgba(52, 211, 153, 0.6);
@@ -715,10 +715,10 @@ const ingestionStyles = `
         box-shadow: 0 0 12px rgba(52, 211, 153, 0.2);
     }
     .ing-indicator-active {
-        border-color: rgba(251, 191, 36, 0.6);
-        color: #fbbf24;
-        background: rgba(251, 191, 36, 0.15);
-        box-shadow: 0 0 12px rgba(251, 191, 36, 0.2);
+        border-color: #FF3548;
+        color: var(--bright-red);
+        background: rgba(227, 38, 54, 0.18);
+        box-shadow: 0 0 14px rgba(227, 38, 54, 0.35);
     }
     .ing-indicator-failed {
         border-color: rgba(248, 113, 113, 0.6);
@@ -833,8 +833,8 @@ const ingestionStyles = `
         gap: 10px;
         margin-top: 14px;
         padding: 12px 14px;
-        background: rgba(184, 120, 112, 0.08);
-        border: 1px solid rgba(184, 120, 112, 0.25);
+        background: rgba(227, 38, 54, 0.1);
+        border: 1px solid rgba(227, 38, 54, 0.3);
         border-radius: var(--radius-sm);
         color: var(--danger);
     }
@@ -860,7 +860,7 @@ const ingestionStyles = `
     /* Completed card */
     .ing-completed-card {
         padding: 20px;
-        border-color: rgba(145, 167, 138, 0.3);
+        border-color: rgba(16, 185, 129, 0.3);
     }
     .ing-completed-inner {
         display: flex;
@@ -874,8 +874,8 @@ const ingestionStyles = `
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(145, 167, 138, 0.1);
-        border: 1px solid rgba(145, 167, 138, 0.3);
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
         border-radius: 50%;
         color: var(--success);
         flex-shrink: 0;

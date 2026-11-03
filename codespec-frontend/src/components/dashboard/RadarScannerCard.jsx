@@ -22,7 +22,7 @@ export default function RadarScannerCard() {
                 </div>
                 <div className="radar-meta-pill">
                     <Compass size={12} className="spin-slow" />
-                    <span>0° N • 248° W</span>
+                    <span>0Â° N â€¢ 248Â° W</span>
                 </div>
             </div>
 
@@ -33,9 +33,9 @@ export default function RadarScannerCard() {
                 <svg className="radar-svg" viewBox="0 0 240 240">
                     <defs>
                         <radialGradient id="radarSweepGrad" cx="50%" cy="50%" r="50%">
-                            <stop offset="0%" stopColor="#c4b5fd" stopOpacity="0.35" />
-                            <stop offset="60%" stopColor="#8b5cf6" stopOpacity="0.12" />
-                            <stop offset="100%" stopColor="#7c3aed" stopOpacity="0" />
+                            <stop offset="0%" stopColor="#FF3548" stopOpacity="0.35" />
+                            <stop offset="60%" stopColor="#E32636" stopOpacity="0.12" />
+                            <stop offset="100%" stopColor="#9a4c61" stopOpacity="0" />
                         </radialGradient>
                     </defs>
 
@@ -43,17 +43,17 @@ export default function RadarScannerCard() {
                     <circle cx="120" cy="120" r="105" fill="none" stroke="rgba(139, 92, 246, 0.15)" strokeWidth="1" />
                     <circle cx="120" cy="120" r="75" fill="none" stroke="rgba(139, 92, 246, 0.22)" strokeWidth="1" strokeDasharray="3 3" />
                     <circle cx="120" cy="120" r="45" fill="none" stroke="rgba(139, 92, 246, 0.35)" strokeWidth="1.2" />
-                    <circle cx="120" cy="120" r="16" fill="rgba(139, 92, 246, 0.12)" stroke="#c4b5fd" strokeWidth="1.5" />
+                    <circle cx="120" cy="120" r="16" fill="rgba(139, 92, 246, 0.12)" stroke="#FF3548" strokeWidth="1.5" />
 
                     {/* Crosshair Axes */}
                     <line x1="120" y1="12" x2="120" y2="228" stroke="rgba(139, 92, 246, 0.18)" strokeWidth="1" />
                     <line x1="12" y1="120" x2="228" y2="120" stroke="rgba(139, 92, 246, 0.18)" strokeWidth="1" />
 
                     {/* Outer tick marks */}
-                    <line x1="120" y1="5" x2="120" y2="15" stroke="#c4b5fd" strokeWidth="1.5" />
-                    <line x1="120" y1="225" x2="120" y2="235" stroke="#c4b5fd" strokeWidth="1.5" />
-                    <line x1="5" y1="120" x2="15" y2="120" stroke="#c4b5fd" strokeWidth="1.5" />
-                    <line x1="225" y1="120" x2="235" y2="120" stroke="#c4b5fd" strokeWidth="1.5" />
+                    <line x1="120" y1="5" x2="120" y2="15" stroke="#FF3548" strokeWidth="1.5" />
+                    <line x1="120" y1="225" x2="120" y2="235" stroke="#FF3548" strokeWidth="1.5" />
+                    <line x1="5" y1="120" x2="15" y2="120" stroke="#FF3548" strokeWidth="1.5" />
+                    <line x1="225" y1="120" x2="235" y2="120" stroke="#FF3548" strokeWidth="1.5" />
 
                     {/* Rotating Sweep Beam */}
                     <g className="radar-sweep-beam">
@@ -61,19 +61,19 @@ export default function RadarScannerCard() {
                             d="M 120 120 L 120 15 A 105 105 0 0 1 205 60 Z"
                             fill="url(#radarSweepGrad)"
                         />
-                        <line x1="120" y1="120" x2="120" y2="15" stroke="#c4b5fd" strokeWidth="1.8" />
+                        <line x1="120" y1="120" x2="120" y2="15" stroke="#FF3548" strokeWidth="1.8" />
                     </g>
 
                     {/* Telemetry Target Blips */}
                     <g className="radar-blip b1">
-                        <circle cx="85" cy="80" r="4.5" fill="#c4b5fd" />
-                        <circle cx="85" cy="80" r="9" fill="none" stroke="#c4b5fd" strokeWidth="1" opacity="0.6" className="pulse-ring" />
+                        <circle cx="85" cy="80" r="4.5" fill="#FF3548" />
+                        <circle cx="85" cy="80" r="9" fill="none" stroke="#FF3548" strokeWidth="1" opacity="0.6" className="pulse-ring" />
                     </g>
                     <g className="radar-blip b2">
-                        <circle cx="165" cy="145" r="3.5" fill="#a78bfa" />
+                        <circle cx="165" cy="145" r="3.5" fill="#d99ba5" />
                     </g>
                     <g className="radar-blip b3">
-                        <circle cx="140" cy="65" r="3" fill="#8b5cf6" opacity="0.8" />
+                        <circle cx="140" cy="65" r="3" fill="#E32636" opacity="0.8" />
                     </g>
                 </svg>
 
@@ -152,7 +152,7 @@ export default function RadarScannerCard() {
                     width: 7px;
                     height: 7px;
                     border-radius: 50%;
-                    background: #c4b5fd;
+                    background: #FF3548;
                     box-shadow: 0 0 8px rgba(196, 181, 253, 0.6);
                 }
 
@@ -173,7 +173,7 @@ export default function RadarScannerCard() {
                     border-radius: 9999px;
                     font-size: 10px;
                     font-weight: 600;
-                    color: #c4b5fd;
+                    color: #FF3548;
                 }
 
                 .spin-slow {
@@ -238,7 +238,7 @@ export default function RadarScannerCard() {
                 .radar-hud-val {
                     font-size: 13px;
                     font-weight: 800;
-                    color: #c4b5fd;
+                    color: #FF3548;
                     line-height: 1;
                 }
 
@@ -276,7 +276,7 @@ export default function RadarScannerCard() {
                 }
 
                 .slider-value {
-                    color: #c4b5fd;
+                    color: #FF3548;
                     font-weight: 700;
                     font-family: inherit;
                 }
@@ -297,7 +297,7 @@ export default function RadarScannerCard() {
                     width: 15px;
                     height: 15px;
                     border-radius: 50%;
-                    background: linear-gradient(135deg, #c4b5fd 0%, #7c3aed 100%);
+                    background: linear-gradient(135deg, #FF3548 0%, #9a4c61 100%);
                     cursor: pointer;
                     box-shadow: 0 0 6px rgba(139, 92, 246, 0.6);
                     border: 2px solid #0c0d12;
@@ -349,7 +349,7 @@ export default function RadarScannerCard() {
                     width: 5px;
                     height: 5px;
                     border-radius: 50%;
-                    background: #8b5cf6;
+                    background: #E32636;
                 }
 
                 .status-icon {
