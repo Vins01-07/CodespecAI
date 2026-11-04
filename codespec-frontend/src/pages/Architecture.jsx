@@ -97,10 +97,10 @@ function Architecture() {
                     </div>
                     <div>
                         <h1 className="premium-page-title">
-                            System Architecture
+                            System <span className="route-title-accent">Architecture</span>
                         </h1>
                         <p className="premium-page-subtitle">
-                            Interactive topology graph, component relationships, data flow, and runtime dependencies.
+                            Codebase health, architectural topology & continuous insights.
                         </p>
                     </div>
                 </div>

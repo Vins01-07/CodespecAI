@@ -100,10 +100,10 @@ export function ChangeImpact() {
                     </div>
                     <div>
                         <h1 className="premium-page-title">
-                            Change Impact Analysis
+                            Change Impact <span className="route-title-accent">Analysis</span>
                         </h1>
                         <p className="premium-page-subtitle">
-                            Predict blast radius, dependent services, breaking changes, and testing requirements before modifying code.
+                            Codebase health, architectural topology & continuous insights.
                         </p>
                     </div>
                 </div>

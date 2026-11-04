@@ -707,16 +707,17 @@ function DocumentationReader({
 
             <style>{`
                 .doc-central-workspace {
-                    display: flex;
-                    align-items: flex-start;
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 220px;
+                    align-items: start;
                     gap: 16px;
                     width: 100%;
                     min-width: 0;
                 }
 
                 .doc-article-container {
-                    flex: 1;
                     min-width: 0;
+                    margin: 0;
                     display: flex;
                     flex-direction: column;
                     background: rgba(16, 21, 30, 0.75) !important;
@@ -726,6 +727,12 @@ function DocumentationReader({
                     border-radius: 18px !important;
                     padding: 24px 28px !important;
                     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+                }
+
+                @media (max-width: 1140px) {
+                    .doc-central-workspace {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
                 }
 
                 .arch-flow-tiers {

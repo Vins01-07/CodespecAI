@@ -254,10 +254,10 @@ function Dependencies() {
                     </div>
                     <div>
                         <h1 className="premium-page-title">
-                            Codebase Dependencies
+                            Codebase <span className="route-title-accent">Dependencies</span>
                         </h1>
                         <p className="premium-page-subtitle">
-                            Inspect dependency relationships, inter-service call hierarchies, communication protocols, and architectural coupling.
+                            Codebase health, architectural topology & continuous insights.
                         </p>
                     </div>
                 </div>

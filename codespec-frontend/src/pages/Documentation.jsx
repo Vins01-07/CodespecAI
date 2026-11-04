@@ -641,7 +641,7 @@ function Documentation() {
                 .doc-workspace-grid {
                     display: grid;
                     grid-template-columns: 290px minmax(0, 1fr);
-                    align-items: flex-start;
+                    align-items: start;
                     gap: 16px;
                     width: 100%;
                 }
@@ -650,6 +650,8 @@ function Documentation() {
                 .doc-left-sidebar {
                     width: 290px;
                     flex-shrink: 0;
+                    align-self: start;
+                    margin: 0;
                     position: sticky;
                     top: calc(var(--topbar-height) + 14px);
                     max-height: calc(100vh - var(--topbar-height) - 36px);

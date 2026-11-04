@@ -579,7 +579,7 @@ function SystemQA() {
                     min-height: calc(100vh - var(--topbar-height) - 48px);
                     display: flex;
                     flex-direction: column;
-                    justify-content: center;
+                    justify-content: flex-start;
                     position: relative;
                 }
 
@@ -590,13 +590,13 @@ function SystemQA() {
                     align-items: center;
                     width: 100%;
                     max-width: 820px;
-                    margin: 10px auto 40px auto;
+                    margin: 0 auto 24px auto;
                     padding: 0 16px;
                     text-align: center;
                 }
 
                 .qa-hero-orb-section {
-                    margin-bottom: 22px;
+                    margin-bottom: 12px;
                 }
 
                 .qa-hero-text {
@@ -604,7 +604,7 @@ function SystemQA() {
                     flex-direction: column;
                     align-items: center;
                     gap: 6px;
-                    margin-bottom: 28px;
+                    margin-bottom: 16px;
                 }
 
                 .qa-hero-salutation {
@@ -646,7 +646,7 @@ function SystemQA() {
                     display: flex;
                     flex-direction: column;
                     gap: 12px;
-                    margin-bottom: 24px;
+                    margin-bottom: 14px;
                     transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
                 }
 
@@ -712,6 +712,7 @@ function SystemQA() {
                     font-family: inherit;
                     box-shadow: none !important;
                     padding: 4px 0;
+                    height: 58px;
                 }
 
                 .qa-hero-textarea::placeholder {
