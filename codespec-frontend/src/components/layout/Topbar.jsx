@@ -47,7 +47,7 @@ function Topbar({ onMenuToggle }) {
                     aria-label="Help & Documentation"
                     title="Documentation"
                 >
-                    <CircleHelp size={16} strokeWidth={1.8} />
+                    <CircleHelp size={18} strokeWidth={1.8} />
                 </button>
 
                 <button
@@ -56,7 +56,7 @@ function Topbar({ onMenuToggle }) {
                     aria-label="Notifications"
                     title="Notifications"
                 >
-                    <Bell size={16} strokeWidth={1.8} />
+                    <Bell size={18} strokeWidth={1.8} />
                     <span className="notification-dot" />
                 </button>
 
@@ -66,7 +66,7 @@ function Topbar({ onMenuToggle }) {
                     aria-label="Settings"
                     title="Settings"
                 >
-                    <Settings size={16} strokeWidth={1.8} />
+                    <Settings size={18} strokeWidth={1.8} />
                 </button>
 
                 <div className="profile" role="button" tabIndex={0}>

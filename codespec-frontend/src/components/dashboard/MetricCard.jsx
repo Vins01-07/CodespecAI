@@ -197,9 +197,11 @@ function MetricCard({
             <MetricMiniChart type={chartType} />
 
             <style>{`
-                .metric-card-container {
-                    background: linear-gradient(180deg, #181920 0%, #111217 100%) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                .cs-card.metric-card-container {
+                    background:
+                        radial-gradient(circle at top left, rgba(227, 38, 54, 0.12), transparent 42%),
+                        linear-gradient(145deg, #15161d 0%, #101116 62%, #111217 100%) !important;
+                    border: 1px solid rgba(227, 38, 54, 0.16) !important;
                     border-radius: 16px !important;
                     position: relative;
                     overflow: hidden;
@@ -208,8 +210,9 @@ function MetricCard({
                     flex-direction: column;
                     justify-content: space-between;
                     transition: all var(--duration-fast) ease;
+                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38), inset 0 1px rgba(255, 255, 255, 0.025) !important;
                 }
-                .metric-card-container:hover {
+                .cs-card.metric-card-container:hover {
                     border-color: rgba(227, 38, 54, 0.45) !important;
                     transform: translateY(-2px);
                     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(227, 38, 54, 0.2) !important;

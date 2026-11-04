@@ -358,7 +358,7 @@ function TableOfContents({ headings = [], activeId }) {
                     flex-direction: column;
                     gap: 16px;
                     position: sticky;
-                    top: calc(var(--topbar-height) + 24px);
+                    top: calc(var(--topbar-height) + 14px);
                     max-height: calc(100vh - var(--topbar-height) - 48px);
                     overflow-y: auto;
                     padding-left: 12px;
@@ -707,16 +707,17 @@ function DocumentationReader({
 
             <style>{`
                 .doc-central-workspace {
-                    display: flex;
-                    align-items: flex-start;
-                    gap: 24px;
+                    display: grid;
+                    grid-template-columns: minmax(0, 1fr) 220px;
+                    align-items: start;
+                    gap: 16px;
                     width: 100%;
                     min-width: 0;
                 }
 
                 .doc-article-container {
-                    flex: 1;
                     min-width: 0;
+                    margin: 0;
                     display: flex;
                     flex-direction: column;
                     background: rgba(16, 21, 30, 0.75) !important;
@@ -726,6 +727,39 @@ function DocumentationReader({
                     border-radius: 18px !important;
                     padding: 24px 28px !important;
                     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+                }
+
+                @media (max-width: 1140px) {
+                    .doc-central-workspace {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
+                }
+
+                .arch-flow-tiers {
+                    display: grid;
+                    grid-template-columns:
+                        minmax(100px, 1fr) 18px
+                        minmax(100px, 1fr) 18px
+                        minmax(100px, 1fr) 18px
+                        minmax(100px, 1fr) !important;
+                    align-items: stretch;
+                    gap: 10px;
+                }
+
+                .arch-flow-tiers .flow-arrow {
+                    align-self: center;
+                    justify-self: center;
+                    width: auto;
+                    overflow: visible;
+                }
+
+                .flow-tier-node {
+                    min-height: 72px;
+                    height: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
                 }
 
                 /* Breadcrumbs */

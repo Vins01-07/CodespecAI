@@ -31,7 +31,7 @@ function Repository() {
             {/* Header Area matching screenshot "Repo List" */}
             <header className="repo-page-header">
                 <div className="header-info">
-                    <h1 className="page-header-title">Repo List</h1>
+                    <h1 className="page-header-title">Repo <span className="route-title-accent">List</span></h1>
                     <p className="page-header-subtitle">
                         Codebase health, architectural topology & continuous insights
                     </p>

@@ -172,10 +172,10 @@ function Ingestion() {
                     <div className="header-info">
                         <div className="title-row">
                             <div className="header-icon-wrap"><Upload size={20} /></div>
-                            <h1 className="header-title">Ingestion & Processing</h1>
+                            <h1 className="header-title">Ingestion &amp; <span className="route-title-accent">Processing</span></h1>
                         </div>
                         <p className="header-desc">
-                            Monitor repository analysis pipeline â€” from ingestion to knowledge graph construction.
+                            Codebase health, architectural topology &amp; continuous insights
                         </p>
                     </div>
                 </header>
@@ -212,10 +212,10 @@ function Ingestion() {
                 <div className="header-info">
                     <div className="title-row">
                         <div className="icon-accent icon-accent--violet"><Upload size={20} /></div>
-                        <h1 className="header-title">Ingestion & Processing</h1>
+                        <h1 className="header-title">Ingestion &amp; <span className="route-title-accent">Processing</span></h1>
                     </div>
                     <p className="header-desc">
-                        Monitor repository analysis pipeline â€” from ingestion to knowledge graph construction.
+                        Codebase health, architectural topology &amp; continuous insights
                     </p>
                 </div>
 

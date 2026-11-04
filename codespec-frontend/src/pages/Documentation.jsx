@@ -639,9 +639,10 @@ function Documentation() {
 
                 /* Three-Area Workspace */
                 .doc-workspace-grid {
-                    display: flex;
-                    align-items: flex-start;
-                    gap: 20px;
+                    display: grid;
+                    grid-template-columns: 290px minmax(0, 1fr);
+                    align-items: start;
+                    gap: 16px;
                     width: 100%;
                 }
 
@@ -649,6 +650,8 @@ function Documentation() {
                 .doc-left-sidebar {
                     width: 290px;
                     flex-shrink: 0;
+                    align-self: start;
+                    margin: 0;
                     position: sticky;
                     top: calc(var(--topbar-height) + 14px);
                     max-height: calc(100vh - var(--topbar-height) - 36px);
@@ -676,6 +679,12 @@ function Documentation() {
                     gap: 12px;
                     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
                     height: 100%;
+                }
+
+                @media (max-width: 900px) {
+                    .doc-workspace-grid {
+                        grid-template-columns: minmax(0, 1fr);
+                    }
                 }
 
                 .doc-mode-tabs {

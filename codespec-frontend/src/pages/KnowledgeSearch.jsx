@@ -62,7 +62,7 @@ function KnowledgeSearch() {
             {/* Header matching reference "Codebase Search" */}
             <div className="search-page-header">
                 <div>
-                    <h1 className="page-header-title">Codebase Search</h1>
+                    <h1 className="page-header-title">Codebase <span className="route-title-accent">Search</span></h1>
                     <p className="page-header-subtitle">
                         Codebase health, architectural topology & continuous insights
                     </p>

@@ -1081,6 +1081,41 @@ main h1 + div > p,
 }
 .metrics-grid, .dashboard-main-grid, .dashboard-left-subgrid { gap: 14px !important; }
 
+.dashboard-left-col,
+.dashboard-right-col {
+    min-width: 0;
+    height: 100%;
+}
+
+.dashboard-left-col > .arch-preview-card {
+    min-height: 0;
+    height: 100%;
+}
+
+.repo-grid .cs-card.repo-card {
+    background:
+        linear-gradient(145deg, rgba(24, 25, 31, 0.98), rgba(16, 17, 21, 0.98)) !important;
+    border-color: rgba(255, 255, 255, 0.085) !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32) !important;
+}
+
+.repo-grid .repo-card::before,
+.repo-grid .repo-card::after {
+    display: none !important;
+}
+
+.repo-grid .repo-card.repo-card-active {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.38) !important;
+}
+
+.repo-grid .repo-card .repo-card-footer,
+.repo-grid .repo-card .repo-metrics-row,
+.repo-grid .repo-card .repo-provider-icon,
+.repo-grid .repo-card .select-active-btn {
+    background: #0d0e12 !important;
+}
+
 input[type="text"]:not(.search-box input),
 input[type="search"]:not(.search-box input),
 input[type="password"]:not(.search-box input),
@@ -1096,6 +1131,50 @@ input[type="number"]:not(.search-box input), select, textarea {
     border-radius: 12px !important;
     border-color: rgba(255,255,255,.09) !important;
     background: rgba(255,255,255,.055) !important;
+}
+
+/* Premium, consistently sized route headers */
+.page-header-title,
+.premium-page-title,
+.header-info .header-title,
+.doc-page-title,
+.qa-hero-headline,
+.chat-stream-title {
+    font-size: clamp(34px, 2.4vw, 42px) !important;
+    line-height: 1.05 !important;
+    letter-spacing: -1.35px !important;
+    font-weight: 800 !important;
+    margin: 0 !important;
+}
+
+.route-title-accent {
+    color: #FF3548 !important;
+    font-weight: 800;
+    text-shadow: 0 0 16px rgba(255, 53, 72, 0.4);
+}
+
+.page-header-subtitle,
+.premium-page-subtitle,
+.header-info .header-desc,
+.doc-page-subtitle,
+.qa-hero-subheadline,
+.chat-stream-subtitle {
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    letter-spacing: -0.15px;
+    font-weight: 450;
+    margin: 8px 0 0 !important;
+    max-width: 760px;
+}
+
+.dashboard-header-banner,
+.repo-page-header,
+.search-page-header,
+.page-header-row,
+.ing-page-header,
+.doc-top-banner,
+.chat-stream-header {
+    margin-bottom: 18px;
 }
 
 .cs-btn-primary, .upgrade-button, .open-arch-btn {

@@ -62,13 +62,6 @@ function RepositoryCard({
         ? repository.language.split("/").map((t) => t.trim())
         : ["TypeScript"];
 
-    // Generate unique seed for sparkline variation
-    const seed = (repository.id || repository.name).split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    const y1 = 20 + (seed % 12);
-    const y2 = 12 + ((seed * 3) % 16);
-    const y3 = 24 + ((seed * 7) % 12);
-    const y4 = 8 + ((seed * 2) % 14);
-
     return (
         <Card className={`repo-card ${isActive ? "repo-card-active" : ""}`}>
             <div className="repo-card-header">
@@ -121,32 +114,10 @@ function RepositoryCard({
                 <div className="metric-mini-divider" />
                 <div className="metric-mini-item">
                     <span className="metric-mini-label">Branch</span>
-                    <span className="metric-mini-val font-mono" style={{ color: "var(--bright-red)" }}>
+                    <span className="metric-mini-val font-mono" style={{ color: "#D4D4D8" }}>
                         {repository.branch || "main"}
                     </span>
                 </div>
-            </div>
-
-            {/* Signature Crimson Activity Sparkline matching reference */}
-            <div className="repo-sparkline-wrap">
-                <svg viewBox="0 0 280 44" preserveAspectRatio="none" className="repo-sparkline-svg">
-                    <defs>
-                        <linearGradient id={`spark-grad-${repository.id || repository.name}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="#FF3548" stopOpacity="0.32" />
-                            <stop offset="100%" stopColor="#E32636" stopOpacity="0.0" />
-                        </linearGradient>
-                    </defs>
-                    <path
-                        d={`M 0,${y1} Q 40,${y2} 80,${y3} T 160,${y4} T 220,${y2} T 280,${y1} L 280,44 L 0,44 Z`}
-                        fill={`url(#spark-grad-${repository.id || repository.name})`}
-                    />
-                    <path
-                        d={`M 0,${y1} Q 40,${y2} 80,${y3} T 160,${y4} T 220,${y2} T 280,${y1}`}
-                        fill="none"
-                        stroke="#FF3548"
-                        strokeWidth="1.8"
-                    />
-                </svg>
             </div>
 
             {/* Footer with updated info and action */}
@@ -181,20 +152,20 @@ function RepositoryCard({
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
-                    background: #15161B !important;
+                    background: linear-gradient(145deg, #17181F 0%, #111217 100%) !important;
                     border: 1px solid rgba(255, 255, 255, 0.08) !important;
                     border-radius: 16px !important;
                     min-height: 180px;
                     transition: all var(--duration-fast) ease;
                 }
                 .repo-card:hover {
-                    border-color: rgba(227, 38, 54, 0.4) !important;
+                    border-color: rgba(255, 255, 255, 0.16) !important;
                     transform: translateY(-2px);
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(227, 38, 54, 0.15) !important;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55) !important;
                 }
                 .repo-card-active {
-                    border-color: rgba(227, 38, 54, 0.55) !important;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 24px rgba(227, 38, 54, 0.22) !important;
+                    border-color: rgba(255, 255, 255, 0.18) !important;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55) !important;
                 }
                 .repo-card-header {
                     display: flex;
@@ -215,10 +186,10 @@ function RepositoryCard({
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    background: rgba(227, 38, 54, 0.12);
-                    border: 1px solid rgba(227, 38, 54, 0.3);
+                    background: #0D0E12;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                     border-radius: 8px;
-                    color: var(--bright-red);
+                    color: #D4D4D8;
                     flex-shrink: 0;
                 }
                 .repo-title-meta {
@@ -299,6 +270,7 @@ function RepositoryCard({
                     justify-content: space-between;
                     padding-top: 8px;
                     border-top: 1px solid rgba(255, 255, 255, 0.06);
+                    background: transparent;
                 }
                 .repo-last-indexed {
                     display: flex;
@@ -313,17 +285,17 @@ function RepositoryCard({
                     gap: 4px;
                     height: 24px;
                     padding: 0 10px;
-                    background: rgba(227, 38, 54, 0.14);
-                    border: 1px solid rgba(227, 38, 54, 0.35);
+                    background: #0D0E12;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                     border-radius: 6px;
-                    color: var(--bright-red);
+                    color: #D4D4D8;
                     font-size: 10.5px;
                     font-weight: 700;
                     cursor: pointer;
                     transition: all var(--duration-fast) ease;
                 }
                 .select-active-btn:hover {
-                    background: linear-gradient(135deg, #FF3548 0%, #E32636 100%);
+                    background: #24252B;
                     color: #FFFFFF;
                     border-color: transparent;
                 }

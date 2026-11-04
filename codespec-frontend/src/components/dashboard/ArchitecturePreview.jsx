@@ -376,9 +376,16 @@ function ArchitecturePreview({
                     align-items: center;
                     gap: 8px;
                 }
+                .arch-canvas-container {
+                    flex: 1;
+                    min-height: 0;
+                    display: flex;
+                    flex-direction: column;
+                }
                 .arch-svg-canvas {
                     width: 100%;
-                    height: auto;
+                    height: 100%;
+                    min-height: 300px;
                     display: block;
                 }
                 .arch-legend-row {

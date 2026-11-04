@@ -96,25 +96,11 @@ function Architecture() {
                         <Network size={18} strokeWidth={2} />
                     </div>
                     <div>
-                        <h1
-                            style={{
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                color: "var(--text-primary)",
-                                margin: 0,
-                                letterSpacing: "-0.3px",
-                            }}
-                        >
-                            System Architecture
+                        <h1 className="premium-page-title">
+                            System <span className="route-title-accent">Architecture</span>
                         </h1>
-                        <p
-                            style={{
-                                fontSize: "12.5px",
-                                color: "var(--text-secondary)",
-                                margin: "3px 0 0 0",
-                            }}
-                        >
-                            Interactive topology graph, component relationships, data flow, and runtime dependencies.
+                        <p className="premium-page-subtitle">
+                            Codebase health, architectural topology & continuous insights.
                         </p>
                     </div>
                 </div>

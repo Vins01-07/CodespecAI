@@ -99,25 +99,11 @@ export function ChangeImpact() {
                         <Zap size={20} strokeWidth={2} />
                     </div>
                     <div>
-                        <h1
-                            style={{
-                                fontSize: "18px",
-                                fontWeight: 700,
-                                color: "var(--text-primary)",
-                                margin: 0,
-                                letterSpacing: "-0.3px",
-                            }}
-                        >
-                            Change Impact Analysis
+                        <h1 className="premium-page-title">
+                            Change Impact <span className="route-title-accent">Analysis</span>
                         </h1>
-                        <p
-                            style={{
-                                fontSize: "12.5px",
-                                color: "var(--text-secondary)",
-                                margin: "3px 0 0 0",
-                            }}
-                        >
-                            Predict blast radius, dependent services, breaking changes, and testing requirements before modifying code.
+                        <p className="premium-page-subtitle">
+                            Codebase health, architectural topology & continuous insights.
                         </p>
                     </div>
                 </div>
