@@ -1,10 +1,27 @@
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
-function Modal({ isOpen, onClose, title, children }) {
+function Modal({ isOpen, onClose, title, children, panelClassName = "" }) {
+    useEffect(() => {
+        if (!isOpen) return undefined;
+
+        const handleEscape = (event) => {
+            if (event.key === "Escape") onClose();
+        };
+
+        document.addEventListener("keydown", handleEscape);
+        return () => document.removeEventListener("keydown", handleEscape);
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
-    return (
+    return createPortal(
         <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            className="modal-overlay upgrade-modal-overlay"
             style={{
                 position: "fixed",
                 inset: 0,
@@ -19,7 +36,7 @@ function Modal({ isOpen, onClose, title, children }) {
             onClick={onClose}
         >
             <div
-                className="cs-card"
+                className={`cs-card ${panelClassName}`.trim()}
                 style={{
                     width: "100%",
                     maxWidth: "540px",
@@ -86,7 +103,8 @@ function Modal({ isOpen, onClose, title, children }) {
                     {children}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
 

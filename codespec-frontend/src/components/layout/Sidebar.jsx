@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { NavLink } from "react-router-dom";
 import useUiStore from "../../store/uiStore";
+import Modal from "../common/Modal";
 import {
     LayoutDashboard,
     FolderGit2,
@@ -12,6 +14,7 @@ import {
     FileText,
     Sparkles,
     ArrowRight,
+    Check,
 } from "lucide-react";
 
 // Red Hexagonal Brand Mark Icon matching the reference screenshot
@@ -105,6 +108,22 @@ const navigation = [
 function Sidebar({ isOpen = false, onClose }) {
     const sidebarCollapsed = useUiStore((state) => state.sidebarCollapsed);
     const toggleSidebar = useUiStore((state) => state.toggleSidebar);
+    const [upgradeOpen, setUpgradeOpen] = useState(false);
+    const [billingCycle, setBillingCycle] = useState("annual");
+    const [upgradeComplete, setUpgradeComplete] = useState(false);
+    const [isPro, setIsPro] = useState(() => localStorage.getItem("codespecPro") === "active");
+
+    const activateTrial = () => {
+        localStorage.setItem("codespecPro", "active");
+        localStorage.setItem("codespecProBilling", billingCycle);
+        setIsPro(true);
+        setUpgradeComplete(true);
+    };
+
+    const closeUpgrade = () => {
+        setUpgradeOpen(false);
+        setUpgradeComplete(false);
+    };
 
     return (
         <aside className={`sidebar ${isOpen ? "open" : ""} ${sidebarCollapsed ? "collapsed" : ""}`}>
@@ -166,14 +185,101 @@ function Sidebar({ isOpen = false, onClose }) {
                         Unlock advanced codebase insights with premium features.
                     </p>
 
-                    <button className="upgrade-button font-mono" type="button">
-                        <span>Upgrade now</span>
+                    <button
+                        className="upgrade-button font-mono"
+                        type="button"
+                        onClick={() => setUpgradeOpen(true)}
+                    >
+                        <span>{isPro ? "Manage plan" : "Upgrade now"}</span>
                         <ArrowRight size={12} />
                     </button>
                 </div>
             </div>
 
+            <Modal
+                isOpen={upgradeOpen}
+                onClose={closeUpgrade}
+                title={upgradeComplete ? "Upgrade complete" : "Upgrade to CodeSpec AI Pro"}
+                panelClassName="upgrade-modal-panel"
+            >
+                {upgradeComplete ? (
+                    <div className="upgrade-success">
+                        <div className="upgrade-success-icon">
+                            <Check size={22} />
+                        </div>
+                        <h4>Your Pro trial is active</h4>
+                        <p>
+                            Your {billingCycle === "annual" ? "annual" : "monthly"} plan is ready.
+                            Premium codebase insights are now unlocked.
+                        </p>
+                        <button className="upgrade-cta" type="button" onClick={closeUpgrade}>
+                            Continue to dashboard
+                        </button>
+                    </div>
+                ) : (
+                    <div className="upgrade-modal-content">
+                        <div className="upgrade-billing-toggle" role="group" aria-label="Billing cycle">
+                            <button
+                                type="button"
+                                className={billingCycle === "monthly" ? "active" : ""}
+                                onClick={() => setBillingCycle("monthly")}
+                            >
+                                Monthly
+                            </button>
+                            <button
+                                type="button"
+                                className={billingCycle === "annual" ? "active" : ""}
+                                onClick={() => setBillingCycle("annual")}
+                            >
+                                Annual <span>Save 20%</span>
+                            </button>
+                        </div>
+
+                        <div className="upgrade-plan">
+                            <div>
+                                <span className="upgrade-plan-label">Pro plan</span>
+                                <div className="upgrade-price">
+                                    {billingCycle === "annual" ? "$19" : "$24"}
+                                    <span>/month</span>
+                                </div>
+                            </div>
+                            <p>{billingCycle === "annual" ? "$228 billed annually" : "Billed monthly"}</p>
+                        </div>
+
+                        <ul className="upgrade-features">
+                            <li><Check size={15} /> Unlimited repository analysis</li>
+                            <li><Check size={15} /> Advanced architecture intelligence</li>
+                            <li><Check size={15} /> Change impact and dependency insights</li>
+                            <li><Check size={15} /> Priority documentation suggestions</li>
+                        </ul>
+
+                        <button className="upgrade-cta" type="button" onClick={activateTrial}>
+                            {isPro ? "Update plan" : "Start 14-day free trial"}
+                            <ArrowRight size={14} />
+                        </button>
+                        <span className="upgrade-note">No payment is charged today.</span>
+                    </div>
+                )}
+            </Modal>
+
             <style>{`
+                .upgrade-modal-overlay.modal-overlay {
+                    background: rgba(16, 17, 21, 0.3) !important;
+                    backdrop-filter: blur(1.5px) !important;
+                }
+                .upgrade-modal-panel {
+                    max-width: 360px !important;
+                    min-height: min(720px, calc(100vh - 32px));
+                    background: rgba(86, 18, 26, 0.78) !important;
+                    border-color: rgba(255, 92, 104, 0.32) !important;
+                    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.72),
+                        inset 0 1px rgba(255, 255, 255, 0.08) !important;
+                    backdrop-filter: blur(24px) saturate(120%) !important;
+                    -webkit-backdrop-filter: blur(24px) saturate(120%) !important;
+                }
+                .upgrade-modal-panel > div:first-child {
+                    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+                }
                 .sidebar.collapsed {
                     width: var(--sidebar-dock-width) !important;
                 }
@@ -195,6 +301,131 @@ function Sidebar({ isOpen = false, onClose }) {
                     width: 44px;
                     height: 44px;
                     margin: 0 auto;
+                }
+                .upgrade-modal-content {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 14px;
+                }
+                .upgrade-billing-toggle {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 4px;
+                    padding: 4px;
+                    border-radius: 10px;
+                    background: rgba(255, 255, 255, 0.04);
+                }
+                .upgrade-billing-toggle button {
+                    border: 0;
+                    border-radius: 7px;
+                    background: transparent;
+                    color: var(--secondary-text);
+                    padding: 9px;
+                    cursor: pointer;
+                    font-weight: 700;
+                }
+                .upgrade-billing-toggle button.active {
+                    background: #292a32;
+                    color: white;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+                }
+                .upgrade-billing-toggle span {
+                    color: #ff6675;
+                    font-size: 10px;
+                    margin-left: 4px;
+                }
+                .upgrade-plan {
+                    display: flex;
+                    align-items: flex-end;
+                    justify-content: space-between;
+                    padding: 16px;
+                    border: 1px solid rgba(227, 38, 54, 0.32);
+                    border-radius: 12px;
+                    background: linear-gradient(135deg, rgba(227, 38, 54, 0.12), transparent 70%);
+                }
+                .upgrade-plan-label {
+                    font-size: 12px;
+                    color: var(--secondary-text);
+                }
+                .upgrade-price {
+                    font-size: 32px;
+                    line-height: 1;
+                    font-weight: 800;
+                    margin-top: 7px;
+                }
+                .upgrade-price span {
+                    font-size: 12px;
+                    color: var(--secondary-text);
+                    font-weight: 500;
+                }
+                .upgrade-plan p {
+                    margin: 0;
+                    font-size: 11px;
+                    color: var(--secondary-text);
+                }
+                .upgrade-features {
+                    list-style: none;
+                    margin: 0;
+                    padding: 2px 0;
+                    display: grid;
+                    gap: 9px;
+                }
+                .upgrade-features li {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    color: #d9d9df;
+                    font-size: 13px;
+                }
+                .upgrade-features svg {
+                    color: #ff5263;
+                    flex: 0 0 auto;
+                }
+                .upgrade-cta {
+                    min-height: 42px;
+                    border: 0;
+                    border-radius: 9px;
+                    color: white;
+                    background: linear-gradient(135deg, #ff3548, #e32636);
+                    font-weight: 800;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 7px;
+                }
+                .upgrade-note {
+                    text-align: center;
+                    font-size: 10px;
+                    color: var(--secondary-text);
+                }
+                .upgrade-success {
+                    text-align: center;
+                    padding: 12px 4px 4px;
+                }
+                .upgrade-success-icon {
+                    width: 48px;
+                    height: 48px;
+                    margin: 0 auto 12px;
+                    border-radius: 50%;
+                    display: grid;
+                    place-items: center;
+                    color: white;
+                    background: linear-gradient(135deg, #ff3548, #e32636);
+                    box-shadow: 0 0 24px rgba(227, 38, 54, 0.35);
+                }
+                .upgrade-success h4 {
+                    margin: 0 0 7px;
+                    font-size: 18px;
+                }
+                .upgrade-success p {
+                    margin: 0 0 18px;
+                    color: var(--secondary-text);
+                    font-size: 13px;
+                    line-height: 1.5;
+                }
+                .upgrade-success .upgrade-cta {
+                    width: 100%;
                 }
                 @media (max-width: 860px) {
                     .sidebar {
